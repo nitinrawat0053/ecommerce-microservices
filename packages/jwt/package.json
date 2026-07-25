@@ -1,0 +1,23 @@
+{
+  "name": "@packages/jwt",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@packages/config": "workspace:*",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
