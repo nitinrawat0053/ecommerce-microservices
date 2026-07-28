@@ -32,18 +32,25 @@ export class ProductController {
       next(error);
     }
   }
-  async getAllProducts(req: Request, res: Response, next: NextFunction) {
-    try {
-      const products = await productService.getAllProducts();
+  
+async getAllProducts(req: Request, res: Response, next: NextFunction) {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = req.query.search as string;
+    const category = req.query.category as string;
 
-      res.status(200).json({
-        success: true,
-        data: products,
-      });
-    } catch (error) {
-      next(error);
-    }
+    const result = await productService.getAllProducts({page,limit,search,category});
+
+    res.status(200).json({
+      success: true,
+      data: result.products,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    next(error);
   }
+}
 
   async getProductById(req: Request, res: Response, next: NextFunction) {
     try {

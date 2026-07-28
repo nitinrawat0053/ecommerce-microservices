@@ -1,5 +1,6 @@
 import { NotFoundError } from "@packages/errors";
 import { ProductRepository } from "../repositories/product.repository";
+import { ProductFilters } from "@packages/shared-types";
 
 const productRepository = new ProductRepository();
 
@@ -23,9 +24,32 @@ export class ProductService {
     });
   }
 
-  async getAllProducts() {
-    return await productRepository.findAll();
-  }
+ async getAllProducts(filters:ProductFilters) {
+  let { page, limit, search, category } = filters;
+
+  page = Math.max(page, 1);
+  limit = Math.max(limit, 1);
+  limit = Math.min(limit, 100);
+
+  if (category) {
+  category = category.toLowerCase();
+}
+
+  const { products, totalProducts } =
+    await productRepository.findAll({page, limit, search, category});
+
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  return {
+    products,
+    pagination: {
+      currentPage: page,
+      limit,
+      totalProducts,
+      totalPages,
+    },
+  };
+}
 
   async getProductById(productId: string) {
     const product = await productRepository.findById(productId);
@@ -36,7 +60,7 @@ export class ProductService {
 
     return product;
   }
-
+  
   async updateProduct(productId: string, productData: any) {
     const updatedProduct = await productRepository.update(
       productId,

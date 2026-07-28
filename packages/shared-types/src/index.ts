@@ -9,3 +9,10 @@ export interface ApiResponse<T> {
   message: string;
   data?: T;
 }
+
+export interface ProductFilters {
+  page: number;
+  limit: number;
+  search?: string;
+  category?: string;
+}
