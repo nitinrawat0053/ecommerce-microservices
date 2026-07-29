@@ -1,5 +1,5 @@
 import { Product, IProduct } from "../models/product.model";
-import { ProductFilters } from "@packages/shared-types";
+import { ProductFilters,ProductQueryFilters } from "@packages/shared-types";
 
 export class ProductRepository {
 
@@ -7,9 +7,8 @@ export class ProductRepository {
     return await Product.create(productData);
   }
 
-  async findAll(filters:ProductFilters) {
-    console.log("Filters:", filters);
-  const { page, limit, search, category  } = filters;
+  async findAll(filters:ProductQueryFilters) {
+  const { page, limit, search, category, sort, order,  minPrice, maxPrice, } = filters;
   const skip = (page - 1) * limit;
 
   const query: any = {};
@@ -23,10 +22,28 @@ export class ProductRepository {
   if (category) {
   query.category = category;
 }
-    console.log("Query:", query);
+ 
+if (minPrice !== undefined || maxPrice !== undefined) {
+  query.price = {};
+
+  if (minPrice !== undefined) {
+    query.price.$gte = minPrice;
+  }
+
+  if (maxPrice !== undefined) {
+    query.price.$lte = maxPrice;
+  }
+}
   const products = await Product.find(query)
-    .skip(skip)
-    .limit(limit);
+  .collation({
+    locale: "en",
+    strength: 2,
+  })
+  .sort({
+    [sort!]: order,
+  })
+  .skip(skip)
+  .limit(limit);
 
   const totalProducts = await Product.countDocuments(query);
 

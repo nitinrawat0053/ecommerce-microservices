@@ -1,4 +1,4 @@
-import { NotFoundError } from "@packages/errors";
+import { NotFoundError,BadRequestError } from "@packages/errors";
 import { ProductRepository } from "../repositories/product.repository";
 import { ProductFilters } from "@packages/shared-types";
 
@@ -25,7 +25,7 @@ export class ProductService {
   }
 
  async getAllProducts(filters:ProductFilters) {
-  let { page, limit, search, category } = filters;
+  let { page, limit, search, category,  sort, order, minPrice, maxPrice} = filters;
 
   page = Math.max(page, 1);
   limit = Math.max(limit, 1);
@@ -35,8 +35,53 @@ export class ProductService {
   category = category.toLowerCase();
 }
 
+  const allowedSortFields = [
+  "price",
+  "name",
+  "stock",
+  "createdAt",
+];
+
+ if (!sort || !allowedSortFields.includes(sort)) {
+  sort = "createdAt";
+}
+
+ if (!order || !["asc", "desc"].includes(order)) {
+  order = "desc";
+}
+
+  const sortOrder: 1 | -1 =
+  order === "asc" ? 1 : -1;
+
+  if (minPrice !== undefined) {
+  if (isNaN(minPrice)) {
+    throw new BadRequestError("Invalid minPrice");  }
+
+  if (minPrice < 0) {
+    throw new BadRequestError("minPrice cannot be negative");
+  }
+}
+
+if (maxPrice !== undefined) {
+  if (isNaN(maxPrice)) {
+    throw new BadRequestError("Invalid maxPrice");
+  }
+
+  if (maxPrice < 0) {
+    throw new BadRequestError("maxPrice cannot be negative");
+  }
+}
+
+if (
+  minPrice !== undefined &&
+  maxPrice !== undefined &&
+  minPrice > maxPrice
+) {
+  throw new BadRequestError("minPrice cannot be greater than maxPrice");
+}
+
   const { products, totalProducts } =
-    await productRepository.findAll({page, limit, search, category});
+    await productRepository.findAll({page, limit, search, category, sort, order: sortOrder,minPrice,maxPrice});
 
   const totalPages = Math.ceil(totalProducts / limit);
 

@@ -39,8 +39,19 @@ async getAllProducts(req: Request, res: Response, next: NextFunction) {
     const limit = Number(req.query.limit) || 10;
     const search = req.query.search as string;
     const category = req.query.category as string;
+    const sort = req.query.sort as string;
+    const order = req.query.order as "asc" | "desc";
+    const minPrice =
+     req.query.minPrice !== undefined
+    ? Number(req.query.minPrice)
+    : undefined;
 
-    const result = await productService.getAllProducts({page,limit,search,category});
+    const maxPrice =
+     req.query.maxPrice !== undefined
+    ? Number(req.query.maxPrice)
+    : undefined;
+
+    const result = await productService.getAllProducts({page,limit,search,category,sort,order,minPrice,maxPrice});
 
     res.status(200).json({
       success: true,
