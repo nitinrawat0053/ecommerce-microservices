@@ -1,6 +1,7 @@
 import { NotFoundError,BadRequestError } from "@packages/errors";
 import { ProductRepository } from "../repositories/product.repository";
 import { ProductFilters } from "@packages/shared-types";
+import { redisClient } from "@packages/redis";
 
 const productRepository = new ProductRepository();
 
@@ -14,7 +15,7 @@ export class ProductService {
     category: string,
     imageUrl?: string
   ) {
-    return await productRepository.create({
+    const product = await productRepository.create({
       name,
       description,
       price,
@@ -22,10 +23,25 @@ export class ProductService {
       category,
       imageUrl,
     });
+  const keys = await redisClient.keys("products:*");
+   if (keys.length > 0) {
+   await redisClient.del(...keys);
+}
+   return product;
   }
 
  async getAllProducts(filters:ProductFilters) {
   let { page, limit, search, category,  sort, order, minPrice, maxPrice} = filters;
+  const cacheKey = `products:${JSON.stringify(filters)}`;
+
+  const cachedProducts = await redisClient.get(cacheKey);
+
+  if (cachedProducts) {
+  console.log(`✅ Cache Hit: ${cacheKey}`);
+  return JSON.parse(cachedProducts);
+}
+
+  console.log(`❌ Cache Miss: ${cacheKey}`);
 
   page = Math.max(page, 1);
   limit = Math.max(limit, 1);
@@ -85,47 +101,83 @@ if (
 
   const totalPages = Math.ceil(totalProducts / limit);
 
-  return {
-    products,
-    pagination: {
-      currentPage: page,
-      limit,
-      totalProducts,
-      totalPages,
-    },
-  };
+  const response = {
+  products,
+  pagination: {
+    currentPage: page,
+    limit,
+    totalProducts,
+    totalPages,
+  },
+};
+
+  await redisClient.set(
+  cacheKey,
+  JSON.stringify(response),
+  "EX",
+  300
+);
+
+return response;
 }
 
   async getProductById(productId: string) {
+    const cacheKey = `product:${productId}`;
+    const cachedProduct = await redisClient.get(cacheKey);
+
+  if (cachedProduct) {
+  console.log("✅ Cache Hit");
+  return JSON.parse(cachedProduct);
+}
+    console.log("❌ Cache Miss");
     const product = await productRepository.findById(productId);
 
     if (!product) {
       throw new NotFoundError("Product not found");
     }
-
+    await redisClient.set(
+     cacheKey,
+     JSON.stringify(product.toObject()),
+     "EX",
+     300
+);
     return product;
   }
   
-  async updateProduct(productId: string, productData: any) {
-    const updatedProduct = await productRepository.update(
-      productId,
-      productData
-    );
+async updateProduct(productId: string, productData: any) {
+  const updatedProduct = await productRepository.update(
+    productId,
+    productData
+  );
 
-    if (!updatedProduct) {
-      throw new NotFoundError("Product not found");
-    }
-
-    return updatedProduct;
+  if (!updatedProduct) {
+    throw new NotFoundError("Product not found");
   }
 
-  async deleteProduct(productId: string) {
-    const deletedProduct = await productRepository.delete(productId);
+  await redisClient.del(`product:${productId}`);
+  const keys = await redisClient.keys("products:*");
 
-    if (!deletedProduct) {
-      throw new NotFoundError("Product not found");
-    }
+  if (keys.length > 0) {
+  await redisClient.del(...keys);
+}
 
-    return deletedProduct;
+  return updatedProduct;
+}
+
+async deleteProduct(productId: string) {
+  const deletedProduct = await productRepository.delete(productId);
+
+  if (!deletedProduct) {
+    throw new NotFoundError("Product not found");
   }
+
+  await redisClient.del(`product:${productId}`);
+  const keys = await redisClient.keys("products:*");
+
+  if (keys.length > 0) {
+  await redisClient.del(...keys);
+}
+
+  return deletedProduct;
+ }
 }

@@ -14,9 +14,9 @@ export const config = {
   USER_SERVICE_PORT: Number(process.env.USER_SERVICE_PORT) || 3002,
   PRODUCT_SERVICE_PORT: Number(process.env.PRODUCT_SERVICE_PORT) || 3003,
 
-  JWT_SECRET: process.env.JWT_SECRET || "",
-
-  MONGODB_URI: process.env.MONGODB_URI || "",
+  JWT_SECRET: process.env.JWT_SECRET,
+  PRODUCT_SERVICE_URL: process.env.PRODUCT_SERVICE_URL,
+  MONGODB_URI: process.env.MONGODB_URI,
 
   REDIS_URL: process.env.REDIS_URL || "",
 }

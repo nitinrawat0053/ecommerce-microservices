@@ -12,10 +12,10 @@ export interface IProduct extends Document {
 const productSchema = new Schema<IProduct>(
   {
     name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+     type: String,
+     required: true,
+     trim: true,
+},
 
     description: {
       type: String,
@@ -37,6 +37,8 @@ const productSchema = new Schema<IProduct>(
     category: {
       type: String,
       required: true,
+      lowercase: true,
+
     },
 
     imageUrl: {
@@ -47,6 +49,11 @@ const productSchema = new Schema<IProduct>(
     timestamps: true,
   }
 );
+ // Single field indexes
+productSchema.index({ name: 1 });
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ createdAt: -1 });
 
 export const Product = mongoose.model<IProduct>(
   "Product",

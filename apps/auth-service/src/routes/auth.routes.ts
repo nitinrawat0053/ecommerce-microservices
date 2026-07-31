@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { NotFoundError } from "@packages/errors";
-import { registerSchema,loginSchema } from "@packages/validation";
-import {validate} from "../middlewares/validate.middleware";
+import { registerSchema,loginSchema,validate } from "@packages/validation";
 import {authController} from "../controllers/auth.controller";
 
 const router = Router();
