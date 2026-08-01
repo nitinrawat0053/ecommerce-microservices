@@ -76,6 +76,24 @@ async getAllProducts(req: Request, res: Response, next: NextFunction) {
     }
   }
 
+  async reduceStock(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { quantity } = req.body;
+
+    const product = await productService.reduceStock(
+      req.params.id as string,
+      quantity
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Stock updated successfully",
+      data: product,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
   async updateProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const product = await productService.updateProduct(

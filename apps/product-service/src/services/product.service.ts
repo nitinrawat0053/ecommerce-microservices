@@ -143,7 +143,40 @@ return response;
 );
     return product;
   }
+    
+  private async clearProductListCache() {
+  const keys = await redisClient.keys("products:*");
+
+  if (keys.length > 0) {
+    await redisClient.del(...keys);
+  }
+}
+  async reduceStock(productId: string, quantity: number) {
+  if (quantity <= 0) {
+    throw new BadRequestError("Quantity must be greater than 0");
+  }
+
+  const product = await productRepository.findById(productId);
+
+  if (!product) {
+    throw new NotFoundError("Product not found");
+  }
+
+  if (product.stock < quantity) {
+    throw new BadRequestError("Insufficient stock");
+  }
+
+  const updatedProduct = await productRepository.reduceStock(
+    productId,
+    quantity
+  );
+
   
+  await redisClient.del(`product:${productId}`);
+  await this.clearProductListCache();
+
+  return updatedProduct;
+}
 async updateProduct(productId: string, productData: any) {
   const updatedProduct = await productRepository.update(
     productId,

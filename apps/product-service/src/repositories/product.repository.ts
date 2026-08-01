@@ -65,6 +65,18 @@ if (minPrice !== undefined || maxPrice !== undefined) {
     );
   }
 
+  async reduceStock(productId: string, quantity: number) {
+  return await Product.findByIdAndUpdate(
+    productId,
+    {
+      $inc: {
+        stock: -quantity,
+      },
+    },
+    { new: true }
+  );
+}
+
   async delete(productId: string) {
     return await Product.findByIdAndDelete(productId);
   }

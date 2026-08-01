@@ -37,16 +37,35 @@ export class OrderService {
 
     const totalAmount = priceAtPurchase * quantity;
 
-    return await orderRepository.create({
-      userId,
-      productId,
-      quantity,
-      priceAtPurchase,
-      totalAmount,
-      status: OrderStatus.PENDING,
-    });
-  }
+    const order = await orderRepository.create({
+    userId,
+    productId,
+    quantity,
+    priceAtPurchase,
+    totalAmount,
+    status: OrderStatus.PENDING,
+});
 
+  await this.reduceProductStock(productId, quantity);
+
+  return order;
+}
+  
+  private async reduceProductStock(
+  productId: string,
+  quantity: number
+) {
+  try {
+    await axios.patch(
+      `${config.PRODUCT_SERVICE_URL}/api/products/${productId}/stock`,
+      {
+        quantity,
+      }
+    );
+  } catch {
+    throw new BadRequestError("Failed to update product stock");
+  }
+}
   async getOrderById(orderId: string) {
   const order = await orderRepository.findById(orderId);
 
