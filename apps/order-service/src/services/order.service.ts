@@ -1,10 +1,10 @@
 import { BadRequestError,NotFoundError } from "@packages/errors";
-import { OrderStatus } from "@packages/shared-types";
+import { OrderStatus, OrderFilters, QUEUES } from "@packages/shared-types";
 import { OrderRepository } from "../repositories/order.repository";
 import {config} from "@packages/config";
 import { IOrder } from "../models/order.model";
-import { OrderFilters } from "@packages/shared-types";
 import axios from "axios";
+import { publishMessage } from "@packages/rabbitmq";
 
 const orderRepository = new OrderRepository();
 
@@ -45,26 +45,11 @@ export class OrderService {
     totalAmount,
     status: OrderStatus.PENDING,
 });
-
-  await this.reduceProductStock(productId, quantity);
-
+    await publishMessage(QUEUES.ORDER_CREATED, {
+    productId,
+    quantity,
+});
   return order;
-}
-  
-  private async reduceProductStock(
-  productId: string,
-  quantity: number
-) {
-  try {
-    await axios.patch(
-      `${config.PRODUCT_SERVICE_URL}/api/products/${productId}/stock`,
-      {
-        quantity,
-      }
-    );
-  } catch {
-    throw new BadRequestError("Failed to update product stock");
-  }
 }
   async getOrderById(orderId: string) {
   const order = await orderRepository.findById(orderId);

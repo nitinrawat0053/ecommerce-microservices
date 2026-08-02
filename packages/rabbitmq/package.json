@@ -1,0 +1,18 @@
+{
+  "name": "@packages/rabbitmq",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@packages/config": "workspace:*",
+    "amqplib": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8",
+    "@types/node": "^26.1.1"
+  }
+}

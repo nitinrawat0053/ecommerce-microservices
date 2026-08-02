@@ -18,6 +18,6 @@ export const config = {
   JWT_SECRET: process.env.JWT_SECRET || "",
   PRODUCT_SERVICE_URL: process.env.PRODUCT_SERVICE_URL || "",
   MONGODB_URI: process.env.MONGODB_URI || "",
-
+  RABBITMQ_URL:process.env.RABBITMQ_URL || "",
   REDIS_URL: process.env.REDIS_URL || "",
 }

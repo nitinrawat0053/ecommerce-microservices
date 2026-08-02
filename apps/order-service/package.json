@@ -16,6 +16,7 @@
     "@packages/config": "workspace:*",
     "@packages/errors": "workspace:*",
     "@packages/logger": "workspace:*",
+    "@packages/rabbitmq": "workspace:*",
     "@packages/redis": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "axios": "^1.19.0",
