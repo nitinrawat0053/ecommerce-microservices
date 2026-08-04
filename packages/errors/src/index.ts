@@ -1,3 +1,4 @@
+export * from "./isTemporaryError";
 export class AppError extends Error {
   statusCode: number;
 

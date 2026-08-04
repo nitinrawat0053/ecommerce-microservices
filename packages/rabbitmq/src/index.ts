@@ -20,18 +20,19 @@ export function getChannel() {
   return channel;
 }
 
-export async function publishMessage(queue: string, message: object) {
+export async function publishMessage(queue: string, message: object,  headers: Record<string, any> = {}) {
   const channel = getChannel();
 
-  await channel.assertQueue(queue, {
-    durable: true,
-  });
+  // await channel.assertQueue(queue, {
+  //   durable: true,
+  // });
 
   channel.sendToQueue(
     queue,
     Buffer.from(JSON.stringify(message)),
     {
       persistent: true,
+      headers,
     }
   );
 
