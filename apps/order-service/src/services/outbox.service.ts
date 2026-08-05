@@ -1,7 +1,7 @@
 import { ClientSession } from "mongoose";
 import { OutboxRepository } from "../repositories/outbox.repository";
 import { publishMessage } from "@packages/rabbitmq";
-import { QUEUES } from "@packages/shared-types";
+import { QUEUES, EVENTS } from "@packages/shared-types";
 
 const outboxRepository = new OutboxRepository();
 
@@ -35,17 +35,22 @@ export class OutboxService {
   for (const event of events) {
     try {
       switch (event.eventType) {
-        case "ORDER_CREATED":
+        case EVENTS.ORDER_CREATED:
           await publishMessage(
             QUEUES.ORDER_CREATED,
             event.payload
           );
           break;
+
+        case EVENTS.ORDER_PLACED:
+          await publishMessage(
+            QUEUES.ORDER_PLACED,
+            event.payload
+          );
+          break;
       }
 
-      await outboxRepository.markAsSent(
-        event.id
-      );
+      await outboxRepository.markAsSent(event.id);
     } catch (error) {
       console.error(
         "Failed to publish outbox event",

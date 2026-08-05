@@ -29,6 +29,23 @@ router.use(
   }
 })
 );
+   router.use(
+  "/cart",
+  authenticate,
+  createProxyMiddleware({
+    target: "http://localhost:3005/api/cart",
+    changeOrigin: true,
+
+    on: {
+      proxyReq: (proxyReq, req) => {
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.userId);
+          proxyReq.setHeader("x-user-role", req.user.role);
+        }
+      },
+    },
+  })
+);
 
 const productProxy = createProxyMiddleware({
   target: "http://localhost:3003",

@@ -1,5 +1,5 @@
 import { BadRequestError,NotFoundError } from "@packages/errors";
-import { OrderStatus, OrderFilters } from "@packages/shared-types";
+import { OrderStatus, OrderFilters, EVENTS } from "@packages/shared-types";
 import { OrderRepository } from "../repositories/order.repository";
 import {config} from "@packages/config";
 import { IOrder } from "../models/order.model";
@@ -54,16 +54,24 @@ async createOrder(userId: string, productId: string, quantity: number) {
       session
     );
 
-    await outboxService.createEvent(
-      "ORDER_CREATED",
-      {
-        productId,
-        quantity,
-      },
-      session
-    );
+   await outboxService.createEvent(
+   EVENTS.ORDER_CREATED,
+  {
+    productId,
+    quantity,
+  },
+  session
+);
 
-    await session.commitTransaction();
+   await outboxService.createEvent(
+   EVENTS.ORDER_PLACED,
+  {
+    userId,
+  },
+  session
+);
+
+  await session.commitTransaction();
 
     return order;
   } catch (error) {
