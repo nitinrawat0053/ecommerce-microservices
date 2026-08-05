@@ -1,12 +1,14 @@
 import { BadRequestError,NotFoundError } from "@packages/errors";
-import { OrderStatus, OrderFilters, QUEUES } from "@packages/shared-types";
+import { OrderStatus, OrderFilters } from "@packages/shared-types";
 import { OrderRepository } from "../repositories/order.repository";
 import {config} from "@packages/config";
 import { IOrder } from "../models/order.model";
+import mongoose from "mongoose";
+import { OutboxService } from "./outbox.service";
 import axios from "axios";
-import { publishMessage } from "@packages/rabbitmq";
 
 const orderRepository = new OrderRepository();
+const outboxService = new OutboxService();
 
 export class OrderService {
 
@@ -21,7 +23,11 @@ export class OrderService {
     throw new BadRequestError("Product not found");
   }
 }
-  async createOrder(userId: string, productId: string, quantity: number) {
+async createOrder(userId: string, productId: string, quantity: number) {
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
 
     if (quantity <= 0) {
       throw new BadRequestError("Quantity must be greater than 0");
@@ -34,22 +40,38 @@ export class OrderService {
     }
 
     const priceAtPurchase = product.price;
-
     const totalAmount = priceAtPurchase * quantity;
 
-    const order = await orderRepository.create({
-    userId,
-    productId,
-    quantity,
-    priceAtPurchase,
-    totalAmount,
-    status: OrderStatus.PENDING,
-});
-    await publishMessage(QUEUES.ORDER_CREATED, {
-    productId,
-    quantity,
-});
-  return order;
+    const order = await orderRepository.create(
+      {
+        userId,
+        productId,
+        quantity,
+        priceAtPurchase,
+        totalAmount,
+        status: OrderStatus.PENDING,
+      },
+      session
+    );
+
+    await outboxService.createEvent(
+      "ORDER_CREATED",
+      {
+        productId,
+        quantity,
+      },
+      session
+    );
+
+    await session.commitTransaction();
+
+    return order;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 }
   async getOrderById(orderId: string) {
   const order = await orderRepository.findById(orderId);

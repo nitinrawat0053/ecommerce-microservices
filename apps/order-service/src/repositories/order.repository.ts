@@ -1,10 +1,15 @@
 import { Order, IOrder } from "../models/order.model";
 import { OrderFilters } from "@packages/shared-types";
+import { ClientSession } from "mongoose";
 
 export class OrderRepository {
 
-  async create(orderData: Partial<IOrder>) {
-    return await Order.create(orderData);
+  async create(orderData: Partial<IOrder>, session: ClientSession) {
+    const [order] = await Order.create(
+      [orderData],
+      { session }
+    );
+    return order;
   }
 
   async findAll(filters:OrderFilters) {
