@@ -46,6 +46,39 @@ router.use(
     },
   })
 );
+  router.use(
+  "/payments",
+  authenticate,
+  createProxyMiddleware({
+    target: "http://localhost:3006/api/payments",
+    changeOrigin: true,
+
+    on: {
+      proxyReq: (proxyReq, req) => {
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.userId);
+          proxyReq.setHeader("x-user-role", req.user.role);
+        }
+      },
+    },
+  })
+);
+  router.use(
+  "/orders",
+  authenticate,
+  createProxyMiddleware({
+    target: "http://localhost:3004/api/orders",
+    changeOrigin: true,
+    on: {
+      proxyReq: (proxyReq, req) => {
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.userId);
+          proxyReq.setHeader("x-user-role", req.user.role);
+        }
+      },
+    },
+  })
+);
 
 const productProxy = createProxyMiddleware({
   target: "http://localhost:3003",

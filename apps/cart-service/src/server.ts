@@ -11,6 +11,7 @@ const startServer = async () => {
   await connectDB();
   await connectRabbitMQ();
   await consumeOrderPlaced();
+
   app.listen(PORT, () => {
     logger.info(`Cart Service running on port ${PORT}`);
   });

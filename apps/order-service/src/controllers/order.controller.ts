@@ -6,8 +6,9 @@ const orderService = new OrderService();
 export class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log("x-user-id:", req.headers["x-user-id"]);
+      const userId = req.headers["x-user-id"] as string;
       const {
-        userId,
         productId,
         quantity
       } = req.body;

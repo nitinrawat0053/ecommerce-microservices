@@ -15,7 +15,8 @@ export const config = {
   PRODUCT_SERVICE_PORT: Number(process.env.PRODUCT_SERVICE_PORT) || 3003,
   ORDER_SERVICE_PORT: Number(process.env.ORDER_SERVICE_PORT) || 3004,
   CART_SERVICE_PORT: Number(process.env.CART_SERVICE_PORT) || 3005,
-  
+  PAYMENT_SERVICE_PORT: Number(process.env.PAYMENT_SERVICE_PORT) || 3006,
+
   JWT_SECRET: process.env.JWT_SECRET || "",
   PRODUCT_SERVICE_URL: process.env.PRODUCT_SERVICE_URL || "",
   MONGODB_URI: process.env.MONGODB_URI || "",

@@ -23,9 +23,9 @@ export function getChannel() {
 export async function publishMessage(queue: string, message: object,  headers: Record<string, any> = {}) {
   const channel = getChannel();
 
-  // await channel.assertQueue(queue, {
-  //   durable: true,
-  // });
+  await channel.assertQueue(queue, {
+    durable: true,
+  });
 
   channel.sendToQueue(
     queue,
@@ -38,4 +38,33 @@ export async function publishMessage(queue: string, message: object,  headers: R
 
   console.log(`📤 Message sent to ${queue}`);
 
+}
+
+  export async function consumeMessage(
+  queue: string,
+  callback: (message: any) => Promise<void>
+) {
+  const channel = getChannel();
+
+  await channel.assertQueue(queue, {
+    durable: true,
+  });
+
+  channel.consume(queue, async (msg) => {
+    if (!msg) return;
+
+    try {
+      const content = JSON.parse(msg.content.toString());
+
+      await callback(content);
+
+      channel.ack(msg);
+    } catch (error) {
+      console.error(`❌ Error consuming ${queue}:`, error);
+
+      channel.nack(msg, false, false);
+    }
+  });
+
+  console.log(`👂 Listening on ${queue}`);
 }

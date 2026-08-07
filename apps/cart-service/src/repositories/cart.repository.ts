@@ -99,7 +99,19 @@ async addNewItem(
     }
   );
 } 
-
+  async clearCart(userId: string) {
+  return await Cart.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        items: [],
+      },
+    },
+    {
+      new: true,
+    }
+  );
+}
   async deleteCart(userId: string) {
     return await Cart.findOneAndDelete({ userId });
   }
