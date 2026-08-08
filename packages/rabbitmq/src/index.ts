@@ -1,5 +1,6 @@
-import amqp, { Channel, ChannelModel  } from "amqplib";
+import amqp, { Channel, ChannelModel } from "amqplib";
 import { config } from "@packages/config";
+import { QUEUE_CONFIG } from "./queue.config";
 
 let connection: ChannelModel;
 let channel: Channel;
@@ -9,9 +10,17 @@ export async function connectRabbitMQ() {
 
   channel = await connection.createChannel();
 
+  await channel.assertExchange(
+    "dead-letter-exchange",
+    "direct",
+    {
+      durable: true,
+    }
+  );
+  await setupDeadLetterQueues();
+
   console.log("✅ Connected to RabbitMQ");
 }
-
 export function getChannel() {
   if (!channel) {
     throw new Error("RabbitMQ is not connected");
@@ -19,13 +28,33 @@ export function getChannel() {
 
   return channel;
 }
+async function assertQueue(queue: string) {
+  const queueConfig =
+    QUEUE_CONFIG[queue as keyof typeof QUEUE_CONFIG];
 
-export async function publishMessage(queue: string, message: object,  headers: Record<string, any> = {}) {
-  const channel = getChannel();
+  if (!queueConfig) {
+    throw new Error(
+      `RabbitMQ queue configuration not found: ${queue}`
+    );
+  }
 
   await channel.assertQueue(queue, {
-    durable: true,
+    durable: queueConfig.durable,
+    arguments: {
+      "x-dead-letter-exchange":
+        queueConfig.deadLetterExchange,
+    },
   });
+}
+
+export async function publishMessage(
+  queue: string,
+  message: object,
+  headers: Record<string, any> = {}
+) {
+  const channel = getChannel();
+
+  await assertQueue(queue);
 
   channel.sendToQueue(
     queue,
@@ -37,34 +66,55 @@ export async function publishMessage(queue: string, message: object,  headers: R
   );
 
   console.log(`📤 Message sent to ${queue}`);
-
 }
-
-  export async function consumeMessage(
+export async function consumeMessage(
   queue: string,
   callback: (message: any) => Promise<void>
 ) {
   const channel = getChannel();
 
-  await channel.assertQueue(queue, {
-    durable: true,
-  });
+  await assertQueue(queue);
 
   channel.consume(queue, async (msg) => {
     if (!msg) return;
 
     try {
-      const content = JSON.parse(msg.content.toString());
+      const content = JSON.parse(
+        msg.content.toString()
+      );
 
       await callback(content);
 
       channel.ack(msg);
     } catch (error) {
-      console.error(`❌ Error consuming ${queue}:`, error);
+      console.error(
+        `❌ Error consuming ${queue}:`,
+        error
+      );
 
       channel.nack(msg, false, false);
     }
   });
 
   console.log(`👂 Listening on ${queue}`);
+}
+
+  async function setupDeadLetterQueues() {
+  const deadLetterExchange = "dead-letter-exchange";
+
+  const queues = Object.keys(QUEUE_CONFIG);
+
+  for (const queue of queues) {
+    const dlq = `${queue}-dlq`;
+
+    await channel.assertQueue(dlq, {
+      durable: true,
+    });
+
+    await channel.bindQueue(
+      dlq,
+      deadLetterExchange,
+      queue
+    );
+  }
 }
