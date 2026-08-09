@@ -67,6 +67,7 @@ async createOrder(userId: string, productId: string, quantity: number) {
    await outboxService.createEvent(
    EVENTS.ORDER_PLACED,
   {
+    orderId: order.id,
     userId,
   },
   session

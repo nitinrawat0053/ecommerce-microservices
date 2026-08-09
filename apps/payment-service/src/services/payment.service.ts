@@ -59,6 +59,7 @@ export class PaymentService {
         EVENTS.PAYMENT_SUCCESS,
         {
           orderId,
+          userId,
           transactionId,
         },
         session
@@ -82,6 +83,7 @@ export class PaymentService {
       EVENTS.PAYMENT_FAILED,
       {
         orderId,
+        userId,
       },
       session
     );

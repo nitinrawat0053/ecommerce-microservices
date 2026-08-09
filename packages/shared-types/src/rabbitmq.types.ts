@@ -20,3 +20,19 @@ export const EVENTS = {
   PAYMENT_SUCCESS:"payment-success",
   PAYMENT_FAILED:"payment-failed",
 } as const;
+
+export interface OrderPlacedEvent {
+  orderId: string;
+  userId: string;
+}
+
+export interface PaymentSuccessEvent {
+  orderId: string;
+  userId: string;
+  transactionId: string;
+}
+
+export interface PaymentFailedEvent {
+  orderId: string;
+  userId: string;
+}

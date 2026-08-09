@@ -153,6 +153,31 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
 
+  apps/notification-service:
+    dependencies:
+      '@packages/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@packages/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@packages/rabbitmq':
+        specifier: workspace:*
+        version: link:../../packages/rabbitmq
+      '@packages/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.1
+        version: 26.1.1
+      tsx:
+        specifier: ^4.23.1
+        version: 4.23.1
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   apps/order-service:
     dependencies:
       '@packages/config':

@@ -79,7 +79,7 @@ export function getChannel() {
 
   return channel;
 }
-async function assertQueue(queue: string) {
+export async function assertQueue(queue: string) {
   const queueConfig =
     QUEUE_CONFIG[queue as keyof typeof QUEUE_CONFIG];
 

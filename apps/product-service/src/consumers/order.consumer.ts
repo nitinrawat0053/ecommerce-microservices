@@ -1,4 +1,4 @@
-import { getChannel, publishMessage } from "@packages/rabbitmq";
+import { getChannel, publishMessage,assertQueue } from "@packages/rabbitmq";
 import { ProductService } from "../services/product.service";
 import { QUEUES, EXCHANGES } from "@packages/shared-types";
 import { isTemporaryError } from "@packages/errors";
@@ -39,11 +39,13 @@ export async function consumeOrderCreated() {
   );
 
   // Original Queue
-  await channel.assertQueue(QUEUES.ORDER_CREATED, {
-    durable: true,
-    deadLetterExchange: EXCHANGES.DEAD_LETTER,
-    deadLetterRoutingKey: QUEUES.ORDER_CREATED,
-  });
+  await assertQueue(QUEUES.ORDER_CREATED);
+  // , {
+//   durable: true,
+//   arguments: {
+//     "x-dead-letter-exchange": EXCHANGES.DEAD_LETTER,
+//   },
+// });
 
   console.log("👂 Order Consumer Started");
 
