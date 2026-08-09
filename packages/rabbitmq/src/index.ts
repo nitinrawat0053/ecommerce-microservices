@@ -5,21 +5,72 @@ import { QUEUE_CONFIG } from "./queue.config";
 let connection: ChannelModel;
 let channel: Channel;
 
+// export async function connectRabbitMQ() {
+//   connection = await amqp.connect(config.RABBITMQ_URL);
+
+//   channel = await connection.createChannel();
+
+//   await channel.assertExchange(
+//     "dead-letter-exchange",
+//     "direct",
+//     {
+//       durable: true,
+//     }
+//   );
+//   await setupDeadLetterQueues();
+
+//   console.log("✅ Connected to RabbitMQ");
+// }
 export async function connectRabbitMQ() {
-  connection = await amqp.connect(config.RABBITMQ_URL);
+  let retries = 5;
 
-  channel = await connection.createChannel();
+  while (retries > 0) {
+    try {
+      console.log(
+        `🔌 Connecting to RabbitMQ... (${retries} attempts left)`
+      );
+       console.log("RabbitMQ URL:",config.RABBITMQ_URL);
 
-  await channel.assertExchange(
-    "dead-letter-exchange",
-    "direct",
-    {
-      durable: true,
+      connection = await amqp.connect(
+        config.RABBITMQ_URL
+      );
+
+      channel = await connection.createChannel();
+
+      await channel.assertExchange(
+        "dead-letter-exchange",
+        "direct",
+        {
+          durable: true,
+        }
+      );
+
+      await setupDeadLetterQueues();
+
+      console.log("✅ Connected to RabbitMQ");
+
+      return;
+    } catch (error) {
+      retries--;
+
+      console.error(
+        "❌ RabbitMQ connection failed:",
+        error
+      );
+
+      if (retries === 0) {
+        throw error;
+      }
+
+      console.log(
+        "⏳ Retrying RabbitMQ connection in 3 seconds..."
+      );
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, 3000)
+      );
     }
-  );
-  await setupDeadLetterQueues();
-
-  console.log("✅ Connected to RabbitMQ");
+  }
 }
 export function getChannel() {
   if (!channel) {

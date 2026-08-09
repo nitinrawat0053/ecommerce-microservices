@@ -4,6 +4,7 @@ import { logger } from "@packages/logger";
 
 export const connectDB = async () => {
   try {
+    console.log("RabbitMQ URL:", config.RABBITMQ_URL);
     await mongoose.connect(config.MONGODB_URI);
 
     logger.info("MongoDB Connected");

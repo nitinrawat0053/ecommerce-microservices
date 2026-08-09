@@ -4,7 +4,7 @@ export * from "./user.types";
 export * from "./rabbitmq.types";
 export * from "./payment-status";
 export * from "./payment-method";
-
+export * from "./notification.types";
 export interface ApiResponse<T> {
   success: boolean;
   message: string;

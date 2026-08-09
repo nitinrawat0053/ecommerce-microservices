@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { PaymentMethod, PaymentStatus, QUEUES, EVENTS } from "@packages/shared-types";
-import { publishMessage } from "@packages/rabbitmq";
-import { ConflictError, NotFoundError } from "@packages/errors";
+import { NotFoundError } from "@packages/errors";
 import { PaymentRepository } from "../repositories/payment.repository";
 import { OutboxService } from "./outbox.service";
 import mongoose from "mongoose";
