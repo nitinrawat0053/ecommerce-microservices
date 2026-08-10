@@ -5,22 +5,6 @@ import { QUEUE_CONFIG } from "./queue.config";
 let connection: ChannelModel;
 let channel: Channel;
 
-// export async function connectRabbitMQ() {
-//   connection = await amqp.connect(config.RABBITMQ_URL);
-
-//   channel = await connection.createChannel();
-
-//   await channel.assertExchange(
-//     "dead-letter-exchange",
-//     "direct",
-//     {
-//       durable: true,
-//     }
-//   );
-//   await setupDeadLetterQueues();
-
-//   console.log("✅ Connected to RabbitMQ");
-// }
 export async function connectRabbitMQ() {
   let retries = 5;
 
@@ -36,6 +20,15 @@ export async function connectRabbitMQ() {
       );
 
       channel = await connection.createChannel();
+
+      await channel.assertExchange(
+        "event-exchange",
+        "direct",
+       {
+         durable: true,
+       }
+      );
+      await setupEventQueues();
 
       await channel.assertExchange(
         "dead-letter-exchange",
@@ -118,6 +111,25 @@ export async function publishMessage(
 
   console.log(`📤 Message sent to ${queue}`);
 }
+
+export async function publishEvent(
+  routingKey: string,
+  message: object
+) {
+  const channel = getChannel();
+
+  channel.publish(
+    "event-exchange",
+    routingKey,
+    Buffer.from(JSON.stringify(message)),
+    {
+      persistent: true,
+    }
+  );
+
+  console.log(`📤 Event published: ${routingKey}`);
+}
+
 export async function consumeMessage(
   queue: string,
   callback: (message: any) => Promise<void>
@@ -149,6 +161,53 @@ export async function consumeMessage(
 
   console.log(`👂 Listening on ${queue}`);
 }
+
+  async function setupEventQueues() {
+  const bindings = [
+    {
+      queue: "order-placed",
+      routingKey: "order-placed",
+    },
+    {
+      queue: "order-created",
+      routingKey: "order-created",
+    },
+    {
+      queue: "payment-success",
+      routingKey: "payment-success",
+    },
+    {
+      queue: "payment-initiated",
+      routingKey: "payment-initiated",
+    },
+    {
+      queue: "payment-failed",
+      routingKey: "payment-failed",
+    },
+    {
+      queue: "notification-payment-success",
+      routingKey: "payment-success",
+    },
+    {
+      queue: "notification-order-placed",
+      routingKey: "order-placed",
+    },
+    {
+      queue: "notification-payment-failed",
+      routingKey: "payment-failed",
+    },
+  ];
+
+  for (const binding of bindings) {
+    await assertQueue(binding.queue);
+
+    await channel.bindQueue(
+      binding.queue,
+      "event-exchange",
+      binding.routingKey
+    );
+  }
+}  
 
   async function setupDeadLetterQueues() {
   const deadLetterExchange = "dead-letter-exchange";

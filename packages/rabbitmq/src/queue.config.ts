@@ -23,4 +23,19 @@ export const QUEUE_CONFIG = {
     durable: true,
     deadLetterExchange: "dead-letter-exchange",
   },
+
+  "notification-order-placed": {
+  durable: true,
+  deadLetterExchange: "dead-letter-exchange",
+ },
+
+  "notification-payment-success": {
+  durable: true,
+  deadLetterExchange: "dead-letter-exchange",
+ },
+
+  "notification-payment-failed": {
+  durable: true,
+  deadLetterExchange: "dead-letter-exchange",
+ },
 } as const;

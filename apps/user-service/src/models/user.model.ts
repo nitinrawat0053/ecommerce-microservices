@@ -6,6 +6,12 @@ export interface IUser extends Document {
   password: string;
   isVerified: boolean;
   role: "USER" | "ADMIN";
+  phone: string;
+  notificationPreferences: {
+    email: boolean;
+    sms: boolean;
+    whatsapp: boolean;
+  };
 }
 
 const userSchema = new Schema<IUser>(
@@ -41,6 +47,26 @@ const userSchema = new Schema<IUser>(
       enum: ["USER", "ADMIN"],
       default: "USER",
     },
+
+    phone: {
+     type: String,
+     required: true,
+},
+
+notificationPreferences: {
+  email: {
+    type: Boolean,
+    default: true,
+  },
+  sms: {
+    type: Boolean,
+    default: true,
+  },
+  whatsapp: {
+    type: Boolean,
+    default: true,
+  },
+},
   },
   {
     timestamps: true,

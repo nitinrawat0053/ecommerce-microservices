@@ -167,6 +167,9 @@ importers:
       '@packages/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      axios:
+        specifier: ^1.19.0
+        version: 1.19.0
     devDependencies:
       '@types/node':
         specifier: ^26.1.1

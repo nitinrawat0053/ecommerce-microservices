@@ -3,14 +3,20 @@ export const QUEUES = {
   ORDER_PLACED: "order-placed",
   ORDER_CREATED_RETRY: "order-created-retry",
   ORDER_CREATED_DLQ: "order-created-dlq",
+  
   PAYMENT_INITIATED:"payment-initiated",
   PAYMENT_SUCCESS:"payment-success",
   PAYMENT_FAILED:"payment-failed",
+
+  NOTIFICATION_ORDER_PLACED: "notification-order-placed",
+  NOTIFICATION_PAYMENT_SUCCESS: "notification-payment-success",
+  NOTIFICATION_PAYMENT_FAILED: "notification-payment-failed",
 } as const;
 
 export const EXCHANGES = {
   RETRY: "retry-exchange",
   DEAD_LETTER: "dead-letter-exchange",
+  EVENTS: "event-exchange",
 } as const;
 
 export const EVENTS = {

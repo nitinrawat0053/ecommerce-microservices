@@ -12,10 +12,33 @@ export class UserService {
     }
 
     return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    };
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  phone: user.phone,
+  role: user.role,
+  notificationPreferences: user.notificationPreferences,
+};
+
   }
+  async updateNotificationPreferences(
+  userId: string,
+  preferences: {
+    email?: boolean;
+    sms?: boolean;
+    whatsapp?: boolean;
+  }
+) {
+  const user =
+    await userRepository.updateNotificationPreferences(
+      userId,
+      preferences
+    );
+
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  return user;
+}
 }

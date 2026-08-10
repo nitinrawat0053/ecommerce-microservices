@@ -2,9 +2,9 @@ import { ClientSession } from "mongoose";
 import { OutboxRepository } from "../repositories/outbox.repository";
 import { publishMessage } from "@packages/rabbitmq";
 import { QUEUES, EVENTS } from "@packages/shared-types";
+import {publishEvent} from "@packages/rabbitmq";
 
 const outboxRepository = new OutboxRepository();
-
 export class OutboxService {
   async createEvent(
     eventType: string,
@@ -36,16 +36,23 @@ export class OutboxService {
     try {
       switch (event.eventType) {
         case EVENTS.ORDER_CREATED:
-          await publishMessage(
+          await publishEvent(
             QUEUES.ORDER_CREATED,
             event.payload
           );
           break;
 
         case EVENTS.ORDER_PLACED:
-          await publishMessage(
+          await publishEvent(
             QUEUES.ORDER_PLACED,
             event.payload
+          );
+          break;
+
+        case EVENTS.PAYMENT_INITIATED:
+          await publishEvent(
+           QUEUES.PAYMENT_INITIATED,
+           event.payload
           );
           break;
       }

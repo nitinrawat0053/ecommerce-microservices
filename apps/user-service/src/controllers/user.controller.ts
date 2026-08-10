@@ -19,6 +19,29 @@ export class UserController {
       next(error);
     }
   }
+  async updateNotificationPreferences(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.headers["x-user-id"] as string;
+
+    const updatedUser =
+      await userService.updateNotificationPreferences(
+        userId,
+        req.body
+      );
+
+    res.status(200).json({
+      success: true,
+      message: "Notification preferences updated successfully",
+      data: updatedUser.notificationPreferences,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 }
 
 export const userController = new UserController();

@@ -11,7 +11,8 @@
     "@packages/config": "workspace:*",
     "@packages/logger": "workspace:*",
     "@packages/rabbitmq": "workspace:*",
-    "@packages/shared-types": "workspace:*"
+    "@packages/shared-types": "workspace:*",
+    "axios": "^1.19.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

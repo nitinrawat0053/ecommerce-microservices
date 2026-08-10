@@ -18,6 +18,7 @@ export const config = {
   PAYMENT_SERVICE_PORT: Number(process.env.PAYMENT_SERVICE_PORT) || 3006,
 
   JWT_SECRET: process.env.JWT_SECRET || "",
+  USER_SERVICE_URL: process.env.USER_SERVICE_URL || "",
   PRODUCT_SERVICE_URL: process.env.PRODUCT_SERVICE_URL || "",
   MONGODB_URI: process.env.MONGODB_URI || "",
   RABBITMQ_URL:process.env.RABBITMQ_URL || "",

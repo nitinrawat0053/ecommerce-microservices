@@ -1,37 +1,27 @@
 import { consumeMessage } from "@packages/rabbitmq";
-import {
-  QUEUES,
-  OrderPlacedEvent,
-  PaymentSuccessEvent,
-  PaymentFailedEvent,
-} from "@packages/shared-types";
+import { QUEUES,OrderPlacedEvent,PaymentSuccessEvent,PaymentFailedEvent } from "@packages/shared-types";
+import { NotificationService } from "../services/notification.service";
 
+const notificationService = new NotificationService();
 export async function startNotificationConsumers() {
   await consumeMessage(
-    QUEUES.ORDER_PLACED,
+    QUEUES.NOTIFICATION_ORDER_PLACED,
     async (message: OrderPlacedEvent) => {
-      console.log("📦 Order Placed Notification Event");
-      console.log("Order ID:", message.orderId);
-      console.log("User ID:", message.userId);
+      await notificationService.handleOrderPlaced(message);
     }
   );
 
   await consumeMessage(
-    QUEUES.PAYMENT_SUCCESS,
+    QUEUES.NOTIFICATION_PAYMENT_SUCCESS,
     async (message: PaymentSuccessEvent) => {
-      console.log("💰 Payment Success Notification Event");
-      console.log("Order ID:", message.orderId);
-      console.log("User ID:", message.userId);
-      console.log("Transaction ID:", message.transactionId);
+      await notificationService.handlePaymentSuccess(message);
     }
   );
 
   await consumeMessage(
-    QUEUES.PAYMENT_FAILED,
+    QUEUES.NOTIFICATION_PAYMENT_FAILED,
     async (message: PaymentFailedEvent) => {
-      console.log("❌ Payment Failed Notification Event");
-      console.log("Order ID:", message.orderId);
-      console.log("User ID:", message.userId);
+      await notificationService.handlePaymentFailed(message);
     }
   );
 }
