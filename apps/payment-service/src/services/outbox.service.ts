@@ -1,6 +1,6 @@
 import { ClientSession } from "mongoose";
 import { OutboxRepository } from "../repositories/outbox.repository";
-import { publishMessage } from "@packages/rabbitmq";
+import { publishEvent } from "@packages/rabbitmq";
 import { QUEUES, EVENTS } from "@packages/shared-types";
 
 const outboxRepository = new OutboxRepository();
@@ -36,14 +36,14 @@ export class OutboxService {
     try {
       switch (event.eventType) {
         case EVENTS.PAYMENT_SUCCESS:
-          await publishMessage(
+          await publishEvent(
             QUEUES.PAYMENT_SUCCESS,
             event.payload
           );
           break;
 
         case EVENTS.PAYMENT_FAILED:
-          await publishMessage(
+          await publishEvent(
             QUEUES.PAYMENT_FAILED,
             event.payload
           );

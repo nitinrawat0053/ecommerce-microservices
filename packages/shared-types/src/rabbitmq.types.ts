@@ -1,6 +1,7 @@
 export const QUEUES = {
   ORDER_CREATED: "order-created",
   ORDER_PLACED: "order-placed",
+  
   ORDER_CREATED_RETRY: "order-created-retry",
   ORDER_CREATED_DLQ: "order-created-dlq",
   
@@ -11,6 +12,15 @@ export const QUEUES = {
   NOTIFICATION_ORDER_PLACED: "notification-order-placed",
   NOTIFICATION_PAYMENT_SUCCESS: "notification-payment-success",
   NOTIFICATION_PAYMENT_FAILED: "notification-payment-failed",
+
+  NOTIFICATION_ORDER_PLACED_RETRY: "notification-order-placed-retry",
+  NOTIFICATION_ORDER_PLACED_DLQ: "notification-order-placed-dlq",
+
+  NOTIFICATION_PAYMENT_SUCCESS_RETRY: "notification-payment-success-retry",
+  NOTIFICATION_PAYMENT_SUCCESS_DLQ: "notification-payment-success-dlq",
+
+  NOTIFICATION_PAYMENT_FAILED_RETRY: "notification-payment-failed-retry",
+  NOTIFICATION_PAYMENT_FAILED_DLQ: "notification-payment-failed-dlq",
 } as const;
 
 export const EXCHANGES = {

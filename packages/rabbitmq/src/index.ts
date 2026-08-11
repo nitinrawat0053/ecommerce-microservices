@@ -84,9 +84,21 @@ export async function assertQueue(queue: string) {
 
   await channel.assertQueue(queue, {
     durable: queueConfig.durable,
+
     arguments: {
-      "x-dead-letter-exchange":
-        queueConfig.deadLetterExchange,
+      ...(queueConfig.messageTtl !== undefined && {
+        "x-message-ttl": queueConfig.messageTtl,
+      }),
+
+      ...(queueConfig.deadLetterExchange !== undefined && {
+        "x-dead-letter-exchange":
+          queueConfig.deadLetterExchange,
+      }),
+
+      ...(queueConfig.deadLetterRoutingKey && {
+        "x-dead-letter-routing-key":
+          queueConfig.deadLetterRoutingKey,
+      }),
     },
   });
 }
@@ -132,7 +144,11 @@ export async function publishEvent(
 
 export async function consumeMessage(
   queue: string,
-  callback: (message: any) => Promise<void>
+  callback: (message: any) => Promise<void>,
+  options?: {
+    retryQueue?: string;
+    maxRetries?: number;
+  }
 ) {
   const channel = getChannel();
 
@@ -140,6 +156,9 @@ export async function consumeMessage(
 
   channel.consume(queue, async (msg) => {
     if (!msg) return;
+
+    const retryCount =
+      msg.properties.headers?.["x-retry-count"] ?? 0;
 
     try {
       const content = JSON.parse(
@@ -149,10 +168,40 @@ export async function consumeMessage(
       await callback(content);
 
       channel.ack(msg);
+
     } catch (error) {
       console.error(
         `❌ Error consuming ${queue}:`,
         error
+      );
+
+      // Retry if retry queue is configured
+      if (
+        options?.retryQueue &&
+        retryCount < (options.maxRetries ?? 3)
+      ) {
+        const nextRetryCount = retryCount + 1;
+
+        await publishMessage(
+          options.retryQueue,
+          JSON.parse(msg.content.toString()),
+          {
+            "x-retry-count": nextRetryCount,
+          }
+        );
+
+        channel.ack(msg);
+
+        console.log(
+          `🔄 ${queue} retry ${nextRetryCount}/${options.maxRetries ?? 3}`
+        );
+
+        return;
+      }
+
+      // Maximum retries reached
+      console.log(
+        `💀 ${queue} failed after ${retryCount} retries. Moving to DLQ`
       );
 
       channel.nack(msg, false, false);
@@ -161,6 +210,37 @@ export async function consumeMessage(
 
   console.log(`👂 Listening on ${queue}`);
 }
+// export async function consumeMessage(
+//   queue: string,
+//   callback: (message: any) => Promise<void>
+// ) {
+//   const channel = getChannel();
+
+//   await assertQueue(queue);
+
+//   channel.consume(queue, async (msg) => {
+//     if (!msg) return;
+
+//     try {
+//       const content = JSON.parse(
+//         msg.content.toString()
+//       );
+
+//       await callback(content);
+
+//       channel.ack(msg);
+//     } catch (error) {
+//       console.error(
+//         `❌ Error consuming ${queue}:`,
+//         error
+//       );
+
+//       channel.nack(msg, false, false);
+//     }
+//   });
+
+//   console.log(`👂 Listening on ${queue}`);
+// }
 
   async function setupEventQueues() {
   const bindings = [
@@ -209,10 +289,14 @@ export async function consumeMessage(
   }
 }  
 
-  async function setupDeadLetterQueues() {
+async function setupDeadLetterQueues() {
   const deadLetterExchange = "dead-letter-exchange";
 
-  const queues = Object.keys(QUEUE_CONFIG);
+  const queues = Object.keys(QUEUE_CONFIG).filter(
+    (queue) =>
+      !queue.endsWith("-retry") &&
+      !queue.endsWith("-dlq")
+  );
 
   for (const queue of queues) {
     const dlq = `${queue}-dlq`;
@@ -228,3 +312,22 @@ export async function consumeMessage(
     );
   }
 }
+//   async function setupDeadLetterQueues() {
+//   const deadLetterExchange = "dead-letter-exchange";
+
+//   const queues = Object.keys(QUEUE_CONFIG);
+
+//   for (const queue of queues) {
+//     const dlq = `${queue}-dlq`;
+
+//     await channel.assertQueue(dlq, {
+//       durable: true,
+//     });
+
+//     await channel.bindQueue(
+//       dlq,
+//       deadLetterExchange,
+//       queue
+//     );
+//   }
+// }

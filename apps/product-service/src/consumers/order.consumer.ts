@@ -1,4 +1,4 @@
-import { getChannel, publishMessage,assertQueue } from "@packages/rabbitmq";
+import { getChannel, publishMessage, assertQueue } from "@packages/rabbitmq";
 import { ProductService } from "../services/product.service";
 import { QUEUES, EXCHANGES } from "@packages/shared-types";
 import { isTemporaryError } from "@packages/errors";

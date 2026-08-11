@@ -4,6 +4,7 @@ import { SmsProvider } from "../providers/sms.provider";
 import { WhatsAppProvider } from "../providers/whatsapp.provider";
 import { UserClient } from "../clients/user.client";
 import { UserService } from "./user.service";
+import { notificationTemplates } from "../templates/notification.templates";
 
 const userService = new UserService();
 export class NotificationService {
@@ -12,27 +13,12 @@ export class NotificationService {
   private whatsappProvider = new WhatsAppProvider();
   private userClient = new UserClient();
 
-  async handleOrderPlaced(message: OrderPlacedEvent) {
+  async handleOrderPlaced(orderEvent: OrderPlacedEvent) {
     console.log("🔔 Processing ORDER_PLACED notification");
 
-    const user = await userService.getUser(message.userId);
+    const user = await userService.getUser(orderEvent.userId);
 
-    const Message = `Your order ${message.orderId} has been placed successfully.`;
-
-    await this.sendNotifications(
-      user,
-      Message
-    );
-  }
-
-  async handlePaymentSuccess(event: PaymentSuccessEvent) {
-    console.log("💰 Processing PAYMENT_SUCCESS notification");
-
-    const user = await this.userClient.getUser(event.userId);
-
-    const message =
-      `Payment successful for order ${event.orderId}. ` +
-      `Transaction ID: ${event.transactionId}`;
+    const message = notificationTemplates.orderPlaced(orderEvent.orderId)
 
     await this.sendNotifications(
       user,
@@ -40,14 +26,30 @@ export class NotificationService {
     );
   }
 
-  async handlePaymentFailed(event: PaymentFailedEvent) {
+  async handlePaymentSuccess(paymentEvent: PaymentSuccessEvent) {
+    console.log("💰 Processing PAYMENT_SUCCESS notification");
+
+    const user = await this.userClient.getUser(paymentEvent.userId);
+
+    const message = notificationTemplates.paymentSuccess(
+      paymentEvent.orderId,
+      paymentEvent.transactionId
+    );
+
+    await this.sendNotifications(
+      user,
+      message
+    );
+  }
+
+  async handlePaymentFailed(paymentEvent: PaymentFailedEvent) {
     console.log("❌ Processing PAYMENT_FAILED notification");
 
-    const user = await this.userClient.getUser(event.userId);
+    const user = await this.userClient.getUser(paymentEvent.userId);
 
-    const message =
-      `Payment failed for order ${event.orderId}.`;
-
+    const message = notificationTemplates.paymentFailed(
+      paymentEvent.orderId
+    );
     await this.sendNotifications(
       user,
       message
