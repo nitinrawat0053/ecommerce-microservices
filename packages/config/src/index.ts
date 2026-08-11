@@ -23,4 +23,5 @@ export const config = {
   MONGODB_URI: process.env.MONGODB_URI || "",
   RABBITMQ_URL:process.env.RABBITMQ_URL || "",
   REDIS_URL: process.env.REDIS_URL || "",
+  RESEND_API_KEY: process.env.RESEND_API_KEY || "",
 }
