@@ -24,4 +24,8 @@ export const config = {
   RABBITMQ_URL:process.env.RABBITMQ_URL || "",
   REDIS_URL: process.env.REDIS_URL || "",
   RESEND_API_KEY: process.env.RESEND_API_KEY || "",
+  TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID! || "",
+  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN! || "",
+  TWILIO_VERIFY_SERVICE_SID: process.env.TWILIO_VERIFY_SERVICE_SID! || "",
+  TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER || "",
 }

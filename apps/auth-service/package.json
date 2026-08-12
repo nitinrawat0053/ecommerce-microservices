@@ -21,7 +21,9 @@
     "@packages/validation": "workspace:*",
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
     "mongoose": "^9.7.4",
+    "twilio": "^6.0.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {

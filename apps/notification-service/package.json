@@ -14,7 +14,8 @@
     "@packages/shared-types": "workspace:*",
     "amqplib": "^2.0.1",
     "axios": "^1.19.0",
-    "resend": "^6.18.1"
+    "resend": "^6.18.1",
+    "twilio": "^6.0.2"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

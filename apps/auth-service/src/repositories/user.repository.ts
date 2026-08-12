@@ -8,4 +8,12 @@ export class UserRepository {
   async create(data: Partial<IUser>): Promise<IUser> {
     return User.create(data);
   }
+
+  async findByPhone(phone: string): Promise<IUser | null> {
+  return User.findOne({ phone });
+}
+
+ async deleteById(id: string): Promise<void> {
+  await User.findByIdAndDelete(id);
+}
 }
