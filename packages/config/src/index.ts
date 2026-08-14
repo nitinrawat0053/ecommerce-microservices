@@ -8,7 +8,8 @@ dotenv.config({
 
 export const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
-
+  LOAD_TEST: process.env.LOAD_TEST || "",
+  
   API_GATEWAY_PORT: Number(process.env.API_GATEWAY_PORT) || 3000,
   AUTH_SERVICE_PORT: Number(process.env.AUTH_SERVICE_PORT) || 3001,
   USER_SERVICE_PORT: Number(process.env.USER_SERVICE_PORT) || 3002,
@@ -23,9 +24,15 @@ export const config = {
   MONGODB_URI: process.env.MONGODB_URI || "",
   RABBITMQ_URL:process.env.RABBITMQ_URL || "",
   REDIS_URL: process.env.REDIS_URL || "",
+
   RESEND_API_KEY: process.env.RESEND_API_KEY || "",
+
   TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID! || "",
   TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN! || "",
   TWILIO_VERIFY_SERVICE_SID: process.env.TWILIO_VERIFY_SERVICE_SID! || "",
   TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER || "",
+
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID!,
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET!,
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || "",
 }

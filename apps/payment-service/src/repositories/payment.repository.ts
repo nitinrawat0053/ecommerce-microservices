@@ -49,4 +49,20 @@ export class PaymentRepository {
       }
     );
   }
+
+  async updateRazorpayOrderId(paymentId: string, razorpayOrderId: string) {
+  return Payment.findByIdAndUpdate(
+    paymentId,
+    {
+      razorpayOrderId,
+    },
+    {
+      returnDocument: "after",
+    }
+  );
+}
+
+  async findByRazorpayOrderId(razorpayOrderId: string) {
+  return Payment.findOne({ razorpayOrderId });
+}
 }

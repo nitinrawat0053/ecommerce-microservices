@@ -6,6 +6,9 @@ export const QUEUES = {
   ORDER_CREATED_DLQ: "order-created-dlq",
   
   PAYMENT_INITIATED:"payment-initiated",
+  PAYMENT_INITIATED_RETRY: "payment-initiated-retry",
+  PAYMENT_INITIATED_DLQ: "payment-initiated-dlq",
+  
   PAYMENT_SUCCESS:"payment-success",
   PAYMENT_FAILED:"payment-failed",
 

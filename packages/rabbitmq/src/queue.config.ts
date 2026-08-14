@@ -79,4 +79,15 @@ export const QUEUE_CONFIG: Record<string, QueueConfig> = {
   "notification-payment-failed-dlq": {
     durable: true,
   },
+
+  "payment-initiated-retry": {
+    durable: true,
+    messageTtl: 5000,
+    deadLetterExchange: "",
+    deadLetterRoutingKey: "payment-initiated",
+},
+
+  "payment-initiated-dlq": {
+    durable: true,
+},
 };

@@ -210,38 +210,6 @@ export async function consumeMessage(
 
   console.log(`👂 Listening on ${queue}`);
 }
-// export async function consumeMessage(
-//   queue: string,
-//   callback: (message: any) => Promise<void>
-// ) {
-//   const channel = getChannel();
-
-//   await assertQueue(queue);
-
-//   channel.consume(queue, async (msg) => {
-//     if (!msg) return;
-
-//     try {
-//       const content = JSON.parse(
-//         msg.content.toString()
-//       );
-
-//       await callback(content);
-
-//       channel.ack(msg);
-//     } catch (error) {
-//       console.error(
-//         `❌ Error consuming ${queue}:`,
-//         error
-//       );
-
-//       channel.nack(msg, false, false);
-//     }
-//   });
-
-//   console.log(`👂 Listening on ${queue}`);
-// }
-
   async function setupEventQueues() {
   const bindings = [
     {

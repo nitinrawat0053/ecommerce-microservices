@@ -20,6 +20,10 @@ export async function startPaymentConsumer() {
       );
 
       console.log("✅ Payment Processed");
-    }
+    },
+    {
+     retryQueue: QUEUES.PAYMENT_INITIATED_RETRY,
+     maxRetries: 3,
+  }
   );
 }
