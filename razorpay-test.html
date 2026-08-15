@@ -7,59 +7,174 @@
 <body>
   <h2>Razorpay Test Payment</h2>
 
-  <button id="pay-button">Pay ₹10,000</button>
+  <p id="status">Loading payment...</p>
+
+  <button id="pay-button" disabled>
+    Loading...
+  </button>
 
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <script>
-    const options = {
-      key: "rzp_test_TPCbChnmJr1ksi",
+    const params = new URLSearchParams(
+      window.location.search
+    );
 
-      amount: 1000000,
+    // Get Razorpay Order ID from URL
+    const razorpayOrderId =
+      params.get("razorpayOrderId");
 
-      currency: "INR",
+    // Your JWT
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTdjYzAyMDc1NGY2N2ZiOTg1MDUyMTIiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4NjgyNjQwOSwiZXhwIjoxNzg2OTEyODA5fQ.WwLj5q7HO97708j5moZrrXByzqeejRMuSW14-1LZQ8I";
 
-      name: "E-Commerce Test",
+    let payment = null;
 
-      description: "Test Payment",
+    async function loadPayment() {
+      if (!razorpayOrderId) {
+        document.getElementById("status").innerText =
+          "❌ Missing razorpayOrderId in URL";
 
-      order_id: "order_TPgKmniyj9En70",
+        return;
+      }
 
-      handler: async function (response) {
-        console.log("Razorpay response:", response);
-
-        const verifyResponse = await fetch(
-          "http://localhost:3006/api/payments/verify",
+      try {
+        const response = await fetch(
+          `http://localhost:3006/api/payments/order/${razorpayOrderId}`,
           {
-            method: "POST",
-
             headers: {
-              "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature
-            })
+              Authorization: `Bearer ${token}`
+            }
           }
         );
 
-        const result = await verifyResponse.json();
+        const result = await response.json();
 
-        console.log("Verification response:", result);
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.message ||
+            "Failed to load payment"
+          );
+        }
 
-        alert(JSON.stringify(result, null, 2));
+        payment = result.data;
+
+        console.log("Payment:", payment);
+
+        const amount = payment.amount;
+
+        document.getElementById("status").innerText =
+          `Razorpay Order: ${payment.razorpayOrderId} | Amount: ₹${amount}`;
+
+        const button =
+          document.getElementById("pay-button");
+
+        button.innerText =
+          `Pay ₹${amount.toLocaleString("en-IN")}`;
+
+        button.disabled = false;
+
+      } catch (error) {
+        console.error(
+          "Payment loading failed:",
+          error
+        );
+
+        document.getElementById("status").innerText =
+          `❌ ${error.message}`;
       }
-    };
+    }
 
     document
       .getElementById("pay-button")
-      .addEventListener("click", function () {
-        const razorpay = new Razorpay(options);
+      .addEventListener(
+        "click",
+        function () {
 
-        razorpay.open();
-      });
+          if (!payment) {
+            alert(
+              "Payment details are not loaded"
+            );
+            return;
+          }
+
+          const options = {
+            key: "rzp_test_TPCbChnmJr1ksi",
+
+            // Backend amount = rupees
+            // Razorpay amount = paise
+            amount: payment.amount * 100,
+
+            currency: payment.currency,
+
+            name: "E-Commerce Test",
+
+            description:
+              "E-Commerce Order Payment",
+
+            // Actual Razorpay Order ID
+            order_id:
+              payment.razorpayOrderId,
+
+            handler: async function (response) {
+
+              console.log(
+                "Razorpay response:",
+                response
+              );
+
+              const verifyResponse =
+                await fetch(
+                  "http://localhost:3006/api/payments/verify",
+                  {
+                    method: "POST",
+
+                    headers: {
+                      "Content-Type":
+                        "application/json",
+
+                      Authorization:
+                        `Bearer ${token}`
+                    },
+
+                    body: JSON.stringify({
+                      razorpayOrderId:
+                        response.razorpay_order_id,
+
+                      razorpayPaymentId:
+                        response.razorpay_payment_id,
+
+                      razorpaySignature:
+                        response.razorpay_signature
+                    })
+                  }
+                );
+
+              const result =
+                await verifyResponse.json();
+
+              console.log(
+                "Verification response:",
+                result
+              );
+
+              alert(
+                JSON.stringify(
+                  result,
+                  null,
+                  2
+                )
+              );
+            }
+          };
+
+          const razorpay =
+            new Razorpay(options);
+
+          razorpay.open();
+        }
+      );
+
+    loadPayment();
   </script>
 </body>
 </html>

@@ -26,7 +26,7 @@ export class OutboxRepository {
         status: "SENT",
       },
       {
-        new: true,
+        returnDocument: "after",
       }
     );
   }

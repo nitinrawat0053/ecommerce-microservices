@@ -45,7 +45,7 @@ export class OrderRepository {
     return await Order.findByIdAndUpdate(
       orderId,
       orderData,
-      { new: true }
+      { returnDocument: "after", }
     );
   }
 

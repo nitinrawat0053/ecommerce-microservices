@@ -19,6 +19,7 @@
     "@packages/rabbitmq": "workspace:*",
     "@packages/redis": "workspace:*",
     "@packages/shared-types": "workspace:*",
+    "@packages/validation": "workspace:*",
     "axios": "^1.19.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",

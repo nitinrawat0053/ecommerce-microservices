@@ -23,7 +23,7 @@ export class OrderService {
     throw new BadRequestError("Product not found");
   }
 }
-async createOrder(userId: string, productId: string, quantity: number) {
+async createOrder(userId: string, productId: string, quantity: number, paymentMethod:PaymentMethod) {
   const session = await mongoose.startSession();
 
   try {
@@ -60,6 +60,7 @@ async createOrder(userId: string, productId: string, quantity: number) {
   {
     productId,
     quantity,
+
   },
   session
 );
@@ -79,7 +80,7 @@ async createOrder(userId: string, productId: string, quantity: number) {
     orderId: order.id,
     userId,
     amount: totalAmount,
-    paymentMethod: PaymentMethod.UPI,
+    paymentMethod,
   },
   session
 );

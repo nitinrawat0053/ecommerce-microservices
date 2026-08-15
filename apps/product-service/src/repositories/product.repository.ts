@@ -61,7 +61,7 @@ if (minPrice !== undefined || maxPrice !== undefined) {
     return await Product.findByIdAndUpdate(
       productId,
       productData,
-      { new: true }
+      { returnDocument: "after", }
     );
   }
 
@@ -73,7 +73,7 @@ if (minPrice !== undefined || maxPrice !== undefined) {
         stock: -quantity,
       },
     },
-    { new: true }
+    { returnDocument: "after", }
   );
 }
 

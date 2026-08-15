@@ -202,7 +202,6 @@ return updatedPayment;
     await session.endSession();
   }
 }
-
   async processWebhookEvent(event: any) {
   const eventType = event.event;
 

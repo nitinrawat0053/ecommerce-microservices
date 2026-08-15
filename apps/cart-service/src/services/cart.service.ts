@@ -119,11 +119,14 @@ async clearCart(userId: string) {
   const cart = await cartRepository.clearCart(userId);
 
   if (!cart) {
-    throw new NotFoundError("Cart not found");
+    console.log(
+      `ℹ️ No cart found for user ${userId}, nothing to clear`
+    );
+
+    return null;
   }
-
   await redisClient.del(`cart:${userId}`);
-
+  console.log(`✅ Cart cleared for user ${userId}`);
   return cart;
 }
 }

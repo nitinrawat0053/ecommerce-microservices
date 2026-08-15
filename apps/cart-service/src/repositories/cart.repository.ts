@@ -33,7 +33,7 @@ export class CartRepository {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     }
   );
 }
@@ -51,7 +51,7 @@ export class CartRepository {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     }
   );
 }
@@ -72,7 +72,7 @@ export class CartRepository {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     }
   );
 }
@@ -95,7 +95,7 @@ async addNewItem(
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     }
   );
 } 
@@ -108,7 +108,7 @@ async addNewItem(
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     }
   );
 }

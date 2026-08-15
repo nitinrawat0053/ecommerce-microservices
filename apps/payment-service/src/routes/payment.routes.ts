@@ -11,6 +11,7 @@ router.get("/order/:orderId",
   paymentController.getOrderPayment
 );
 
+
 router.get("/user/:userId",
   paymentController.getUserPayments
 );

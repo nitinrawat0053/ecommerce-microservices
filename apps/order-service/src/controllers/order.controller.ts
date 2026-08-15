@@ -8,15 +8,13 @@ export class OrderController {
     try {
       console.log("x-user-id:", req.headers["x-user-id"]);
       const userId = req.headers["x-user-id"] as string;
-      const {
-        productId,
-        quantity
-      } = req.body;
+      const {productId, quantity, paymentMethod} = req.body;
 
       const order = await orderService.createOrder(
         userId,
         productId,
-        quantity
+        quantity,
+        paymentMethod
       );
 
       res.status(201).json({

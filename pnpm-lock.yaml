@@ -216,6 +216,9 @@ importers:
       '@packages/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@packages/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       axios:
         specifier: ^1.19.0
         version: 1.19.0
@@ -437,6 +440,9 @@ importers:
       '@packages/errors':
         specifier: workspace:*
         version: link:../errors
+      '@packages/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       express:
         specifier: ^5.2.1
         version: 5.2.1
