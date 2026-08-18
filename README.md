@@ -500,15 +500,10 @@ pnpm test
 
 Some areas planned for further improvement:
 
-* [ ] API documentation with Swagger / OpenAPI
+* [ ] API documentation with Swagger
 * [ ] Advanced product search and filtering
 * [ ] AI-powered product recommendations
 * [ ] Smart inventory forecasting
-* [ ] Distributed tracing
-* [ ] Centralized monitoring
-* [ ] Kubernetes deployment
-* [ ] CI/CD pipeline
-* [ ] Retry mechanisms and Dead Letter Queues
 * [ ] Advanced analytics dashboard
 
 ---
@@ -519,9 +514,9 @@ Some areas planned for further improvement:
 
 Connect with me:
 
-* GitHub: `<your-github-url>`
-* LinkedIn: `<your-linkedin-url>`
-* Email: `<your-email>`
+* GitHub: `https://github.com/nitinrawat0053`
+* LinkedIn: `https://linkedin.com/in/nitin-singh-rawat-9594b228b`
+* Email: `nitinrawat2040@gmail.com`
 
 ---
 
