@@ -1,0 +1,1956 @@
+{
+  "info": {
+    "name": "E-Commerce Microservices API",
+    "description": "Complete API collection for the E-Commerce Microservices Platform.\n\n**Base URL:** http://localhost:3000 (API Gateway)\n\nAll requests go through the API Gateway which handles JWT authentication, role-based authorization, and proxies to individual services.\n\n---\n\n## Authentication Flow\n1. Register → POST /api/auth/register\n2. Verify Phone → POST /api/auth/verify-phone\n3. Login → POST /api/auth/login → Copy `accessToken` from response\n4. Set `accessToken` as Authorization: Bearer <token> header\n\n## Role-Based Access\n- **Public:** Product listing, Auth endpoints\n- **USER:** Cart, Orders, Payments, Profile\n- **ADMIN:** Product CRUD, Order management\n\n---\n\n**Services:** Auth (3001) · User (3002) · Product (3003) · Order (3004) · Cart (3005) · Payment (3006) · Notification (event-driven)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "Authentication endpoints — Register, Login, Verify Phone. Auth service runs on port 3001 but is proxied through the gateway at /api/auth.",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data) {",
+                  "  pm.collectionVariables.set('userId', res.data._id || res.data.id || '');",
+                  "  console.log('✅ User registered, ID:', res.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+919876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user account. An OTP is sent to the provided phone number via Twilio Verify."
+          },
+          "response": [
+            {
+              "name": "Success - OTP Sent",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+919876543210\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Verification OTP sent to your phone\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+919876543210\",\n    \"isVerified\": false,\n    \"role\": \"USER\",\n    \"createdAt\": \"2026-08-19T10:30:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error - Duplicate Email",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+919876543210\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "register"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"User with this email already exists\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify Phone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success) {",
+                  "  console.log('✅ Phone verified successfully');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-phone",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "verify-phone"]
+            },
+            "description": "Verify phone number with the 6-digit OTP code sent via Twilio. Rate limited."
+          },
+          "response": [
+            {
+              "name": "Success - Phone Verified",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phone\": \"+919876543210\",\n  \"code\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/verify-phone",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "verify-phone"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Phone number verified successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+919876543210\",\n    \"isVerified\": true,\n    \"role\": \"USER\"\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid Code",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phone\": \"+919876543210\",\n  \"code\": \"000000\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/verify-phone",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "verify-phone"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid verification code\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  if (res.data.user) {",
+                  "    pm.collectionVariables.set('userId', res.data.user._id || '');",
+                  "  }",
+                  "  console.log('✅ Login successful, token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with email and password. Returns JWT access token. Save the token to the `accessToken` collection variable for authenticated requests."
+          },
+          "response": [
+            {
+              "name": "Success - Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjVmMWEyYjNjNGQ1ZTZmN2E4YjljMGQiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTcyNDA0NDYwMCwiZXhwIjoxNzI0MTMxMDAwfQ.example-signature\",\n    \"user\": {\n      \"_id\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\",\n      \"phone\": \"+919876543210\",\n      \"role\": \"USER\",\n      \"isVerified\": true\n    }\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid email or password\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Users",
+      "description": "User profile and notification preferences. Requires authentication. Proxied through gateway at /api/users.",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            },
+            "description": "Get the authenticated user's profile. The gateway injects x-user-id from the JWT token."
+          },
+          "response": [
+            {
+              "name": "Success - Profile",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "profile"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile fetched successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+919876543210\",\n    \"isVerified\": true,\n    \"role\": \"USER\",\n    \"notificationPreferences\": {\n      \"email\": true,\n      \"sms\": true,\n      \"whatsapp\": false\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Notification Preferences",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": true,\n  \"sms\": false,\n  \"whatsapp\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/notification-preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "notification-preferences"]
+            },
+            "description": "Update notification channel preferences for email, SMS, and WhatsApp."
+          },
+          "response": [
+            {
+              "name": "Success - Preferences Updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": true,\n  \"sms\": false,\n  \"whatsapp\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/notification-preferences",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "notification-preferences"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Notification preferences updated successfully\",\n  \"data\": {\n    \"email\": true,\n    \"sms\": false,\n    \"whatsapp\": true\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📦 Products",
+      "description": "Product catalog. GET endpoints are public. POST/PUT/DELETE require ADMIN role. Proxied through gateway at /api/products.",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (default: 10)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by product name",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "description": "Filter by category",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "description": "Sort field (name, price, createdAt)",
+                  "disabled": true
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Sort order: asc or desc",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "description": "Minimum price filter",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "description": "Maximum price filter",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Public endpoint. Get paginated list of products with optional search, category, price range, and sort filters."
+          },
+          "response": [
+            {
+              "name": "Success - Products List",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/products?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"_id\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n      \"name\": \"Wireless Bluetooth Headphones\",\n      \"description\": \"Premium noise-cancelling wireless headphones with 30-hour battery life\",\n      \"price\": 2999,\n      \"stock\": 50,\n      \"category\": \"Electronics\",\n      \"imageUrl\": \"https://example.com/headphones.jpg\",\n      \"createdAt\": \"2026-08-19T10:30:00.000Z\"\n    },\n    {\n      \"_id\": \"665f1a2b3c4d5e6f7a8b9c2d\",\n      \"name\": \"Running Shoes Pro\",\n      \"description\": \"Lightweight running shoes with responsive cushioning\",\n      \"price\": 4999,\n      \"stock\": 25,\n      \"category\": \"Footwear\",\n      \"imageUrl\": \"https://example.com/shoes.jpg\",\n      \"createdAt\": \"2026-08-19T11:00:00.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 2,\n    \"totalPages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Public endpoint. Get a single product by its ID. Result is cached in Redis for subsequent requests."
+          },
+          "response": [
+            {
+              "name": "Success - Product Detail",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "{{productId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n    \"name\": \"Wireless Bluetooth Headphones\",\n    \"description\": \"Premium noise-cancelling wireless headphones with 30-hour battery life\",\n    \"price\": 2999,\n    \"stock\": 50,\n    \"category\": \"Electronics\",\n    \"imageUrl\": \"https://example.com/headphones.jpg\",\n    \"createdAt\": \"2026-08-19T10:30:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error - Product Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/000000000000000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "000000000000000000000000"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Product not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Product (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data) {",
+                  "  pm.collectionVariables.set('productId', res.data._id || '');",
+                  "  console.log('✅ Product created, ID:', res.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wireless Bluetooth Headphones\",\n  \"description\": \"Premium noise-cancelling wireless headphones with 30-hour battery life\",\n  \"price\": 2999,\n  \"stock\": 50,\n  \"category\": \"Electronics\",\n  \"imageUrl\": \"https://example.com/headphones.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Admin only. Create a new product. Requires ADMIN role in JWT."
+          },
+          "response": [
+            {
+              "name": "Success - Product Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Wireless Bluetooth Headphones\",\n  \"description\": \"Premium noise-cancelling wireless headphones with 30-hour battery life\",\n  \"price\": 2999,\n  \"stock\": 50,\n  \"category\": \"Electronics\",\n  \"imageUrl\": \"https://example.com/headphones.jpg\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Product created successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n    \"name\": \"Wireless Bluetooth Headphones\",\n    \"description\": \"Premium noise-cancelling wireless headphones with 30-hour battery life\",\n    \"price\": 2999,\n    \"stock\": 50,\n    \"category\": \"Electronics\",\n    \"imageUrl\": \"https://example.com/headphones.jpg\",\n    \"createdAt\": \"2026-08-19T10:30:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error - Validation Failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"A\",\n  \"description\": \"Short\",\n  \"price\": -10,\n  \"stock\": 5.5,\n  \"category\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"name\", \"message\": \"Name must be at least 2 characters\" },\n    { \"field\": \"description\", \"message\": \"Description must be at least 10 characters\" },\n    { \"field\": \"price\", \"message\": \"Price cannot be negative\" },\n    { \"field\": \"stock\", \"message\": \"Stock must be an integer\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Product (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wireless Bluetooth Headphones V2\",\n  \"price\": 3499,\n  \"stock\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Admin only. Partial update of product fields."
+          },
+          "response": [
+            {
+              "name": "Success - Product Updated",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Wireless Bluetooth Headphones V2\",\n  \"price\": 3499,\n  \"stock\": 100\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "{{productId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Product updated successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n    \"name\": \"Wireless Bluetooth Headphones V2\",\n    \"price\": 3499,\n    \"stock\": 100,\n    \"category\": \"Electronics\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reduce Stock (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/stock",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}", "stock"]
+            },
+            "description": "Admin only. Reduce stock for a product. Also called internally by the Order Service via RabbitMQ event."
+          },
+          "response": [
+            {
+              "name": "Success - Stock Reduced",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 2\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productId}}/stock",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "{{productId}}", "stock"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Stock updated successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n    \"name\": \"Wireless Bluetooth Headphones V2\",\n    \"stock\": 48\n  }\n}"
+            },
+            {
+              "name": "Error - Insufficient Stock",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 999\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productId}}/stock",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "{{productId}}", "stock"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Insufficient stock\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Product (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Admin only. Permanently delete a product."
+          },
+          "response": [
+            {
+              "name": "Success - Product Deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "{{productId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Product deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🛒 Cart",
+      "description": "Shopping cart management. All endpoints require authentication. Proxied through gateway at /api/cart.",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data) {",
+                  "  console.log('✅ Item added to cart');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cart"]
+            },
+            "description": "Add a product to the user's cart. If the product already exists in the cart, quantity is updated."
+          },
+          "response": [
+            {
+              "name": "Success - Added to Cart",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/cart",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "cart"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c3d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"items\": [\n      {\n        \"productId\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n        \"name\": \"Wireless Bluetooth Headphones\",\n        \"price\": 2999,\n        \"quantity\": 2,\n        \"imageUrl\": \"https://example.com/headphones.jpg\"\n      }\n    ],\n    \"totalPrice\": 5998\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cart"]
+            },
+            "description": "Get the current user's cart with all items and total price. Cached in Redis."
+          },
+          "response": [
+            {
+              "name": "Success - Cart Contents",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/cart",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "cart"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c3d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"items\": [\n      {\n        \"productId\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n        \"name\": \"Wireless Bluetooth Headphones\",\n        \"price\": 2999,\n        \"quantity\": 2,\n        \"imageUrl\": \"https://example.com/headphones.jpg\"\n      }\n    ],\n    \"totalPrice\": 5998\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Quantity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cart/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cart", "{{productId}}"]
+            },
+            "description": "Update the quantity of a specific item in the cart."
+          },
+          "response": [
+            {
+              "name": "Success - Quantity Updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 3\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/cart/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "cart", "{{productId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c3d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"items\": [\n      {\n        \"productId\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n        \"name\": \"Wireless Bluetooth Headphones\",\n        \"price\": 2999,\n        \"quantity\": 3,\n        \"imageUrl\": \"https://example.com/headphones.jpg\"\n      }\n    ],\n    \"totalPrice\": 8997\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cart/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cart", "{{productId}}"]
+            },
+            "description": "Remove a specific product from the cart."
+          },
+          "response": [
+            {
+              "name": "Success - Item Removed",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/cart/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "cart", "{{productId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c3d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"items\": [],\n    \"totalPrice\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cart"]
+            },
+            "description": "Remove all items from the cart. Also triggered automatically after an order is placed."
+          },
+          "response": [
+            {
+              "name": "Success - Cart Cleared",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/cart",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "cart"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c3d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"items\": [],\n    \"totalPrice\": 0\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Orders",
+      "description": "Order management. Creating an order triggers the outbox pattern: stock reduction (Product Service), cart clearing (Cart Service), and payment initiation (Payment Service) via RabbitMQ events.",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data) {",
+                  "  pm.collectionVariables.set('orderId', res.data._id || '');",
+                  "  console.log('✅ Order created, ID:', res.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"paymentMethod\": \"UPI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            },
+            "description": "Create a new order. Payment methods: UPI, CARD, NET_BANKING, WALLET. This triggers the outbox pattern which publishes events to Product, Cart, Payment, and Notification services."
+          },
+          "response": [
+            {
+              "name": "Success - Order Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"paymentMethod\": \"UPI\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Order created successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"productId\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n    \"quantity\": 1,\n    \"totalAmount\": 2999,\n    \"paymentMethod\": \"UPI\",\n    \"status\": \"PENDING\",\n    \"createdAt\": \"2026-08-19T12:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error - Insufficient Stock",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 999,\n  \"paymentMethod\": \"UPI\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Insufficient stock for product\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filter by status: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of orders. Optionally filter by order status."
+          },
+          "response": [
+            {
+              "name": "Success - Orders List",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"_id\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n      \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n      \"productId\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n      \"quantity\": 1,\n      \"totalAmount\": 2999,\n      \"paymentMethod\": \"UPI\",\n      \"status\": \"CONFIRMED\",\n      \"createdAt\": \"2026-08-19T12:00:00.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}"]
+            },
+            "description": "Get a single order by its ID."
+          },
+          "response": [
+            {
+              "name": "Success - Order Detail",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders", "{{orderId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"productId\": \"665f1a2b3c4d5e6f7a8b9c1d\",\n    \"quantity\": 1,\n    \"totalAmount\": 2999,\n    \"paymentMethod\": \"UPI\",\n    \"status\": \"CONFIRMED\",\n    \"createdAt\": \"2026-08-19T12:00:00.000Z\",\n    \"updatedAt\": \"2026-08-19T12:05:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Order (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SHIPPED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}"]
+            },
+            "description": "Admin only. Update order status. Valid statuses: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED."
+          },
+          "response": [
+            {
+              "name": "Success - Order Updated",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"SHIPPED\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders", "{{orderId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Order updated successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n    \"status\": \"SHIPPED\",\n    \"updatedAt\": \"2026-08-19T14:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Order (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}"]
+            },
+            "description": "Admin only. Permanently delete an order."
+          },
+          "response": [
+            {
+              "name": "Success - Order Deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders", "{{orderId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Order deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "💳 Payments",
+      "description": "Payment processing via Razorpay. Supports UPI, Card, Net Banking, and Wallet. Includes client-side verification and server-side webhook handling.",
+      "item": [
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
+            },
+            "description": "Get payment details by payment ID."
+          },
+          "response": [
+            {
+              "name": "Success - Payment Detail",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "{{paymentId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c5d\",\n    \"orderId\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n    \"userId\": \"665f1a2b3c4d5e6f7a8b9c0d\",\n    \"amount\": 2999,\n    \"currency\": \"INR\",\n    \"method\": \"UPI\",\n    \"status\": \"SUCCESS\",\n    \"razorpayOrderId\": \"order_ABC123\",\n    \"razorpayPaymentId\": \"pay_XYZ789\",\n    \"createdAt\": \"2026-08-19T12:05:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Payment by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/order/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "order", "{{orderId}}"]
+            },
+            "description": "Get the payment record associated with a specific order."
+          },
+          "response": [
+            {
+              "name": "Success - Order Payment",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/order/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "order", "{{orderId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c5d\",\n    \"orderId\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n    \"amount\": 2999,\n    \"currency\": \"INR\",\n    \"method\": \"UPI\",\n    \"status\": \"SUCCESS\",\n    \"razorpayOrderId\": \"order_ABC123\",\n    \"razorpayPaymentId\": \"pay_XYZ789\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get User Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "user", "{{userId}}"]
+            },
+            "description": "Get all payments made by a specific user."
+          },
+          "response": [
+            {
+              "name": "Success - User Payments",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/user/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "user", "{{userId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"_id\": \"665f1a2b3c4d5e6f7a8b9c5d\",\n      \"orderId\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n      \"amount\": 2999,\n      \"currency\": \"INR\",\n      \"method\": \"UPI\",\n      \"status\": \"SUCCESS\",\n      \"createdAt\": \"2026-08-19T12:05:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razorpayOrderId\": \"order_ABC123\",\n  \"razorpayPaymentId\": \"pay_XYZ789\",\n  \"razorpaySignature\": \"expected_hmac_sha256_signature\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "verify"]
+            },
+            "description": "Client-side payment verification. Called from the frontend after Razorpay checkout success. Verifies the HMAC signature and updates payment status."
+          },
+          "response": [
+            {
+              "name": "Success - Payment Verified",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"razorpayOrderId\": \"order_ABC123\",\n  \"razorpayPaymentId\": \"pay_XYZ789\",\n  \"razorpaySignature\": \"expected_hmac_sha256_signature\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/verify",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "verify"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Payment verified successfully\",\n  \"data\": {\n    \"_id\": \"665f1a2b3c4d5e6f7a8b9c5d\",\n    \"orderId\": \"665f1a2b3c4d5e6f7a8b9c4d\",\n    \"status\": \"SUCCESS\",\n    \"razorpayPaymentId\": \"pay_XYZ789\"\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid Signature",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"razorpayOrderId\": \"order_ABC123\",\n  \"razorpayPaymentId\": \"pay_XYZ789\",\n  \"razorpaySignature\": \"invalid_signature\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/verify",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "verify"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid payment signature\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Razorpay Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-razorpay-signature",
+                "value": "webhook_hmac_sha256_signature"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {\n        \"id\": \"pay_XYZ789\",\n        \"order_id\": \"order_ABC123\",\n        \"amount\": 299900,\n        \"currency\": \"INR\",\n        \"status\": \"captured\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/webhook",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "webhook"]
+            },
+            "description": "Razorpay server-side webhook. Called by Razorpay on payment events. Verifies the webhook signature, then publishes PAYMENT_SUCCESS or PAYMENT_FAILED events via RabbitMQ to Order and Notification services."
+          },
+          "response": [
+            {
+              "name": "Success - Webhook Processed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-razorpay-signature",
+                    "value": "webhook_hmac_sha256_signature"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {\n        \"id\": \"pay_XYZ789\",\n        \"order_id\": \"order_ABC123\",\n        \"amount\": 299900,\n        \"currency\": \"INR\",\n        \"status\": \"captured\"\n      }\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/webhook",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "webhook"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}"
+            },
+            {
+              "name": "Error - Missing Signature",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event\": \"payment.captured\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/payments/webhook",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "payments", "webhook"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Missing Razorpay signature\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
