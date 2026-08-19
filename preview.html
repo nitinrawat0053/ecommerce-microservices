@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Microservices — Architecture</title>
+<style>
+  :root { --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a; --accent: #6c63ff; --accent2: #00d4aa; --accent3: #ff6b6b; --text: #e4e4e7; --muted: #71717a; --green: #22c55e; --yellow: #eab308; --red: #ef4444; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+  .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; transition: border-color 0.2s; }
+  .card:hover { border-color: var(--accent); }
+  .card h3 { font-size: 1rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+  .card .port { font-size: 0.75rem; color: var(--muted); background: var(--bg); padding: 2px 8px; border-radius: 6px; }
+  .card p { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+  .tag { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; margin-right: 4px; margin-top: 6px; }
+  .tag.sync { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .tag.async { background: rgba(0,212,170,0.15); color: var(--accent2); }
+  .tag.db { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .tag.cache { background: rgba(239,68,68,0.15); color: var(--red); }
+  .section-title { font-size: 1.1rem; color: var(--accent); margin: 1.5rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .flow { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.8; color: var(--muted); overflow-x: auto; white-space: pre; }
+  .flow .hl { color: var(--accent); }
+  .flow .hl2 { color: var(--accent2); }
+  .flow .hl3 { color: var(--accent3); }
+  .tech-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+  .tech-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.82rem; }
+  .tech-item strong { color: var(--accent); }
+  .pkg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; }
+  .pkg { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; font-size: 0.82rem; }
+  .pkg .name { color: var(--accent2); font-weight: 600; }
+  .pkg .desc { color: var(--muted); margin-top: 0.2rem; font-size: 0.78rem; }
+</style>
+</head>
+<body>
+  <h1>🛒 E-Commerce Microservices</h1>
+  <p class="subtitle">TypeScript · Express 5 · MongoDB · RabbitMQ · Redis · Razorpay</p>
+
+  <div class="tech-stack">
+    <div class="tech-item"><strong>Runtime</strong> Node.js + TypeScript</div>
+    <div class="tech-item"><strong>Framework</strong> Express 5</div>
+    <div class="tech-item"><strong>Database</strong> MongoDB (Mongoose)</div>
+    <div class="tech-item"><strong>Queue</strong> RabbitMQ</div>
+    <div class="tech-item"><strong>Cache</strong> Redis (ioredis)</div>
+    <div class="tech-item"><strong>Payments</strong> Razorpay</div>
+    <div class="tech-item"><strong>Auth</strong> JWT + Twilio OTP</div>
+    <div class="tech-item"><strong>Monorepo</strong> pnpm + Turborepo</div>
+  </div>
+
+  <div class="section-title">📦 Services (8)</div>
+  <div class="grid">
+    <div class="card">
+      <h3>🚪 API Gateway <span class="port">:3000</span></h3>
+      <p>Single entry point. Reverse proxy, JWT auth, role-based access control. Forwards <code>x-user-id</code> and <code>x-user-role</code> headers.</p>
+      <span class="tag sync">http-proxy-middleware</span>
+    </div>
+    <div class="card">
+      <h3>🔐 Auth Service <span class="port">:3001</span></h3>
+      <p>Register, login, phone verification via Twilio OTP. bcrypt password hashing, rate limiting.</p>
+      <span class="tag sync">express-rate-limit</span>
+      <span class="tag db">MongoDB</span>
+    </div>
+    <div class="card">
+      <h3>👤 User Service <span class="port">:3002</span></h3>
+      <p>User profile management, notification preferences, role assignment.</p>
+      <span class="tag db">MongoDB</span>
+    </div>
+    <div class="card">
+      <h3>📦 Product Service <span class="port">:3003</span></h3>
+      <p>CRUD products with Redis caching (5min TTL). Stock management, search, filters, sorting.</p>
+      <span class="tag cache">Redis</span>
+      <span class="tag db">MongoDB</span>
+    </div>
+    <div class="card">
+      <h3>📋 Order Service <span class="port">:3004</span></h3>
+      <p>Order lifecycle management. Transactional outbox pattern for reliable event publishing. Status tracking (PENDING → CONFIRMED → SHIPPED → DELIVERED).</p>
+      <span class="tag async">RabbitMQ</span>
+      <span class="tag db">MongoDB + Outbox</span>
+    </div>
+    <div class="card">
+      <h3>🛒 Cart Service <span class="port">:3005</span></h3>
+      <p>Shopping cart CRUD with Redis caching (1hr TTL). Auto-clears on order placement.</p>
+      <span class="tag cache">Redis</span>
+      <span class="tag async">RabbitMQ</span>
+    </div>
+    <div class="card">
+      <h3>💳 Payment Service <span class="port">:3006</span></h3>
+      <p>Razorpay integration with webhook handling. Transactional outbox for payment events. Load-test mock mode.</p>
+      <span class="tag async">RabbitMQ</span>
+      <span class="tag db">MongoDB + Outbox</span>
+    </div>
+    <div class="card">
+      <h3>🔔 Notification Service</h3>
+      <p>Event-driven notifications via Resend (email), Twilio (SMS/WhatsApp). Retry queues with DLQ support.</p>
+      <span class="tag async">RabbitMQ</span>
+      <span class="tag sync">User Service API</span>
+    </div>
+  </div>
+
+  <div class="section-title">🔄 Order Flow</div>
+  <div class="flow"><span class="hl">User</span> places order → <span class="hl2">Order Service</span> creates order + outbox events
+       ↓ (outbox worker polls every 5s)
+  ┌────────┴────────┐
+  ↓                 ↓
+<span class="hl3">ORDER_CREATED</span>      <span class="hl3">ORDER_PLACED</span>       <span class="hl3">PAYMENT_INITIATED</span>
+  ↓                 ↓                         ↓
+<span class="hl2">Product Service</span>   <span class="hl2">Cart Service</span>          <span class="hl2">Payment Service</span>
+(reduce stock)    (clear cart)         (create Razorpay order)
+                                               ↓
+                                       Payment verified / webhook
+                                               ↓
+                                     <span class="hl3">PAYMENT_SUCCESS</span> / <span class="hl3">PAYMENT_FAILED</span>
+                                               ↓
+                                     <span class="hl2">Order Service</span> (confirm/cancel)
+                                     <span class="hl2">Notification Service</span> (email/SMS/WhatsApp)</div>
+
+  <div class="section-title">🏗️ Design Patterns</div>
+  <div class="grid">
+    <div class="card">
+      <h3>📋 Transactional Outbox</h3>
+      <p>Events written to MongoDB within the same transaction as domain data. A polling worker publishes them to RabbitMQ. Guarantees exactly-once delivery.</p>
+    </div>
+    <div class="card">
+      <h3>🔄 Retry + DLQ</h3>
+      <p>Failed messages → retry queue (5s TTL) → after 3 attempts → dead letter queue. Applied to notifications and payment flows.</p>
+    </div>
+    <div class="card">
+      <h3>🔐 API Gateway Pattern</h3>
+      <p>Single entry point handles JWT verification, role-based access, and forwards identity headers to downstream services.</p>
+    </div>
+    <div class="card">
+      <h3>⚡ Redis Caching</h3>
+      <p>Product listings cached with 5min TTL. Cart cached with 1hr TTL. Cache invalidated on mutations.</p>
+    </div>
+  </div>
+
+  <div class="section-title">📦 Shared Packages</div>
+  <div class="pkg-grid">
+    <div class="pkg"><div class="name">@packages/config</div><div class="desc">Centralized env config</div></div>
+    <div class="pkg"><div class="name">@packages/errors</div><div class="desc">Custom error classes</div></div>
+    <div class="pkg"><div class="name">@packages/jwt</div><div class="desc">JWT sign/verify</div></div>
+    <div class="pkg"><div class="name">@packages/logger</div><div class="desc">Console logger</div></div>
+    <div class="pkg"><div class="name">@packages/rabbitmq</div><div class="desc">Connection, publish/subscribe, retry+DLQ</div></div>
+    <div class="pkg"><div class="name">@packages/redis</div><div class="desc">Shared ioredis client</div></div>
+    <div class="pkg"><div class="name">@packages/shared-types</div><div class="desc">Enums, interfaces, queue constants</div></div>
+    <div class="pkg"><div class="name">@packages/validation</div><div class="desc">Zod schemas</div></div>
+  </div>
+</body>
+</html>
