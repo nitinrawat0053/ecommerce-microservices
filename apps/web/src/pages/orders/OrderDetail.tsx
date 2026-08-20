@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../../api/client';
-import { ArrowLeft, Package, CreditCard, MapPin } from 'lucide-react';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '@/api/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, Package, CreditCard, User, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  CONFIRMED: 'bg-blue-50 text-blue-700 border-blue-200',
-  SHIPPED: 'bg-purple-50 text-purple-700 border-purple-200',
-  DELIVERED: 'bg-green-50 text-green-700 border-green-200',
-  CANCELLED: 'bg-red-50 text-red-700 border-red-200',
+const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'success' | 'destructive' | 'warning' }> = {
+  PENDING: { label: 'Pending Payment', variant: 'warning' },
+  CONFIRMED: { label: 'Paid', variant: 'success' },
+  CANCELLED: { label: 'Cancelled', variant: 'destructive' },
 };
 
 export default function OrderDetail() {
@@ -17,71 +18,102 @@ export default function OrderDetail() {
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [payment, setPayment] = useState<any>(null);
+  const [productName, setProductName] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     Promise.all([
-      api.get(`/orders/${id}`).then((r) => setOrder(r.data.data)),
+      api.get(`/orders/${id}`).then((r) => {
+        const o = r.data.data;
+        setOrder(o);
+        if (o.productId) {
+          const pid = typeof o.productId === 'object' ? o.productId._id || o.productId : o.productId;
+          api.get(`/products/${pid}`).then((r) => setProductName(r.data.data?.name || pid)).catch(() => setProductName(pid));
+        }
+      }),
       api.get(`/payments/order/${id}`).then((r) => setPayment(r.data.data)).catch(() => {}),
     ]).finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <LoadingSpinner />;
-  if (!order) return <div className="text-center py-20 text-text-muted">Order not found</div>;
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <Skeleton className="h-4 w-32" />
+        <Card><CardContent className="p-8 space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-20 w-full" /></CardContent></Card>
+      </div>
+    );
+  }
+  if (!order) return <div className="text-center py-20 text-muted-foreground">Order not found</div>;
+
+  let displayStatus = order.status || 'PENDING';
+  if (payment?.status === 'SUCCESS') displayStatus = 'CONFIRMED';
+  else if (payment?.status === 'FAILED') displayStatus = 'CANCELLED';
+  const statusConf = STATUS_MAP[displayStatus] || STATUS_MAP.PENDING;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-text-muted hover:text-text"><ArrowLeft size={16} /> Back to orders</button>
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <ArrowLeft size={16} /> Back to orders
+      </button>
 
-      <div className="bg-white rounded-2xl border border-border p-8">
-        <div className="flex items-start justify-between mb-6">
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Order #{order._id.slice(-8).toUpperCase()}</h1>
-            <p className="text-sm text-text-muted mt-1">Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            <CardTitle className="text-2xl">Order #{order._id.slice(-8).toUpperCase()}</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </p>
           </div>
-          <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${STATUS_COLORS[order.status] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>{order.status}</span>
-        </div>
+          <Badge variant={statusConf.variant} className="text-sm px-3 py-1">{statusConf.label}</Badge>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center shrink-0"><Package size={18} className="text-muted-foreground" /></div>
+              <div>
+                <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Product</p>
+                <p className="text-sm font-semibold mt-0.5">{productName || (typeof order.productId === 'object' ? order.productId?.name : '') || 'Product'}</p>
+                <p className="text-xs text-muted-foreground">Qty: {order.quantity}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center shrink-0"><CreditCard size={18} className="text-muted-foreground" /></div>
+              <div>
+                <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Payment</p>
+                <p className="text-sm font-semibold mt-0.5">₹{order.totalAmount?.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">{payment?.method || payment?.paymentMethod || 'N/A'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center shrink-0"><User size={18} className="text-muted-foreground" /></div>
+              <div>
+                <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Customer</p>
+                <p className="text-sm font-semibold mt-0.5">You</p>
+                <p className="text-xs text-muted-foreground">Buyer</p>
+              </div>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-t border-border">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-primary-light rounded-lg flex items-center justify-center"><Package size={18} className="text-primary" /></div>
-            <div>
-              <p className="text-xs text-text-muted uppercase font-medium">Product</p>
-              <p className="text-sm font-semibold mt-0.5">{order.productId?.name || order.productId}</p>
-              <p className="text-xs text-text-muted">Qty: {order.quantity}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center"><CreditCard size={18} className="text-secondary" /></div>
-            <div>
-              <p className="text-xs text-text-muted uppercase font-medium">Payment</p>
-              <p className="text-sm font-semibold mt-0.5">₹{order.totalAmount?.toLocaleString()}</p>
-              <p className="text-xs text-text-muted">{order.paymentMethod}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center"><MapPin size={18} className="text-success" /></div>
-            <div>
-              <p className="text-xs text-text-muted uppercase font-medium">User</p>
-              <p className="text-sm font-semibold mt-0.5">{order.userId?.name || order.userId}</p>
-              <p className="text-xs text-text-muted">{order.userId?.email || ''}</p>
-            </div>
-          </div>
-        </div>
-
-        {payment && (
-          <div className="border-t border-border pt-6 mt-2">
-            <h3 className="text-sm font-semibold mb-3">Payment Details</h3>
-            <div className="bg-surface-alt rounded-xl p-4 grid grid-cols-2 gap-4 text-sm">
-              <div><p className="text-text-muted">Payment ID</p><p className="font-mono text-xs">{payment.razorpayPaymentId || 'N/A'}</p></div>
-              <div><p className="text-text-muted">Status</p><p className="font-semibold">{payment.status}</p></div>
-              <div><p className="text-text-muted">Amount</p><p className="font-semibold">₹{payment.amount?.toLocaleString()}</p></div>
-              <div><p className="text-text-muted">Method</p><p className="font-semibold">{payment.method}</p></div>
-            </div>
-          </div>
-        )}
-      </div>
+          {payment && (
+            <>
+              <Separator />
+              <div>
+                <h3 className="text-sm font-semibold mb-4">Payment Details</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><p className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">Payment ID</p><p className="font-mono text-xs mt-1">{payment.razorpayPaymentId || 'N/A'}</p></div>
+                  <div><p className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">Status</p><p className="font-semibold mt-1">{payment.status}</p></div>
+                  <div><p className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">Amount</p><p className="font-semibold mt-1">₹{payment.amount?.toLocaleString()}</p></div>
+                  <div><p className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">Method</p><p className="font-semibold mt-1">{payment.method || payment.paymentMethod || 'N/A'}</p></div>
+                  {payment.razorpayOrderId && (
+                    <div className="col-span-2"><p className="text-muted-foreground text-[11px] uppercase tracking-wider font-medium">Razorpay Order ID</p><p className="font-mono text-xs mt-1">{payment.razorpayOrderId}</p></div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

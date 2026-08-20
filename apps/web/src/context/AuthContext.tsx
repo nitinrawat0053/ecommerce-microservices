@@ -41,9 +41,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
-    const { accessToken, user: userData } = res.data.data;
+    const { token: accessToken, user: userData } = res.data.data;
     setToken(accessToken);
-    setUser(userData);
+    // Normalize: auth API returns 'id', but other APIs use '_id'
+    setUser({ ...userData, _id: userData._id || userData.id });
   };
 
   const register = async (name: string, email: string, password: string, phone: string) => {

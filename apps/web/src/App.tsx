@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'sonner';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -9,6 +10,7 @@ import VerifyPhone from './pages/auth/VerifyPhone';
 import Dashboard from './pages/Dashboard';
 import ProductList from './pages/products/ProductList';
 import ProductDetail from './pages/products/ProductDetail';
+import AdminProductList from './pages/admin/AdminProductList';
 import AdminProductForm from './pages/products/AdminProductForm';
 import CartView from './pages/cart/CartView';
 import OrderList from './pages/orders/OrderList';
@@ -42,6 +44,7 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<ProductList />} />
         <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
         <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
         <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
         <Route path="/cart" element={<ProtectedRoute><CartView /></ProtectedRoute>} />
@@ -63,6 +66,17 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
+        <Toaster 
+          position="top-center" 
+          richColors 
+          closeButton
+          toastOptions={{
+            duration: 3000,
+            style: {
+              zIndex: 9999,
+            },
+          }}
+        />
       </AuthProvider>
     </BrowserRouter>
   );

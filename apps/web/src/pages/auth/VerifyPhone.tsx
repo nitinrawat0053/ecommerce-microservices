@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { ShieldCheck, KeyRound } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { ShieldCheck, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function VerifyPhone() {
   const { verifyPhone } = useAuth();
@@ -30,33 +34,63 @@ export default function VerifyPhone() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-alt px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary-light rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ShieldCheck size={32} className="text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-[400px] space-y-6">
+        <div className="text-center space-y-2">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto">
+            <ShieldCheck size={24} className="text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-text">Verify Phone</h1>
-          <p className="text-text-muted mt-2">Enter the 6-digit OTP sent to {phone || 'your phone'}</p>
-        </div>
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-border p-8 space-y-5">
-          {error && <div className="p-3 bg-red-50 text-danger text-sm rounded-lg">{error}</div>}
-          {success && <div className="p-3 bg-green-50 text-success text-sm rounded-lg">{success}</div>}
-          <div>
-            <label className="block text-sm font-medium text-text mb-1.5">OTP Code</label>
-            <div className="relative">
-              <KeyRound size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light" />
-              <input required maxLength={6} pattern="\d{6}" value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg text-sm text-center text-2xl tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            </div>
-          </div>
-          <button type="submit" disabled={loading} className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-            <ShieldCheck size={16} />
-            {loading ? 'Verifying...' : 'Verify'}
-          </button>
-          <p className="text-center text-sm text-text-muted">
-            <Link to="/login" className="text-primary hover:text-primary-hover font-medium">Back to login</Link>
+          <h1 className="text-2xl font-bold tracking-tight">Verify your phone</h1>
+          <p className="text-muted-foreground text-sm">
+            Enter the 6-digit code sent to {phone || 'your phone'}
           </p>
-        </form>
+        </div>
+
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="p-3 text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-md dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                  {success}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="otp">OTP Code</Label>
+                <Input
+                  id="otp"
+                  required
+                  maxLength={6}
+                  pattern="\d{6}"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="000000"
+                  className="text-center text-2xl tracking-[0.5em] font-mono h-12"
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Verify'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-sm text-muted-foreground">
+          <Link to="/login" className="font-medium text-foreground hover:underline inline-flex items-center gap-1.5">
+            <ArrowLeft size={14} />
+            Back to login
+          </Link>
+        </p>
       </div>
     </div>
   );

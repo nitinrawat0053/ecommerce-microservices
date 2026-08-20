@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { UserPlus, Mail, Lock, User, Phone } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Store, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Register() {
   const { register } = useAuth();
@@ -24,53 +28,69 @@ export default function Register() {
     }
   };
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [field]: e.target.value });
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => 
+    setForm({ ...form, [field]: e.target.value });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-alt px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-text">🛍️ ShopMicro</h1>
-          <p className="text-text-muted mt-2">Create your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-[400px] space-y-6">
+        <div className="text-center space-y-2">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto">
+            <Store size={24} className="text-primary-foreground" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
+          <p className="text-muted-foreground text-sm">Enter your details to get started</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-border p-8 space-y-5">
-          {error && <div className="p-3 bg-red-50 text-danger text-sm rounded-lg">{error}</div>}
-          <div>
-            <label className="block text-sm font-medium text-text mb-1.5">Full Name</label>
-            <div className="relative">
-              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light" />
-              <input required minLength={2} value={form.name} onChange={update('name')} placeholder="John Doe" className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text mb-1.5">Email</label>
-            <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light" />
-              <input type="email" required value={form.email} onChange={update('email')} placeholder="you@example.com" className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text mb-1.5">Password</label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light" />
-              <input type="password" required minLength={8} value={form.password} onChange={update('password')} placeholder="Min 8 characters" className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text mb-1.5">Phone</label>
-            <div className="relative">
-              <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light" />
-              <input required minLength={10} value={form.phone} onChange={update('phone')} placeholder="+919876543210" className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            </div>
-          </div>
-          <button type="submit" disabled={loading} className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-            <UserPlus size={16} />
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
-          <p className="text-center text-sm text-text-muted">
-            Already have an account? <Link to="/login" className="text-primary hover:text-primary-hover font-medium">Sign in</Link>
-          </p>
-        </form>
+
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                  {error}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" required minLength={2} placeholder="John Doe" value={form.name} onChange={update('name')} />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" required placeholder="name@example.com" value={form.email} onChange={update('email')} />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" required minLength={8} placeholder="Min 8 characters" value={form.password} onChange={update('password')} />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input id="phone" required minLength={10} placeholder="+919876543210" value={form.phone} onChange={update('phone')} />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Create account
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <Link to="/login" className="font-medium text-foreground hover:underline">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );

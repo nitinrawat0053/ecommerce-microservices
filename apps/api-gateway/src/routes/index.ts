@@ -4,11 +4,21 @@ import { authenticate } from "../middlewares/auth.middleware";
 import {authorize} from "../middlewares/authorize.middleware";
 const router = Router();
 
+// router.use(
+//   "/auth",
+//   createProxyMiddleware({
+//     target: "http://localhost:3001/api/auth",
+//     changeOrigin: true,
+//   })
+// );
 router.use(
   "/auth",
   createProxyMiddleware({
-    target: "http://localhost:3001/api/auth",
+    target: "http://localhost:3001",
     changeOrigin: true,
+    pathRewrite: {
+      "^/": "/api/auth/",
+    },
   })
 );
 

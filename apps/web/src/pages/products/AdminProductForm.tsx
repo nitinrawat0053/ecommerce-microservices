@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../api/client';
-import { Save, ArrowLeft } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import api from '@/api/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Save, ArrowLeft, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export default function AdminProductForm() {
   const { id } = useParams();
@@ -26,56 +33,103 @@ export default function AdminProductForm() {
     setLoading(true);
     try {
       const body = { ...form, price: Number(form.price), stock: Number(form.stock) };
-      if (isEdit) await api.put(`/products/${id}`, body);
-      else await api.post('/products', body);
-      navigate('/products');
+      if (isEdit) { await api.put(`/products/${id}`, body); toast.success('Product updated'); }
+      else { await api.post('/products', body); toast.success('Product created'); }
+      navigate('/admin/products');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed');
+      setError(err.response?.data?.message || 'Failed to save product');
     } finally {
       setLoading(false);
     }
   };
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm({ ...form, [field]: e.target.value });
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+    setForm({ ...form, [field]: e.target.value });
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-text-muted hover:text-text"><ArrowLeft size={16} /> Back</button>
-      <h1 className="text-2xl font-bold">{isEdit ? 'Edit Product' : 'New Product'}</h1>
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border p-8 space-y-5">
-        {error && <div className="p-3 bg-red-50 text-danger text-sm rounded-lg">{error}</div>}
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Name</label>
-          <input required minLength={2} maxLength={100} value={form.name} onChange={update('name')} className="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Description</label>
-          <textarea required minLength={10} value={form.description} onChange={update('description')} rows={3} className="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Price (₹)</label>
-            <input type="number" required min={0} value={form.price} onChange={update('price')} className="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Stock</label>
-            <input type="number" required min={0} value={form.stock} onChange={update('stock')} className="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Category</label>
-          <select value={form.category} onChange={update('category')} className="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-            <option>Electronics</option><option>Clothing</option><option>Footwear</option><option>Home</option><option>Sports</option><option>Books</option><option>Other</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Image URL (optional)</label>
-          <input type="url" value={form.imageUrl} onChange={update('imageUrl')} placeholder="https://..." className="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-        </div>
-        <button type="submit" disabled={loading} className="w-full py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-          <Save size={16} /> {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product'}
-        </button>
-      </form>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link to="/products" className="hover:text-foreground transition-colors">Products</Link>
+        <span>/</span>
+        <span className="text-foreground font-medium">{isEdit ? 'Edit' : 'New'}</span>
+      </div>
+
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">{isEdit ? 'Edit Product' : 'Create Product'}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{isEdit ? 'Update product details' : 'Add a new product to your store'}</p>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input required minLength={2} maxLength={100} value={form.name} onChange={update('name')} placeholder="Product name" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea required minLength={10} value={form.description} onChange={update('description')} rows={3} placeholder="Describe your product" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Price (₹)</Label>
+                <Input type="number" required min={0} value={form.price} onChange={update('price')} placeholder="0" />
+              </div>
+              <div className="space-y-2">
+                <Label>Stock</Label>
+                <Input type="number" required min={0} value={form.stock} onChange={update('stock')} placeholder="0" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Electronics">Electronics</SelectItem>
+                  <SelectItem value="Clothing">Clothing</SelectItem>
+                  <SelectItem value="Footwear">Footwear</SelectItem>
+                  <SelectItem value="Home">Home</SelectItem>
+                  <SelectItem value="Sports">Sports</SelectItem>
+                  <SelectItem value="Books">Books</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Image URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input type="url" value={form.imageUrl} onChange={update('imageUrl')} placeholder="https://example.com/image.jpg" />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Link to="/products" className="flex-1">
+                <Button type="button" variant="outline" className="w-full">Cancel</Button>
+              </Link>
+              <Button type="submit" className="flex-1" disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {isEdit ? 'Update Product' : 'Create Product'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

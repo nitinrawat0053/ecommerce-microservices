@@ -1,72 +1,141 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api/client';
-import { Package, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import api from '@/api/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Package, ChevronLeft, ChevronRight, Box } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'bg-yellow-50 text-yellow-700',
-  CONFIRMED: 'bg-blue-50 text-blue-700',
-  SHIPPED: 'bg-purple-50 text-purple-700',
-  DELIVERED: 'bg-green-50 text-green-700',
-  CANCELLED: 'bg-red-50 text-red-700',
+const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'success' | 'destructive' | 'warning' | 'secondary' }> = {
+  PENDING: { label: 'Pending', variant: 'warning' },
+  CONFIRMED: { label: 'Paid', variant: 'success' },
+  CANCELLED: { label: 'Cancelled', variant: 'destructive' },
 };
+
+function getDisplayStatus(order: any, paymentMap: Map<string, any>): string {
+  const payment = paymentMap.get(order._id);
+  if (payment?.status === 'SUCCESS') return 'CONFIRMED';
+  if (payment?.status === 'FAILED') return 'CANCELLED';
+  return order.status || 'PENDING';
+}
 
 export default function OrderList() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [paymentMap, setPaymentMap] = useState<Map<string, any>>(new Map());
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     setLoading(true);
     const params: any = { page, limit: 10 };
     if (statusFilter) params.status = statusFilter;
-    api.get('/orders', { params }).then((r) => { setOrders(r.data.data); setTotalPages(r.data.pagination?.totalPages || 1); }).finally(() => setLoading(false));
+
+    api.get('/orders', { params }).then(async (r) => {
+      const orderList = r.data.data || [];
+      setOrders(orderList);
+      setTotalPages(r.data.pagination?.totalPages || 1);
+      setTotalCount(r.data.pagination?.totalOrders || 0);
+
+      const paymentResults = await Promise.allSettled(
+        orderList.map((o: any) => api.get(`/payments/order/${o._id}`).then((r) => ({ orderId: o._id, payment: r.data.data })))
+      );
+      const map = new Map<string, any>();
+      paymentResults.forEach((result) => {
+        if (result.status === 'fulfilled' && result.value.payment) map.set(result.value.orderId, result.value.payment);
+      });
+      setPaymentMap(map);
+    }).finally(() => setLoading(false));
   }, [page, statusFilter]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-72" />
+        <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Orders</h1>
-        <Link to="/orders/new" className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover">New Order</Link>
-      </div>
-      <div className="flex gap-2">
-        {['', 'PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((s) => (
-          <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${statusFilter === s ? 'bg-primary text-white border-primary' : 'border-border text-text-muted hover:bg-surface-alt'}`}>
-            {s || 'All'}
-          </button>
-        ))}
-      </div>
-      {loading ? <LoadingSpinner /> : orders.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-border">
-          <Package size={48} className="mx-auto mb-4 text-text-light opacity-40" />
-          <p className="text-text-muted">No orders found</p>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{totalCount} order{totalCount !== 1 ? 's' : ''}</p>
         </div>
+        <Link to="/orders/new?from=cart">
+          <Button size="sm">New Order</Button>
+        </Link>
+      </div>
+
+      <Tabs value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+        <TabsList>
+          <TabsTrigger value="">All</TabsTrigger>
+          <TabsTrigger value="PENDING">Pending</TabsTrigger>
+          <TabsTrigger value="CONFIRMED">Paid</TabsTrigger>
+          <TabsTrigger value="CANCELLED">Cancelled</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {orders.length === 0 ? (
+        <Card>
+          <CardContent className="py-20 text-center">
+            <Package size={40} className="mx-auto mb-3 text-muted-foreground/30" />
+            <p className="text-muted-foreground font-medium">{statusFilter ? 'No orders with this status' : 'No orders yet'}</p>
+            <Link to="/products" className="text-sm text-foreground font-medium hover:underline mt-1 inline-block">Browse Products →</Link>
+          </CardContent>
+        </Card>
       ) : (
         <>
-          <div className="space-y-3">
-            {orders.map((o) => (
-              <Link key={o._id} to={`/orders/${o._id}`} className="block bg-white rounded-xl border border-border p-5 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold">Order #{o._id.slice(-8).toUpperCase()}</p>
-                    <p className="text-xs text-text-muted mt-1">{new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold">₹{o.totalAmount?.toLocaleString()}</p>
-                    <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[o.status] || 'bg-gray-50 text-gray-600'}`}>{o.status}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <Card>
+            <CardContent className="p-0">
+              <div className="divide-y divide-border">
+                {[...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((o) => {
+                  const ds = getDisplayStatus(o, paymentMap);
+                  const conf = STATUS_MAP[ds] || STATUS_MAP.PENDING;
+                  return (
+                    <Link key={o._id} to={`/orders/${o._id}`} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                          <Box size={16} className="text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">Order #{o._id.slice(-8).toUpperCase()}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold">₹{o.totalAmount?.toLocaleString()}</p>
+                        <Badge variant={conf.variant} className="mt-1">{conf.label}</Badge>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 pt-4">
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="p-2 border border-border rounded-lg hover:bg-surface-alt disabled:opacity-40"><ChevronLeft size={16} /></button>
-              <span className="text-sm text-text-muted">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="p-2 border border-border rounded-lg hover:bg-surface-alt disabled:opacity-40"><ChevronRight size={16} /></button>
+            <div className="flex items-center justify-center gap-1">
+              <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
+                <ChevronLeft size={16} />
+              </Button>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
+                <Button key={p} variant={page === p ? 'default' : 'outline'} size="icon" className="h-9 w-9" onClick={() => setPage(p)}>
+                  {p}
+                </Button>
+              ))}
+              <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}>
+                <ChevronRight size={16} />
+              </Button>
             </div>
           )}
         </>
