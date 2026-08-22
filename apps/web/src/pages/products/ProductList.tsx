@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import ProductCard from '@/components/ProductCard';
 import {
   Search, ShoppingCart, ChevronLeft, ChevronRight, Package,
-  ArrowRight, SlidersHorizontal, Star, X, Grid3X3, List
+  SlidersHorizontal, X, Grid3X3, List
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -16,7 +16,7 @@ interface Product {
   stock: number; category: string; imageUrl?: string; createdAt?: string;
 }
 
-type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'name_asc';
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'newest', label: 'Newest' },
   { value: 'price_asc', label: 'Price: Low → High' },
@@ -28,41 +28,90 @@ const ALL_CATEGORIES = ['Electronics', 'Fashion', 'Home & Kitchen', 'Beauty', 'S
 
 export default function ProductList() {
   const { isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // ═══ SINGLE SOURCE OF TRUTH: URL query params ═══
+  const selectedCategory = searchParams.get('category') || '';
+  const searchQuery = searchParams.get('search') || '';
+  const sortBy = (searchParams.get('sort') as SortOption) || 'newest';
+  const minPriceParam = searchParams.get('minPrice') || '';
+  const maxPriceParam = searchParams.get('maxPrice') || '';
+  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+
+  // Local UI state only for inputs (not synced to URL until committed)
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [localMinPrice, setLocalMinPrice] = useState(minPriceParam);
+  const [localMaxPrice, setLocalMaxPrice] = useState(maxPriceParam);
+
+  // Products state
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [searchParams] = useSearchParams();
-  const [search, setSearch] = useState(() => searchParams.get('search') || '');
-  const [category, setCategory] = useState(() => searchParams.get('category') || '');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [sort, setSort] = useState<SortOption>('newest');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const params: any = { page, limit: 12 };
-      if (search) params.search = search;
-      if (category) params.category = category;
-      if (minPrice) params.minPrice = minPrice;
-      if (maxPrice) params.maxPrice = maxPrice;
-      if (sort === 'price_asc') { params.sort = 'price'; params.order = 'asc'; }
-      else if (sort === 'price_desc') { params.sort = 'price'; params.order = 'desc'; }
-      else if (sort === 'name_asc') { params.sort = 'name'; params.order = 'asc'; }
-      else { params.sort = 'createdAt'; params.order = 'desc'; }
+  // Sync local input state when URL changes (e.g., browser back/forward)
+  useEffect(() => {
+    setLocalSearch(searchParams.get('search') || '');
+    setLocalMinPrice(searchParams.get('minPrice') || '');
+    setLocalMaxPrice(searchParams.get('maxPrice') || '');
+  }, [searchParams]);
 
-      const res = await api.get('/products', { params });
-      setProducts(res.data.data || []);
-      setTotalPages(res.data.pagination?.totalPages || 1);
-      setTotalCount(res.data.pagination?.totalOrders || (res.data.data || []).length);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+  // Helper: update URL params (single source of truth writes)
+  const updateParams = (updates: Record<string, string>) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          next.set(key, value);
+        } else {
+          next.delete(key);
+        }
+      });
+      // Reset to page 1 when filters change (unless just changing page)
+      if (!('page' in updates)) {
+        next.delete('page');
+      }
+      return next;
+    }, { replace: true });
   };
 
-  useEffect(() => { fetchProducts(); }, [page, search, category, minPrice, maxPrice, sort]);
+  // Clear all filters
+  const clearAllFilters = () => {
+    setLocalSearch('');
+    setLocalMinPrice('');
+    setLocalMaxPrice('');
+    setSearchParams({}, { replace: true });
+  };
+
+  // ═══ FETCH PRODUCTS ═══
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    const params: any = { page: pageParam, limit: 12 };
+    if (selectedCategory) params.category = selectedCategory;
+    if (searchQuery) params.search = searchQuery;
+    if (minPriceParam) params.minPrice = minPriceParam;
+    if (maxPriceParam) params.maxPrice = maxPriceParam;
+    if (sortBy === 'price_asc') { params.sort = 'price'; params.order = 'asc'; }
+    else if (sortBy === 'price_desc') { params.sort = 'price'; params.order = 'desc'; }
+    else if (sortBy === 'name_asc') { params.sort = 'name'; params.order = 'asc'; }
+    else { params.sort = 'createdAt'; params.order = 'desc'; }
+
+    api.get('/products', { params }).then((r) => {
+      if (cancelled) return;
+      setProducts(r.data.data || []);
+      setTotalPages(r.data.pagination?.totalPages || 1);
+      setTotalCount(r.data.pagination?.totalOrders || (r.data.data || []).length);
+    }).catch(() => {
+      if (!cancelled) { setProducts([]); setTotalCount(0); }
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [pageParam, selectedCategory, searchQuery, minPriceParam, maxPriceParam, sortBy]);
 
   const addToCart = async (product: Product) => {
     try {
@@ -72,16 +121,19 @@ export default function ProductList() {
     }
   };
 
+  const hasActiveFilters = !!(selectedCategory || searchQuery || minPriceParam || maxPriceParam);
+
   return (
     <div className="space-y-4">
-      {/* Breadcrumb + Header */}
+      {/* ═══ HEADER ═══ */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-foreground">
-            {category || 'All Products'}
+            {selectedCategory || 'All Products'}
           </h1>
           <p className="text-sm text-gray-500 dark:text-muted-foreground mt-0.5">
             {totalCount} product{totalCount !== 1 ? 's' : ''} found
+            {selectedCategory && <span className="text-gray-400"> in <span className="font-medium text-gray-600 dark:text-foreground">{selectedCategory}</span></span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -93,23 +145,78 @@ export default function ProductList() {
         </div>
       </div>
 
-      {/* Filters Bar */}
+      {/* ═══ FILTERS BAR ═══ */}
       <div className="bg-white dark:bg-card border border-gray-100 dark:border-border rounded-xl p-3 space-y-3">
-        {/* Search + Category + Price */}
+        {/* Search + Category Dropdown + Price Range */}
         <div className="flex flex-wrap gap-2 items-center">
           <div className="relative flex-1 min-w-[180px]">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search products..." className="pl-9 h-9 text-sm" />
+            <input
+              type="text"
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  updateParams({ search: localSearch.trim() });
+                }
+              }}
+              onBlur={() => {
+                // Commit search on blur if changed
+                if (localSearch !== searchQuery) {
+                  updateParams({ search: localSearch.trim() });
+                }
+              }}
+              placeholder="Search products..."
+              className="w-full h-9 pl-9 pr-4 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
           </div>
-          <select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-            className="h-9 px-3 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+
+          {/* Category Dropdown — derives value from URL, writes back to URL */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => updateParams({ category: e.target.value })}
+            className="h-9 px-3 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          >
             <option value="">All Categories</option>
             {ALL_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+
+          {/* Price Range */}
           <div className="flex items-center gap-1">
-            <Input type="number" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }} placeholder="Min ₹" className="w-20 h-9 text-sm" />
+            <input
+              type="number"
+              value={localMinPrice}
+              onChange={(e) => setLocalMinPrice(e.target.value)}
+              onBlur={() => {
+                if (localMinPrice !== minPriceParam) updateParams({ minPrice: localMinPrice });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  updateParams({ minPrice: localMinPrice });
+                }
+              }}
+              placeholder="Min ₹"
+              className="w-20 h-9 px-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
             <span className="text-gray-400">–</span>
-            <Input type="number" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }} placeholder="Max ₹" className="w-20 h-9 text-sm" />
+            <input
+              type="number"
+              value={localMaxPrice}
+              onChange={(e) => setLocalMaxPrice(e.target.value)}
+              onBlur={() => {
+                if (localMaxPrice !== maxPriceParam) updateParams({ maxPrice: localMaxPrice });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  updateParams({ maxPrice: localMaxPrice });
+                }
+              }}
+              placeholder="Max ₹"
+              className="w-20 h-9 px-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
           </div>
         </div>
 
@@ -119,22 +226,28 @@ export default function ProductList() {
             <SlidersHorizontal size={13} className="text-gray-400" />
             <span className="text-xs text-gray-500 font-medium">Sort:</span>
             {SORT_OPTIONS.map((opt) => (
-              <button key={opt.value} onClick={() => { setSort(opt.value); setPage(1); }}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${sort === opt.value ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground hover:bg-gray-200'}`}>
+              <button
+                key={opt.value}
+                onClick={() => updateParams({ sort: opt.value === 'newest' ? '' : opt.value })}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  sortBy === opt.value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground hover:bg-gray-200'
+                }`}
+              >
                 {opt.label}
               </button>
             ))}
           </div>
-          {(category || search || minPrice || maxPrice) && (
-            <button onClick={() => { setCategory(''); setSearch(''); setMinPrice(''); setMaxPrice(''); setPage(1); }}
-              className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600">
+          {hasActiveFilters && (
+            <button onClick={clearAllFilters} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-medium">
               <X size={12} /> Clear all
             </button>
           )}
         </div>
       </div>
 
-      {/* Products Grid */}
+      {/* ═══ PRODUCTS GRID ═══ */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
@@ -149,10 +262,12 @@ export default function ProductList() {
       ) : products.length === 0 ? (
         <div className="bg-white dark:bg-card border border-gray-100 dark:border-border rounded-xl py-20 text-center">
           <Package size={48} className="mx-auto mb-4 text-gray-200 dark:text-muted-foreground/30" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-foreground mb-1">No products found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-foreground mb-1">
+            {selectedCategory ? `No products found in ${selectedCategory}` : 'No products found'}
+          </h3>
           <p className="text-sm text-gray-500 dark:text-muted-foreground mb-4">Try adjusting your filters or search</p>
           <div className="flex items-center justify-center gap-3">
-            <Button variant="outline" onClick={() => { setCategory(''); setSearch(''); setMinPrice(''); setMaxPrice(''); setPage(1); }}>Clear Filters</Button>
+            <Button variant="outline" onClick={clearAllFilters}>Clear Filters</Button>
             <Link to="/"><Button>Browse All</Button></Link>
           </div>
         </div>
@@ -188,14 +303,25 @@ export default function ProductList() {
         )
       )}
 
-      {/* Pagination */}
+      {/* ═══ PAGINATION ═══ */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-1 pt-2">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}><ChevronLeft size={14} /></Button>
+          <Button variant="outline" size="icon" className="h-8 w-8"
+            onClick={() => updateParams({ page: String(Math.max(1, pageParam - 1)) })}
+            disabled={pageParam <= 1}>
+            <ChevronLeft size={14} />
+          </Button>
           {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
-            <Button key={p} variant={page === p ? 'default' : 'outline'} size="icon" className="h-8 w-8 text-xs" onClick={() => setPage(p)}>{p}</Button>
+            <Button key={p} variant={pageParam === p ? 'default' : 'outline'} size="icon" className="h-8 w-8 text-xs"
+              onClick={() => updateParams({ page: String(p) })}>
+              {p}
+            </Button>
           ))}
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}><ChevronRight size={14} /></Button>
+          <Button variant="outline" size="icon" className="h-8 w-8"
+            onClick={() => updateParams({ page: String(Math.min(totalPages, pageParam + 1)) })}
+            disabled={pageParam >= totalPages}>
+            <ChevronRight size={14} />
+          </Button>
         </div>
       )}
     </div>
