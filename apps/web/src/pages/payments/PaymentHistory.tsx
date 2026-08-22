@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, RefreshCw, Clock, CheckCircle2, XCircle, ArrowLeftRight } from 'lucide-react';
+import { CreditCard, RefreshCw, Clock, CheckCircle2, XCircle, ArrowLeftRight, ArrowUpDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const STATUS_CONFIG: Record<string, { variant: 'default' | 'success' | 'destructive' | 'secondary' | 'warning'; label: string }> = {
@@ -22,6 +22,7 @@ export default function PaymentHistory() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount-high' | 'amount-low'>('newest');
 
   const fetchPayments = useCallback(async (isRefresh = false) => {
     if (!user?._id) return;
@@ -39,7 +40,12 @@ export default function PaymentHistory() {
 
   const sortedPayments = [...payments]
     .filter((p) => !statusFilter || p.status === statusFilter)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a, b) => {
+      if (sortBy === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      if (sortBy === 'amount-high') return (b.amount || 0) - (a.amount || 0);
+      if (sortBy === 'amount-low') return (a.amount || 0) - (b.amount || 0);
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   if (loading) return <div className="space-y-6"><Skeleton className="h-8 w-48" /><div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div></div>;
 
@@ -67,6 +73,14 @@ export default function PaymentHistory() {
           </TabsList>
         </Tabs>
       )}
+
+      <div className="flex items-center gap-2">
+        <ArrowUpDown size={14} className="text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">Sort:</span>
+        {([['newest', 'Newest'], ['oldest', 'Oldest'], ['amount-high', 'Amount \u2193'], ['amount-low', 'Amount \u2191']] as const).map(([val, label]) => (
+          <Button key={val} variant={sortBy === val ? 'default' : 'outline'} size="sm" className="h-7 text-xs" onClick={() => setSortBy(val)}>{label}</Button>
+        ))}
+      </div>
 
       {sortedPayments.length === 0 ? (
         <Card>

@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/api/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, Package, AlertCircle, ShoppingBag } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, Package, AlertCircle, ShoppingBag, Trash } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface CartItemRaw { productId: string; quantity: number; addedAt?: string; }
 interface CartItemDetailed { productId: string; quantity: number; name: string; price: number; stock: number; imageUrl?: string; category?: string; }
@@ -21,6 +22,7 @@ export default function CartView() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [clearing, setClearing] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
 
   const fetchProductDetails = useCallback(async (productIds: string[]): Promise<Map<string, any>> => {
     const productMap = new Map<string, any>();
@@ -66,17 +68,24 @@ export default function CartView() {
 
   const remove = async (productId: string) => {
     setUpdating(productId);
-    try { const res = await api.delete(`/cart/${productId}`); await rebuildItems(res.data.data); }
+    try { const res = await api.delete(`/cart/${productId}`); await rebuildItems(res.data.data); toast.success('Item removed from cart'); }
     catch (err: any) { toast.error(err.response?.data?.message || 'Failed to remove item'); }
     finally { setUpdating(null); }
   };
 
   const clearCart = async () => {
-    if (!confirm('Clear entire cart?')) return;
     setClearing(true);
-    try { await api.delete('/cart'); setItems([]); setTotalPrice(0); }
-    catch (err: any) { toast.error(err.response?.data?.message || 'Failed to clear cart'); }
-    finally { setClearing(false); }
+    try {
+      await api.delete('/cart');
+      setItems([]);
+      setTotalPrice(0);
+      setShowClearDialog(false);
+      toast.success('Cart cleared successfully', {
+        icon: <Trash2 size={14} className="text-emerald-500" />,
+      });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to clear cart. Please try again.');
+    } finally { setClearing(false); }
   };
 
   if (loading) {
@@ -98,7 +107,7 @@ export default function CartView() {
           <p className="text-sm text-muted-foreground mt-0.5">{items.length} {items.length === 1 ? 'item' : 'items'} in your cart</p>
         </div>
         {items.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={clearCart} disabled={clearing} className="text-destructive hover:text-destructive">
+          <Button variant="ghost" size="sm" onClick={() => setShowClearDialog(true)} disabled={clearing} className="text-destructive hover:text-destructive hover:bg-destructive/10">
             <Trash2 size={14} /> {clearing ? 'Clearing...' : 'Clear cart'}
           </Button>
         )}
@@ -180,6 +189,39 @@ export default function CartView() {
           </Card>
         </>
       ) : null}
+
+      {/* ═══ CLEAR CART CONFIRMATION MODAL ═══ */}
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <div className="mx-auto h-12 w-12 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-2">
+              <Trash size={20} className="text-red-500" />
+            </div>
+            <DialogTitle className="text-center">Clear your cart?</DialogTitle>
+            <DialogDescription className="text-center">
+              This will remove all {items.length} item{items.length !== 1 ? 's' : ''} from your cart. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row gap-3 sm:justify-center">
+            <Button variant="outline" onClick={() => setShowClearDialog(false)} disabled={clearing} className="flex-1 sm:flex-none">
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={clearCart} disabled={clearing} className="flex-1 sm:flex-none">
+              {clearing ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Clearing...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Trash2 size={14} />
+                  Clear Cart
+                </div>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

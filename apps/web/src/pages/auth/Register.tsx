@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Store, ArrowRight, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Register() {
   const { register } = useAuth();
@@ -19,7 +20,11 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      await register(form.name, form.email, form.password, form.phone);
+      const res = await register(form.name, form.email, form.password, form.phone);
+      // If OTP failed to send, still navigate but show warning
+      if (res?.data?.otpSent === false) {
+        toast.warning(res.message || 'Account created. OTP could not be sent — you can verify later from your profile.');
+      }
       navigate('/verify-phone', { state: { phone: form.phone } });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed');

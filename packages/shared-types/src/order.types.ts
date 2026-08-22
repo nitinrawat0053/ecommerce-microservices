@@ -10,4 +10,6 @@ export interface OrderFilters {
   page: number;
   limit: number;
   status?: OrderStatus;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

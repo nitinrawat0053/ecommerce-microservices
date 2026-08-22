@@ -5,17 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { ShieldCheck, ArrowLeft, Loader2 } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Loader2, RotateCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function VerifyPhone() {
-  const { verifyPhone } = useAuth();
+  const { verifyPhone, resendOtp } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const phone = (location.state as any)?.phone || '';
+  const state = (location.state as any) || {};
+  const phone = state.phone || '';
+  const fromProfile = state.fromProfile || false;
+
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +29,30 @@ export default function VerifyPhone() {
     setLoading(true);
     try {
       await verifyPhone(phone, code);
-      setSuccess('Phone verified! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000);
+      toast.success('Phone verified successfully!');
+      if (fromProfile) {
+        navigate('/profile');
+      } else {
+        setSuccess('Phone verified! Redirecting to login...');
+        setTimeout(() => navigate('/login'), 2000);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Verification failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setError('');
+    try {
+      await resendOtp(phone);
+      toast.success('OTP resent successfully');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to resend OTP');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -81,14 +104,32 @@ export default function VerifyPhone() {
                   'Verify'
                 )}
               </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <RotateCw size={14} className="mr-2" />
+                )}
+                {resending ? 'Resending...' : 'Resend OTP'}
+              </Button>
             </form>
           </CardContent>
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          <Link to="/login" className="font-medium text-foreground hover:underline inline-flex items-center gap-1.5">
+          <Link
+            to={fromProfile ? '/profile' : '/login'}
+            className="font-medium text-foreground hover:underline inline-flex items-center gap-1.5"
+          >
             <ArrowLeft size={14} />
-            Back to login
+            {fromProfile ? 'Back to profile' : 'Back to login'}
           </Link>
         </p>
       </div>

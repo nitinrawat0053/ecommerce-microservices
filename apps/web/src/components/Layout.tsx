@@ -1,9 +1,9 @@
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  ShoppingCart, Package, CreditCard, User, LayoutDashboard, 
+import {  ShoppingCart, Package, CreditCard, User, LayoutDashboard,
   LogOut, Menu, Store, ChevronRight, Settings, Bell, Moon, Sun,
-  AlertTriangle, PackageX, PackageCheck, Check
+  AlertTriangle, PackageX, PackageCheck, Check,
+  UserCircle, ClipboardList, BellRing, BarChart3
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/api/client';
@@ -45,6 +45,7 @@ export default function Layout() {
   const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Dark mode effect
   useEffect(() => {
@@ -90,7 +91,7 @@ export default function Layout() {
   const unreadCount = activeAlerts.length;
 
   const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/', label: 'Home', icon: LayoutDashboard },
     { to: '/products', label: 'Products', icon: Package },
     { to: '/cart', label: 'Cart', icon: ShoppingCart },
     { to: '/orders', label: 'Orders', icon: Package },
@@ -171,6 +172,20 @@ export default function Layout() {
                   <div className="px-3 py-1 mt-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Admin
                   </div>
+                  <Link
+                    to="/"
+                    onClick={() => setSidebarOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium",
+                      "transition-colors",
+                      location.pathname === '/'
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <BarChart3 size={18} />
+                    Dashboard
+                  </Link>
                   <Link
                     to="/admin/products"
                     onClick={() => setSidebarOpen(false)}
@@ -323,12 +338,50 @@ export default function Layout() {
 
               <Separator orientation="vertical" className="h-6" />
 
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
-                  {user?.name?.charAt(0)?.toUpperCase()}
-                </div>
-                <span className="text-sm font-medium hidden sm:block">{user?.name}</span>
-              </div>
+              {/* User Profile Dropdown */}
+              <Popover open={userMenuOpen} onOpenChange={setUserMenuOpen}>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-2 hover:bg-muted rounded-lg px-2 py-1.5 transition-colors cursor-pointer">
+                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold">
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <span className="text-sm font-medium hidden sm:block">{user?.name}</span>
+                    <ChevronRight size={14} className={cn("text-muted-foreground transition-transform duration-200", userMenuOpen && "rotate-90")} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-1.5" align="end" sideOffset={8}>
+                  <div className="px-3 py-2 border-b border-border mb-1">
+                    <p className="text-sm font-semibold">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    >
+                      <UserCircle size={16} />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    >
+                      <ClipboardList size={16} />
+                      My Orders
+                    </Link>
+                    <Link
+                      to="/profile/notifications"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    >
+                      <BellRing size={16} />
+                      Notification Preferences
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </header>
 

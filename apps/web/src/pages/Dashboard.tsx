@@ -1,515 +1,251 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@/api/client';
-import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Package, ShoppingCart, CreditCard, TrendingUp, ArrowUpRight, 
-  RefreshCw, DollarSign, Users, Activity, Store, Box, 
-  ArrowRight, Clock, CheckCircle2, XCircle
-} from 'lucide-react';
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar,
-  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend
-} from 'recharts';
+  ChevronLeft, ChevronRight, ArrowRight, Smartphone, Shirt, Home,
+  BookOpen, Dumbbell, Heart, Armchair, Gem, Baby, Dog, Car,
+  TrendingUp, Zap, ShoppingCart, Flame, Shield, Truck, RotateCcw,
+  Headphones, Package
+} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import AdminDashboard from './admin/AdminDashboard';
+import ProductCard from '@/components/ProductCard';
 
-const CHART_COLORS = ['hsl(12, 76%, 61%)', 'hsl(173, 58%, 39%)', 'hsl(197, 37%, 24%)', 'hsl(43, 74%, 66%)', 'hsl(27, 87%, 67%)'];
+const BANNERS = [
+  { title: 'Mega Electronics Sale', subtitle: 'Up to 75% off on laptops, smartwatches, headphones & more', gradient: 'from-blue-600 via-indigo-600 to-purple-700', cta: 'Shop Now', link: '/products?category=Electronics', icon: LaptopIcon },
+  { title: 'Fashion Week Deals', subtitle: 'New arrivals at unbeatable prices — styles for everyone', gradient: 'from-rose-500 via-pink-500 to-fuchsia-600', cta: 'Explore', link: '/products?category=Fashion', icon: Shirt },
+  { title: 'Home & Kitchen Fest', subtitle: 'Transform your space for less — curated essentials', gradient: 'from-emerald-500 via-teal-500 to-cyan-600', cta: 'Discover', link: '/products?category=Home & Kitchen', icon: Home },
+];
 
-export default function Dashboard() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState({ products: 0, orders: 0, payments: 0, totalRevenue: 0 });
-  const [orders, setOrders] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+function LaptopIcon(props: any) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16" />
+    </svg>
+  );
+}
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    try {
-      const [productsRes, ordersRes, paymentsRes] = await Promise.allSettled([
-        api.get('/products?limit=50'),
-        api.get('/orders?limit=50'),
-        user?._id ? api.get(`/payments/user/${user._id}`) : Promise.resolve({ data: { data: [] } }),
-      ]);
+/* ─── Product Carousel ─── */
+function ProductCarousel({ title, icon: Icon, products, loading, viewAllLink }: {
+  title: string; icon: any; products: any[]; loading: boolean; viewAllLink?: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-      const productList = productsRes.status === 'fulfilled' ? (productsRes.value.data.data || []) : [];
-      const orderList = ordersRes.status === 'fulfilled' ? (ordersRes.value.data.data || []) : [];
-      const paymentList = paymentsRes.status === 'fulfilled' ? (paymentsRes.value.data.data || []) : [];
+  const updateScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+  }, []);
 
-      setProducts(productList);
-      setOrders(orderList);
-      setPayments(paymentList);
-
-      const totalRevenue = paymentList
-        .filter((p: any) => p.status === 'SUCCESS')
-        .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-
-      setStats({
-        products: productsRes.status === 'fulfilled' ? (productsRes.value.data.pagination?.total || productList.length) : 0,
-        orders: ordersRes.status === 'fulfilled' ? (ordersRes.value.data.pagination?.totalOrders || orderList.length) : 0,
-        payments: paymentList.length,
-        totalRevenue,
-      });
-    } catch (err) {
-      console.error('Dashboard fetch error:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [user]);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Auto-refresh every 30s
   useEffect(() => {
-    const interval = setInterval(() => fetchData(true), 30000);
-    return () => clearInterval(interval);
-  }, [fetchData]);
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', updateScroll);
+    updateScroll();
+    return () => el.removeEventListener('scroll', updateScroll);
+  }, [updateScroll, products]);
 
-  // --- Chart Data Derivation ---
-
-  // 1. Revenue trend (last 7 days from payments)
-  const getRevenueTrend = () => {
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - i));
-      return {
-        date: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-        fullDate: d.toISOString().split('T')[0],
-        revenue: 0,
-        orders: 0,
-      };
-    });
-
-    payments.forEach((p: any) => {
-      if (p.status === 'SUCCESS' && p.createdAt) {
-        const payDate = new Date(p.createdAt).toISOString().split('T')[0];
-        const bucket = last7Days.find(d => d.fullDate === payDate);
-        if (bucket) bucket.revenue += p.amount || 0;
-      }
-    });
-
-    orders.forEach((o: any) => {
-      if (o.createdAt) {
-        const orderDate = new Date(o.createdAt).toISOString().split('T')[0];
-        const bucket = last7Days.find(d => d.fullDate === orderDate);
-        if (bucket) bucket.orders += 1;
-      }
-    });
-
-    return last7Days;
+  const scroll = (dir: 'left' | 'right') => {
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -500 : 500, behavior: 'smooth' });
   };
-
-  // 2. Order status breakdown
-  const getOrderStatusData = () => {
-    const statusMap = { PENDING: 0, CONFIRMED: 0, CANCELLED: 0 };
-    orders.forEach((o: any) => {
-      const payment = payments.find((p: any) => p.orderId === o._id);
-      if (payment?.status === 'SUCCESS') statusMap.CONFIRMED++;
-      else if (payment?.status === 'FAILED') statusMap.CANCELLED++;
-      else statusMap.PENDING++;
-    });
-    return [
-      { name: 'Paid', value: statusMap.CONFIRMED, color: 'hsl(142, 76%, 36%)' },
-      { name: 'Pending', value: statusMap.PENDING, color: 'hsl(38, 92%, 50%)' },
-      { name: 'Cancelled', value: statusMap.CANCELLED, color: 'hsl(0, 84%, 60%)' },
-    ].filter(d => d.value > 0);
-  };
-
-  // 3. Payment methods breakdown
-  const getPaymentMethodsData = () => {
-    const methodMap: Record<string, number> = {};
-    payments.forEach((p: any) => {
-      const method = p.method || p.paymentMethod || 'Unknown';
-      methodMap[method] = (methodMap[method] || 0) + (p.amount || 0);
-    });
-    return Object.entries(methodMap).map(([name, amount]) => ({ name, amount }));
-  };
-
-  // 4. Top products
-  const getTopProducts = () => {
-    const productSales: Record<string, { name: string; sold: number; revenue: number }> = {};
-    orders.forEach((o: any) => {
-      const pid = typeof o.productId === 'object' ? o.productId?._id : o.productId;
-      const product = products.find((p: any) => p._id === pid);
-      if (product) {
-        if (!productSales[product._id]) {
-          productSales[product._id] = { name: product.name.slice(0, 15), sold: 0, revenue: 0 };
-        }
-        productSales[product._id].sold += o.quantity || 1;
-        productSales[product._id].revenue += o.totalAmount || 0;
-      }
-    });
-    return Object.values(productSales)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-  };
-
-  const revenueTrend = getRevenueTrend();
-  const orderStatusData = getOrderStatusData();
-  const paymentMethodsData = getPaymentMethodsData();
-  const topProducts = getTopProducts();
-
-  const statCards = [
-    { 
-      label: 'Total Revenue', 
-      value: `₹${stats.totalRevenue.toLocaleString()}`, 
-      icon: DollarSign, 
-      change: '+12.5%',
-      changeType: 'positive' as const,
-    },
-    { 
-      label: 'Total Orders', 
-      value: stats.orders.toString(), 
-      icon: ShoppingCart, 
-      change: '+8.2%',
-      changeType: 'positive' as const,
-    },
-    { 
-      label: 'Products', 
-      value: stats.products.toString(), 
-      icon: Package, 
-      change: '+3',
-      changeType: 'positive' as const,
-    },
-    { 
-      label: 'Payments', 
-      value: stats.payments.toString(), 
-      icon: CreditCard, 
-      change: `${payments.filter((p: any) => p.status === 'SUCCESS').length} successful`,
-      changeType: 'neutral' as const,
-    },
-  ];
-
-  const recentOrders = orders.slice(0, 5);
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="h-8 w-48 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-64 bg-muted rounded mt-2 animate-pulse" />
-          </div>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 bg-gray-200 dark:bg-muted rounded animate-pulse" />
+          <div className="h-5 w-36 bg-gray-200 dark:bg-muted rounded animate-pulse" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-32 bg-muted rounded-xl animate-pulse" />
+        <div className="flex gap-4 overflow-hidden">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="min-w-[200px] h-80 bg-gray-100 dark:bg-muted/50 rounded-2xl animate-pulse" />
           ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="h-80 bg-muted rounded-xl animate-pulse" />
-          <div className="h-80 bg-muted rounded-xl animate-pulse" />
         </div>
       </div>
     );
   }
+  if (products.length === 0) return null;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Welcome back, {user?.name?.split(' ')[0]} 👋
-          </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Here's what's happening with your store today.
-          </p>
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+            <Icon size={16} className="text-blue-600 dark:text-blue-400" />
+          </div>
+          <h2 className="text-lg font-extrabold text-gray-900 dark:text-foreground">{title}</h2>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fetchData(true)}
-          disabled={refreshing}
-        >
-          <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          {viewAllLink && (
+            <Link to={viewAllLink} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+              View All <ArrowRight size={14} />
+            </Link>
+          )}
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => scroll('left')} disabled={!canScrollLeft}
+              className="h-8 w-8 rounded-full border border-gray-200 dark:border-border flex items-center justify-center hover:bg-gray-50 dark:hover:bg-muted disabled:opacity-20 transition-all">
+              <ChevronLeft size={16} />
+            </button>
+            <button onClick={() => scroll('right')} disabled={!canScrollRight}
+              className="h-8 w-8 rounded-full border border-gray-200 dark:border-border flex items-center justify-center hover:bg-gray-50 dark:hover:bg-muted disabled:opacity-20 transition-all">
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
       </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map(({ label, value, icon: Icon, change, changeType }) => (
-          <Card key={label}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {label}
-              </CardTitle>
-              <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                <Icon size={18} className="text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {changeType === 'positive' ? (
-                  <span className="text-emerald-600 font-medium">{change}</span>
-                ) : (
-                  <span>{change}</span>
-                )}
-                {' '}from last period
-              </p>
-            </CardContent>
-          </Card>
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollSnapType: 'x mandatory' }}>
+        {products.map((p) => (
+          <div key={p._id} className="flex-shrink-0" style={{ scrollSnapAlign: 'start' }}>
+            <ProductCard product={p} compact />
+          </div>
         ))}
       </div>
+    </section>
+  );
+}
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Revenue Trend - takes 2 cols */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Revenue Trend</CardTitle>
-            <CardDescription>Daily revenue and orders over the last 7 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={revenueTrend}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(12, 76%, 61%)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="hsl(12, 76%, 61%)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis 
-                  dataKey="date" 
-                  className="text-xs fill-muted-foreground"
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis 
-                  className="text-xs fill-muted-foreground"
-                  tick={{ fontSize: 12 }}
-                  tickFormatter={(v) => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(0 0% 100%)', 
-                    border: '1px solid hsl(240 5.9% 90%)',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                  formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="hsl(12, 76%, 61%)" 
-                  strokeWidth={2}
-                  fillOpacity={1} 
-                  fill="url(#colorRevenue)" 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+/* ═══ MAIN DASHBOARD ═══ */
+export default function Dashboard() {
+  const { isAdmin } = useAuth();
+  if (isAdmin) return <AdminDashboard />;
 
-        {/* Order Status Pie */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Order Status</CardTitle>
-            <CardDescription>Breakdown of all orders</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {orderStatusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={orderStatusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {orderStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(0 0% 100%)', 
-                      border: '1px solid hsl(240 5.9% 90%)',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Legend 
-                    iconType="circle"
-                    formatter={(value) => <span className="text-xs text-muted-foreground">{value}</span>}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-sm text-muted-foreground">
-                No order data yet
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bannerIndex, setBannerIndex] = useState(0);
 
-      {/* Second Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Top Products Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Top Products</CardTitle>
-            <CardDescription>Products by revenue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {topProducts.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topProducts} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis type="number" tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
-                  <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11 }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(0 0% 100%)', 
-                      border: '1px solid hsl(240 5.9% 90%)',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                    formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                  />
-                  <Bar dataKey="revenue" fill="hsl(12, 76%, 61%)" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-sm text-muted-foreground">
-                No product data yet
-              </div>
-            )}
-          </CardContent>
-        </Card>
+  useEffect(() => {
+    api.get('/products?limit=200').then(r => setProducts(r.data.data || [])).finally(() => setLoading(false));
+  }, []);
 
-        {/* Payment Methods Bar */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Payment Methods</CardTitle>
-            <CardDescription>Revenue by payment method</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {paymentMethodsData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={paymentMethodsData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(0 0% 100%)', 
-                      border: '1px solid hsl(240 5.9% 90%)',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                    formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Amount']}
-                  />
-                  <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
-                    {paymentMethodsData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-sm text-muted-foreground">
-                No payment data yet
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+  useEffect(() => {
+    const t = setInterval(() => setBannerIndex(p => (p + 1) % BANNERS.length), 6000);
+    return () => clearInterval(t);
+  }, []);
 
-      {/* Recent Orders Table + Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Recent Orders */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base">Recent Orders</CardTitle>
-              <CardDescription>Latest {recentOrders.length} orders</CardDescription>
-            </div>
-            <Link to="/orders">
-              <Button variant="ghost" size="sm">
-                View all <ArrowRight size={14} />
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {recentOrders.length > 0 ? (
-              <div className="space-y-3">
-                {recentOrders.map((order: any) => {
-                  const payment = payments.find((p: any) => p.orderId === order._id);
-                  const status = payment?.status === 'SUCCESS' ? 'Paid' : payment?.status === 'FAILED' ? 'Cancelled' : 'Pending';
-                  const statusVariant = status === 'Paid' ? 'success' : status === 'Cancelled' ? 'destructive' : 'warning';
-                  
-                  return (
-                    <Link 
-                      key={order._id} 
-                      to={`/orders/${order._id}`}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                          <Box size={16} className="text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Order #{order._id.slice(-8).toUpperCase()}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">₹{order.totalAmount?.toLocaleString()}</p>
-                        <Badge variant={statusVariant as any} className="mt-1">
-                          {status}
-                        </Badge>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-sm text-muted-foreground">
-                No orders yet. <Link to="/products" className="text-foreground font-medium hover:underline">Start shopping</Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+  const getByCategory = (cat: string) =>
+    products.filter(p => p.category?.toLowerCase().includes(cat.toLowerCase()) || p.name?.toLowerCase().includes(cat.toLowerCase())).slice(0, 15);
+  const trending = [...products].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 15);
+  const bestSellers = [...products].sort((a, b) => (b.stock || 0) - (a.stock || 0)).slice(0, 15);
+  const electronics = getByCategory('electronic');
+  const fashion = getByCategory('fashion');
+  const homeKitchen = getByCategory('home');
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {[
-              { label: 'Browse Products', to: '/products', icon: Store },
-              { label: 'View Cart', to: '/cart', icon: ShoppingCart },
-              { label: 'My Orders', to: '/orders', icon: Package },
-              { label: 'Payment History', to: '/payments', icon: CreditCard },
-              { label: 'Profile', to: '/profile', icon: Users },
-            ].map(({ label, to, icon: Icon }) => (
-              <Link key={to} to={to}>
-                <Button variant="ghost" className="w-full justify-start gap-3 h-10">
-                  <Icon size={16} className="text-muted-foreground" />
-                  {label}
+  return (
+    <div className="space-y-8">
+      {/* ═══ HERO BANNER ═══ */}
+      <section className="relative rounded-3xl overflow-hidden h-[220px] sm:h-[280px] md:h-[340px]">
+        {BANNERS.map((b, i) => (
+          <div key={i} className={`absolute inset-0 transition-all duration-700 ease-in-out ${i === bannerIndex ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-105'}`}>
+            <div className={`absolute inset-0 bg-gradient-to-r ${b.gradient}`} />
+            <div className="absolute -right-20 -top-20 w-[300px] h-[300px] rounded-full bg-white/5" />
+            <div className="absolute -right-10 top-1/2 w-[200px] h-[200px] rounded-full bg-white/5" />
+            <div className="absolute left-1/3 -bottom-10 w-[150px] h-[150px] rounded-full bg-white/5" />
+            <div className="relative z-10 h-full flex flex-col justify-center px-8 md:px-16 max-w-2xl">
+              <span className="inline-block w-fit text-white/60 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Limited Time Offer</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-[1.1] drop-shadow-lg">{b.title}</h2>
+              <p className="text-white/75 text-sm md:text-base mt-2.5 max-w-md leading-relaxed">{b.subtitle}</p>
+              <Link to={b.link} className="mt-4">
+                <Button className="bg-white text-gray-900 hover:bg-gray-100 font-bold shadow-xl px-6 py-2.5 h-auto text-sm rounded-xl">
+                  {b.cta} <ArrowRight size={15} className="ml-2" />
                 </Button>
               </Link>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+            </div>
+            <div className="absolute right-8 md:right-16 top-1/2 -translate-y-1/2 hidden md:flex h-32 w-32 rounded-3xl bg-white/10 backdrop-blur-sm items-center justify-center">
+              <b.icon size={56} className="text-white/30" />
+            </div>
+          </div>
+        ))}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/20 backdrop-blur-sm rounded-full px-3 py-1.5">
+          {BANNERS.map((_, i) => (
+            <button key={i} onClick={() => setBannerIndex(i)}
+              className={`h-2 rounded-full transition-all duration-300 ${i === bannerIndex ? 'w-7 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`} />
+          ))}
+        </div>
+        <button onClick={() => setBannerIndex(p => (p - 1 + BANNERS.length) % BANNERS.length)}
+          className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/25 transition-all shadow-lg">
+          <ChevronLeft size={20} />
+        </button>
+        <button onClick={() => setBannerIndex(p => (p + 1) % BANNERS.length)}
+          className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/25 transition-all shadow-lg">
+          <ChevronRight size={20} />
+        </button>
+      </section>
+
+      {/* ═══ TRUST BADGES ═══ */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { icon: Truck, label: 'Free Shipping', desc: 'Orders over ₹999', color: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+          { icon: Shield, label: 'Secure Payment', desc: '100% protected', color: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+          { icon: RotateCcw, label: 'Easy Returns', desc: '7-day policy', color: 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400' },
+          { icon: Headphones, label: '24/7 Support', desc: 'Always here', color: 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400' },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center gap-3 py-3 px-1">
+            <div className={`h-10 w-10 rounded-xl ${item.color} flex items-center justify-center shrink-0`}>
+              <item.icon size={18} />
+            </div>
+            <div>
+              <p className="text-[12px] font-bold text-gray-900 dark:text-foreground leading-tight">{item.label}</p>
+              <p className="text-[10px] text-gray-400 dark:text-muted-foreground">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* ═══ FLASH DEALS ═══ */}
+      <section className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl p-5 md:p-6 flex items-center justify-between overflow-hidden">
+        <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10" />
+        <div className="absolute right-20 bottom-0 w-20 h-20 rounded-full bg-white/5" />
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <Flame size={24} className="text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg md:text-xl font-black text-white">Flash Deals</h3>
+            <p className="text-white/75 text-sm">Get up to 50% off on all products!</p>
+          </div>
+        </div>
+        <Link to="/products" className="relative z-10">
+          <Button className="bg-white text-orange-600 hover:bg-gray-100 font-bold shadow-xl px-5 h-auto py-2.5 text-sm rounded-xl">
+            Shop Now <ArrowRight size={14} className="ml-1.5" />
+          </Button>
+        </Link>
+      </section>
+
+      {/* ═══ TRENDING PRODUCTS ═══ */}
+      <ProductCarousel title="Trending Now" icon={TrendingUp} products={trending} loading={loading} viewAllLink="/products" />
+
+      {/* ═══ CATEGORY-BASED SECTIONS ═══ */}
+      {electronics.length > 0 && (
+        <ProductCarousel title="Electronics" icon={Zap} products={electronics} loading={loading} viewAllLink="/products?category=Electronics" />
+      )}
+      {fashion.length > 0 && (
+        <ProductCarousel title="Fashion" icon={Heart} products={fashion} loading={loading} viewAllLink="/products?category=Fashion" />
+      )}
+      {homeKitchen.length > 0 && (
+        <ProductCarousel title="Home & Kitchen" icon={Home} products={homeKitchen} loading={loading} viewAllLink="/products?category=Home & Kitchen" />
+      )}
+
+      {/* ═══ BEST SELLERS ═══ */}
+      <ProductCarousel title="Best Sellers" icon={Flame} products={bestSellers} loading={loading} viewAllLink="/products" />
+
+      {/* ═══ BOTTOM CTA ═══ */}
+      <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-3xl p-8 md:p-10 text-center overflow-hidden">
+        <div className="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-white/5" />
+        <div className="absolute right-10 -bottom-10 w-32 h-32 rounded-full bg-white/5" />
+        <div className="relative z-10">
+          <h3 className="text-xl md:text-2xl font-black text-white">Explore Our Full Collection</h3>
+          <p className="text-white/60 text-sm mt-1.5">{products.length}+ products waiting for you</p>
+          <Link to="/products" className="mt-4 inline-block">
+            <Button className="bg-white text-blue-600 hover:bg-gray-100 font-bold shadow-xl px-6 py-2.5 h-auto text-sm rounded-xl">
+              Browse All Products <ArrowRight size={14} className="ml-1.5" />
+            </Button>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

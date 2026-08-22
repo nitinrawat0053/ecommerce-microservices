@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from 'sonner';
 import Layout from './components/Layout';
+import CustomerLayout from './components/CustomerLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Login from './pages/auth/Login';
@@ -19,6 +21,7 @@ import CreateOrder from './pages/orders/CreateOrder';
 import PaymentHistory from './pages/payments/PaymentHistory';
 import PaymentVerify from './pages/payments/PaymentVerify';
 import Profile from './pages/user/Profile';
+import Wishlist from './pages/user/Wishlist';
 import NotificationPreferences from './pages/user/NotificationPreferences';
 
 function AuthRoutes() {
@@ -40,13 +43,18 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Admin routes — sidebar layout */}
       <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/products" element={<ProductList />} />
-        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
         <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
         <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
+      </Route>
+
+      {/* Customer routes — full-width e-commerce layout */}
+      <Route element={<CustomerLayout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/products" element={<ProductList />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<ProtectedRoute><CartView /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
         <Route path="/orders/new" element={<ProtectedRoute><CreateOrder /></ProtectedRoute>} />
@@ -54,6 +62,7 @@ function AppRoutes() {
         <Route path="/payments" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
         <Route path="/payments/verify" element={<ProtectedRoute><PaymentVerify /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/profile/notifications" element={<ProtectedRoute><NotificationPreferences /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
@@ -65,16 +74,16 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <WishlistProvider>
         <AppRoutes />
-        <Toaster 
-          position="top-center" 
-          richColors 
+        </WishlistProvider>
+        <Toaster
+          position="top-center"
+          richColors
           closeButton
           toastOptions={{
             duration: 3000,
-            style: {
-              zIndex: 9999,
-            },
+            style: { zIndex: 9999 },
           }}
         />
       </AuthProvider>

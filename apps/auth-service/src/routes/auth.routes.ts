@@ -33,4 +33,9 @@ router.post("/verify-phone",
   authController.verifyPhone
 );
 
+router.post("/resend-otp",
+  verifyPhoneRateLimiter,
+  authController.resendOtp
+);
+
 export default router;

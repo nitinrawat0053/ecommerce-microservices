@@ -10,9 +10,13 @@ export class AuthController {
 
       const user = await authService.register(name, email, password, phone);
 
+      const message = user.otpSent
+        ? "Verification OTP sent to your phone"
+        : "Account created but OTP could not be sent. Please use Verify Now from your profile.";
+
       res.status(201).json({
         success: true,
-        message: "Verification OTP sent to your phone",
+        message,
         data: user,
       });
     } catch (error) {
@@ -41,6 +45,19 @@ export class AuthController {
     next(error);
   }
 }
+  async resendOtp(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { phone } = req.body;
+    await authService.resendOtp(phone);
+    res.status(200).json({
+      success: true,
+      message: "OTP resent successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
   async login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body;

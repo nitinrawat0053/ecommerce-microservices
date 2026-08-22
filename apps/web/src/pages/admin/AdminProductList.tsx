@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { 
   Package, Plus, Pencil, Trash2, Search, 
-  ChevronLeft, ChevronRight, AlertCircle, Loader2
+  ChevronLeft, ChevronRight, AlertCircle, Loader2, ArrowUpDown
 } from 'lucide-react';
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, 
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import ImportProductsDialog from '@/components/ImportProductsDialog';
 
 interface Product {
   _id: string;
@@ -39,6 +40,7 @@ export default function AdminProductList() {
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price-high' | 'price-low' | 'name-az'>('newest');
 
   // Redirect non-admins
   useEffect(() => {
@@ -88,11 +90,14 @@ export default function AdminProductList() {
           <h1 className="text-2xl font-bold tracking-tight">Manage Products</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{totalCount} products in your store</p>
         </div>
-        <Link to="/admin/products/new">
-          <Button>
-            <Plus size={16} /> Add Product
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <ImportProductsDialog />
+          <Link to="/admin/products/new">
+            <Button>
+              <Plus size={16} /> Add Product
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -125,7 +130,13 @@ export default function AdminProductList() {
         <Card>
           <CardContent className="p-0">
             <div className="divide-y divide-border">
-              {products.map((product) => (
+              {[...products].sort((a, b) => {
+                if (sortBy === 'oldest') return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+                if (sortBy === 'price-high') return b.price - a.price;
+                if (sortBy === 'price-low') return a.price - b.price;
+                if (sortBy === 'name-az') return a.name.localeCompare(b.name);
+                return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+              }).map((product) => (
                 <div key={product._id} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
                   {/* Image */}
                   <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
@@ -193,6 +204,15 @@ export default function AdminProductList() {
           </CardContent>
         </Card>
       )}
+
+      {/* Sort */}
+      <div className="flex items-center gap-2">
+        <ArrowUpDown size={14} className="text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">Sort:</span>
+        {([['newest', 'Newest'], ['oldest', 'Oldest'], ['price-high', 'Price ↓'], ['price-low', 'Price ↑'], ['name-az', 'Name A→Z']] as const).map(([val, label]) => (
+          <Button key={val} variant={sortBy === val ? 'default' : 'outline'} size="sm" className="h-7 text-xs" onClick={() => setSortBy(val)}>{label}</Button>
+        ))}
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (

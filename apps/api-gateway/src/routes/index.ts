@@ -98,6 +98,32 @@ const productProxy = createProxyMiddleware({
   },
 });
 
+// Product Import (Admin) - must be before catch-all routes
+router.get(
+  "/products/import/template",
+  authenticate,
+  authorize(["ADMIN"]),
+  productProxy
+);
+router.post(
+  "/products/import/preview",
+  authenticate,
+  authorize(["ADMIN"]),
+  productProxy
+);
+router.post(
+  "/products/import",
+  authenticate,
+  authorize(["ADMIN"]),
+  productProxy
+);
+router.post(
+  "/products/upload-image",
+  authenticate,
+  authorize(["ADMIN"]),
+  productProxy
+);
+
 // Public
 router.get("/products", productProxy);
 router.get("/products/:id", productProxy);

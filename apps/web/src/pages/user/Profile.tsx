@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { User, Mail, Phone, Shield, Bell } from 'lucide-react';
+import { User, Mail, Phone, Shield, ShieldCheck, ShieldOff, Bell, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/users/profile').then((r) => setProfile(r.data.data)).finally(() => setLoading(false));
+    api.get('/users/profile').then((r) => {
+      const data = r.data.data;
+      setProfile(data);
+      // Sync isVerified from backend to context
+      if (data && user && data.isVerified !== user.isVerified) {
+        updateUser({ isVerified: data.isVerified });
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="max-w-2xl mx-auto space-y-6"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
   if (!profile) return <div className="text-center py-20 text-muted-foreground">Could not load profile</div>;
+
+  const isVerified = user?.isVerified ?? profile?.isVerified ?? false;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -50,13 +59,30 @@ export default function Profile() {
               <div className="flex-1"><p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{label}</p><p className="text-sm font-medium mt-0.5">{value}</p></div>
             </div>
           ))}
+
+          {/* Verification Status */}
           <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-colors">
-            <div className="h-9 w-9 bg-muted rounded-lg flex items-center justify-center"><Shield size={16} className="text-muted-foreground" /></div>
+            <div className="h-9 w-9 bg-muted rounded-lg flex items-center justify-center">
+              {isVerified ? (
+                <ShieldCheck size={16} className="text-emerald-500" />
+              ) : (
+                <ShieldOff size={16} className="text-destructive" />
+              )}
+            </div>
             <div className="flex-1">
-              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Verified</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <div className={`h-2 w-2 rounded-full ${profile.isVerified ? 'bg-emerald-500' : 'bg-destructive'}`} />
-                <p className="text-sm font-medium">{profile.isVerified ? 'Yes' : 'No'}</p>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Verification Status</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                {isVerified ? (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 size={15} />
+                    Verified
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-destructive">
+                    <XCircle size={15} />
+                    Not Verified
+                  </span>
+                )}
               </div>
             </div>
           </div>

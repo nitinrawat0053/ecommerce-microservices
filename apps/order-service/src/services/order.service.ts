@@ -105,7 +105,7 @@ async createOrder(userId: string, productId: string, quantity: number, paymentMe
   return order;
 }
   async getAllOrders(filters: OrderFilters) {
-  let { page, limit, status } = filters;
+  let { page, limit, status, sortBy, sortOrder } = filters;
 
   page = Math.max(page, 1);
   limit = Math.max(limit, 1);
@@ -116,6 +116,8 @@ async createOrder(userId: string, productId: string, quantity: number, paymentMe
       page,
       limit,
       status,
+      sortBy: sortBy || 'createdAt',
+      sortOrder: sortOrder || 'desc',
     });
 
   const totalPages = Math.ceil(totalOrders / limit);

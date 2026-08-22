@@ -104,7 +104,8 @@ describe("OutboxService", () => {
     it("should mark event as sent", async () => {
       mockOutboxMarkAsSent.mockResolvedValue({ id: "evt1", status: "SENT" });
       const result = await outboxService.markEventAsSent("evt1");
-      expect(result.status).toBe("SENT");
+      expect(result).not.toBeNull();
+      expect(result!.status).toBe("SENT");
     });
   });
 });
