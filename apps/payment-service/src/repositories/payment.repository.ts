@@ -34,13 +34,15 @@ export class PaymentRepository {
   status: PaymentStatus,
   transactionId: string | undefined,
   failureReason: string | undefined,
-  session: ClientSession
+  session: ClientSession,
+  razorpayPaymentId?: string
   ) {
     return await Payment.findByIdAndUpdate(
       paymentId,
       {
         status,
         transactionId,
+        razorpayPaymentId,
         failureReason,
       },
       {

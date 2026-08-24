@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Star, ShoppingCart, Package } from 'lucide-react';
+import StockBadge from './StockBadge';
 import WishlistButton from './WishlistButton';
 import { toast } from 'sonner';
 import api from '@/api/client';
@@ -85,10 +86,10 @@ export default function ProductCard({ product, discount: propDiscount, rating: p
             </div>
           )}
 
-          {/* Low stock badge */}
-          {product.stock > 0 && product.stock <= 5 && (
-            <span className="absolute top-2.5 right-12 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm z-10">
-              Only {product.stock} left
+          {/* Low stock badge (1–10) */}
+          {product.stock > 0 && product.stock <= 10 && (
+            <span className="absolute top-2.5 right-12 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm z-10 flex items-center gap-0.5">
+              ⚠ Only {product.stock} left
             </span>
           )}
 
@@ -127,6 +128,11 @@ export default function ProductCard({ product, discount: propDiscount, rating: p
                 ₹{fakeOriginal.toLocaleString()}
               </span>
             )}
+          </div>
+
+          {/* Stock status */}
+          <div className="pt-0.5">
+            <StockBadge stock={product.stock} />
           </div>
 
           {/* Quick Add button (visible on hover) */}

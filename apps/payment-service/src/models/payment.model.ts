@@ -9,6 +9,7 @@ export interface IPayment extends Document {
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
   razorpayOrderId?: string;
+  razorpayPaymentId?: string;
   transactionId?: string;
   failureReason?: string;
 }
@@ -54,6 +55,10 @@ const paymentSchema = new Schema<IPayment>(
     razorpayOrderId: {
      type: String,
      index: true,
+    },
+
+    razorpayPaymentId: {
+      type: String,
     },
 
     transactionId: {

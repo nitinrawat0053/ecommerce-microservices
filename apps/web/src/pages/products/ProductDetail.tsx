@@ -8,10 +8,11 @@ import WishlistButton from '@/components/WishlistButton';
 import ProductCard from '@/components/ProductCard';
 import {
   ShoppingCart, Package, Check, Minus, Plus,
-  Star, Truck, Shield, RotateCcw, ChevronRight, ChevronLeft, Sparkles
+  Star, Truck, Shield, RotateCcw, ChevronRight, ChevronLeft, Sparkles, XCircle
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import StockBadge from '@/components/StockBadge';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -183,14 +184,10 @@ export default function ProductDetail() {
             <Separator />
 
             {/* Stock */}
-            <div className="flex items-center gap-2">
-              <div className={`w-2.5 h-2.5 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span className={`text-sm font-semibold ${product.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                {product.stock > 0 ? `In Stock — ${product.stock} units available` : 'Out of Stock'}
-              </span>
-            </div>
+            <StockBadge stock={product.stock} size="lg" />
 
             {/* Quantity */}
+            {product.stock > 0 && (
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-900 dark:text-foreground">Quantity</label>
               <div className="flex items-center border border-gray-200 dark:border-border rounded-lg w-fit">
@@ -203,21 +200,30 @@ export default function ProductDetail() {
                 </button>
               </div>
             </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <Button size="lg" className="flex-1 h-12 font-bold text-sm bg-blue-600 hover:bg-blue-700" onClick={addToCart} disabled={product.stock === 0 || adding}>
-                {adding ? (
-                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : addedToCart ? (
-                  <><Check size={16} className="mr-2" /> Added to Cart</>
-                ) : (
-                  <><ShoppingCart size={16} className="mr-2" /> Add to Cart</>
-                )}
-              </Button>
-              <Button size="lg" variant="outline" className="flex-1 h-12 font-bold text-sm" onClick={buyNow} disabled={product.stock === 0}>
-                Buy Now
-              </Button>
+              {product.stock > 0 ? (
+                <>
+                  <Button size="lg" className="flex-1 h-12 font-bold text-sm bg-blue-600 hover:bg-blue-700" onClick={addToCart} disabled={adding}>
+                    {adding ? (
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : addedToCart ? (
+                      <><Check size={16} className="mr-2" /> Added to Cart</>
+                    ) : (
+                      <><ShoppingCart size={16} className="mr-2" /> Add to Cart</>
+                    )}
+                  </Button>
+                  <Button size="lg" variant="outline" className="flex-1 h-12 font-bold text-sm" onClick={buyNow}>
+                    Buy Now
+                  </Button>
+                </>
+              ) : (
+                <Button size="lg" className="flex-1 h-12 font-bold text-sm bg-gray-400 cursor-not-allowed" disabled>
+                  <XCircle size={16} className="mr-2" /> Out of Stock
+                </Button>
+              )}
             </div>
 
             {/* Trust Badges */}

@@ -87,7 +87,8 @@ if (config.LOAD_TEST) {
         PaymentStatus.SUCCESS,
         mockPaymentId,
         undefined,
-        session
+        session,
+        mockPaymentId
       );
 
     await outboxService.createEvent(
@@ -179,7 +180,8 @@ return updatedPayment;
         PaymentStatus.SUCCESS,
         razorpayPaymentId,
         undefined,
-        session
+        session,
+        razorpayPaymentId
       );
 
     await outboxService.createEvent(
@@ -246,7 +248,8 @@ return updatedPayment;
         PaymentStatus.SUCCESS,
         razorpayPaymentId,
         undefined,
-        session
+        session,
+        razorpayPaymentId
       );
 
       await outboxService.createEvent(
@@ -286,7 +289,8 @@ return updatedPayment;
         razorpayPaymentId,
         paymentEntity.error_description ||
           "Payment failed",
-        session
+        session,
+        razorpayPaymentId
       );
 
       await outboxService.createEvent(
