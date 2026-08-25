@@ -1,0 +1,881 @@
+◇ injected env (28) from .env // tip: ⌘ suppress logs { quiet: true }
+[INFO] MongoDB Connected
+🔌 Connecting to RabbitMQ... (5 attempts left)
+RabbitMQ URL: amqp://admin:admin@localhost:5672
+✅ Connected to RabbitMQ
+👂 Listening on payment-initiated
+[INFO] Payment Service running on port 3006
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8d93706c9026eae305ac2c (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8d93706c9026eae305ac2c (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8d93706c9026eae305ac2c (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8d93706c9026eae305ac2c (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+💳 Payment Initiated
+⚠️ [PaymentService] Payment not found for orderId: 6a8d93706c9026eae305ac2c (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: PENDING
+✅ Payment Processed
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: PENDING
+🔍 [PaymentService] verifyPayment called - razorpayOrderId: order_TU0shaEiZ13j7q, razorpayPaymentId: pay_TU0tGaQSF6Ikra
+📋 [PaymentService] Found payment 6a8d9373227dd8d600923781 with status: PENDING
+✅ [PaymentService] Signature verified for payment 6a8d9373227dd8d600923781
+💰 [PaymentService] Payment 6a8d9373227dd8d600923781 updated to SUCCESS in DB
+📦 [PaymentService] PAYMENT_SUCCESS event created in outbox for order 6a8d93706c9026eae305ac2c
+📦 [PaymentService] ORDER_PLACED event created in outbox for order 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Transaction committed. Payment 6a8d9373227dd8d600923781 verified successfully.
+🔗 [PaymentService] Starting background confirmOrderDirectly for order 6a8d93706c9026eae305ac2c
+🔗 [PaymentService] Confirming order 6a8d93706c9026eae305ac2c via Order Service at http://localhost:3004 (attempt 1/3)
+✅ [PaymentService] Order 6a8d93706c9026eae305ac2c confirmed successfully via HTTP (attempt 1)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a883126be9076758063d687
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+✅ [PaymentService] Found payment 6a8831281094568f513c7606 for orderId: 6a883126be9076758063d687, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+⚠️ [PaymentService] Payment not found for orderId: 6a8dea2ca4eee27dbf71fbbd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+⚠️ [PaymentService] Payment not found for orderId: 6a8dea2ca4eee27dbf71fbbd (may still be processing)
+💳 Payment Initiated
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: PENDING
+✅ Payment Processed
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: PENDING
+🔍 [PaymentService] verifyPayment called - razorpayOrderId: order_TU7BaX2VUvFaWd, razorpayPaymentId: pay_TU7Cke9AECADbL
+📋 [PaymentService] Found payment 6a8dea2d227dd8d600923784 with status: PENDING
+✅ [PaymentService] Signature verified for payment 6a8dea2d227dd8d600923784
+💰 [PaymentService] Payment 6a8dea2d227dd8d600923784 updated to SUCCESS in DB
+📦 [PaymentService] PAYMENT_SUCCESS event created in outbox for order 6a8dea2ca4eee27dbf71fbbd
+📦 [PaymentService] ORDER_PLACED event created in outbox for order 6a8dea2ca4eee27dbf71fbbd
+✅ [PaymentService] Transaction committed. Payment 6a8dea2d227dd8d600923784 verified successfully.
+🔗 [PaymentService] Starting background confirmOrderDirectly for order 6a8dea2ca4eee27dbf71fbbd
+🔗 [PaymentService] Confirming order 6a8dea2ca4eee27dbf71fbbd via Order Service at http://localhost:3004 (attempt 1/3)
+✅ [PaymentService] Order 6a8dea2ca4eee27dbf71fbbd confirmed successfully via HTTP (attempt 1)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8a17926ba222e79228a5b1
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a1793fee7d0755dc3b584 for orderId: 6a8a17926ba222e79228a5b1, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8df1a3d9beb8541b6abea3 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8df1a3d9beb8541b6abea3 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8df1a3d9beb8541b6abea3 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8df1a3d9beb8541b6abea3 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8df1a3d9beb8541b6abea3 (may still be processing)
+💳 Payment Initiated
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8df1a3d9beb8541b6abea3 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: PENDING
+✅ Payment Processed
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: PENDING
+🔍 [PaymentService] verifyPayment called - razorpayOrderId: order_TU7jHW3QvVYzMU, razorpayPaymentId: pay_TU7jYsllF7GpNU
+📋 [PaymentService] Found payment 6a8df1a6227dd8d600923787 with status: PENDING
+✅ [PaymentService] Signature verified for payment 6a8df1a6227dd8d600923787
+💰 [PaymentService] Payment 6a8df1a6227dd8d600923787 updated to SUCCESS in DB
+📦 [PaymentService] PAYMENT_SUCCESS event created in outbox for order 6a8df1a3d9beb8541b6abea3
+📦 [PaymentService] ORDER_PLACED event created in outbox for order 6a8df1a3d9beb8541b6abea3
+✅ [PaymentService] Transaction committed. Payment 6a8df1a6227dd8d600923787 verified successfully.
+🔗 [PaymentService] Starting background confirmOrderDirectly for order 6a8df1a3d9beb8541b6abea3
+🔗 [PaymentService] Confirming order 6a8df1a3d9beb8541b6abea3 via Order Service at http://localhost:3004 (attempt 1/3)
+✅ [PaymentService] Order 6a8df1a3d9beb8541b6abea3 confirmed successfully via HTTP (attempt 1)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8a187d6ba222e79228a5b5
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8a187ffee7d0755dc3b586 for orderId: 6a8a187d6ba222e79228a5b5, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+📦 [PaymentOutbox] Processing 2 pending events
+📤 [PaymentOutbox] Processing event ORDER_CREATED for order undefined (id: 6a8dfa9e68d0bce991f037e5)
+⚠️ [PaymentOutbox] Unknown event type: ORDER_CREATED
+✅ [PaymentOutbox] Event 6a8dfa9e68d0bce991f037e5 marked as sent
+📤 [PaymentOutbox] Processing event payment-initiated for order 6a8dfa9d68d0bce991f037e4 (id: 6a8dfa9e68d0bce991f037e6)
+⚠️ [PaymentOutbox] Unknown event type: payment-initiated
+✅ [PaymentOutbox] Event 6a8dfa9e68d0bce991f037e6 marked as sent
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8c0fa612fe726a6ec3b784
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+✅ [PaymentService] Found payment 6a8c0fa8448640f540b308e3 for orderId: 6a8c0fa612fe726a6ec3b784, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+📦 [PaymentOutbox] Processing 2 pending events
+📤 [PaymentOutbox] Processing event ORDER_CREATED for order undefined (id: 6a8dfb0f68d0bce991f037e8)
+⚠️ [PaymentOutbox] Unknown event type: ORDER_CREATED
+✅ [PaymentOutbox] Event 6a8dfb0f68d0bce991f037e8 marked as sent
+📤 [PaymentOutbox] Processing event payment-initiated for order 6a8dfb0f68d0bce991f037e7 (id: 6a8dfb0f68d0bce991f037e9)
+⚠️ [PaymentOutbox] Unknown event type: payment-initiated
+✅ [PaymentOutbox] Event 6a8dfb0f68d0bce991f037e9 marked as sent
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8df1a3d9beb8541b6abea3
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
+✅ [PaymentService] Found payment 6a8df1a6227dd8d600923787 for orderId: 6a8df1a3d9beb8541b6abea3, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8dea2ca4eee27dbf71fbbd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d79449a0ff78c860131bd
+🔍 [PaymentService] Looking up payment for orderId: 6a8d93706c9026eae305ac2c
+🔍 [PaymentService] Looking up payment for orderId: 6a8d6bdb6e49882a44b06e26
+🔍 [PaymentService] Looking up payment for orderId: 6a8d54906e49882a44b06e23
+✅ [PaymentService] Found payment 6a8dea2d227dd8d600923784 for orderId: 6a8dea2ca4eee27dbf71fbbd, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8d445c850263eb608b0d0f
+⚠️ [PaymentService] Payment not found for orderId: 6a8d79449a0ff78c860131bd (may still be processing)
+✅ [PaymentService] Found payment 6a8d9373227dd8d600923781 for orderId: 6a8d93706c9026eae305ac2c, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d6bdc11ff3a4ddfc22678 for orderId: 6a8d6bdb6e49882a44b06e26, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d5493339f33dba174cf92 for orderId: 6a8d54906e49882a44b06e23, status: SUCCESS
+✅ [PaymentService] Found payment 6a8d445ed6761495a8a9b7ad for orderId: 6a8d445c850263eb608b0d0f, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a8c58b90c4dc030cf3c6cd8
+🔍 [PaymentService] Looking up payment for orderId: 6a8c59150c4dc030cf3c6cdb
+🔍 [PaymentService] Looking up payment for orderId: 6a8c48faeec36fbbe323c950
+⚠️ [PaymentService] Payment not found for orderId: 6a8c58b90c4dc030cf3c6cd8 (may still be processing)
+⚠️ [PaymentService] Payment not found for orderId: 6a8c59150c4dc030cf3c6cdb (may still be processing)
+✅ [PaymentService] Found payment 6a8c48fa2d382328280c4b7b for orderId: 6a8c48faeec36fbbe323c950, status: SUCCESS
+🔍 [PaymentService] Looking up payment for orderId: 6a91f037e700000000000000
+⚠️ [PaymentService] Payment not found for orderId: 6a91f037e700000000000000 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfb0f68d0bce991f037e7
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfb0f68d0bce991f037e7 (may still be processing)
+🔍 [PaymentService] Looking up payment for orderId: 6a8dfa9d68d0bce991f037e4
+⚠️ [PaymentService] Payment not found for orderId: 6a8dfa9d68d0bce991f037e4 (may still be processing)
