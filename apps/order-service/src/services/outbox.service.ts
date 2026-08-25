@@ -31,6 +31,9 @@ export class OutboxService {
 
   async processPendingEvents() {
   const events = await outboxRepository.findPending();
+  if (events.length > 0) {
+    console.log(`📦 [OrderOutbox] Processing ${events.length} pending events`);
+  }
 
   for (const event of events) {
     try {

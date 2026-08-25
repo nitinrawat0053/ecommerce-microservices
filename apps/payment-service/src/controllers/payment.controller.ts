@@ -22,17 +22,16 @@ export class PaymentController {
     } catch (error) {
       next(error);
     }
-  }
-
-  async getOrderPayment(
+  }  async getOrderPayment(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const payment = await paymentService.getOrderPayment(
-        req.params.orderId as string
-      );
+      const payment =
+        await paymentService.getOrderPayment(
+          req.params.orderId as string
+        );
 
       res.status(200).json({
         success: true,

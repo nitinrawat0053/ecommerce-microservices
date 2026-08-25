@@ -147,7 +147,7 @@ async function consumePaymentSuccess(channel: Channel) {
   await assertQueue(QUEUES.NOTIFICATION_PAYMENT_SUCCESS);
 
   console.log(
-    "👂 Listening on notification-payment-success"
+    "👂 [NotificationConsumer] Listening on notification-payment-success"
   );
 
   await channel.consume(
@@ -164,9 +164,9 @@ async function consumePaymentSuccess(channel: Channel) {
 
       try {
         console.log(
-          `💰 Processing PAYMENT_SUCCESS notification (attempt ${
+          `💰 [NotificationConsumer] Processing PAYMENT_SUCCESS notification (attempt ${
             retryCount + 1
-          })`
+          }) - orderId: ${event.orderId}, userId: ${event.userId}`
         );
 
         await notificationService.handlePaymentSuccess(event);
@@ -174,15 +174,19 @@ async function consumePaymentSuccess(channel: Channel) {
         channel.ack(message);
 
         console.log(
-          "✅ PAYMENT_SUCCESS notification sent"
+          `✅ [NotificationConsumer] PAYMENT_SUCCESS notification sent for order ${event.orderId}`
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error(
-          "❌ PAYMENT_SUCCESS notification failed",
-          error
+          `❌ [NotificationConsumer] PAYMENT_SUCCESS notification failed for order ${event.orderId}:`,
+          error.message || error,
+          error.stack || ''
         );
 
         if (retryCount < MAX_RETRIES) {
+          console.log(
+            `🔄 [NotificationConsumer] Retrying PAYMENT_SUCCESS for order ${event.orderId} (${retryCount + 1}/${MAX_RETRIES})`
+          );
           await publishMessage(
             QUEUES.NOTIFICATION_PAYMENT_SUCCESS_RETRY,
             event,
@@ -194,13 +198,13 @@ async function consumePaymentSuccess(channel: Channel) {
           channel.ack(message);
 
           console.log(
-            `🔄 PAYMENT_SUCCESS retry ${
+            `🔄 [NotificationConsumer] PAYMENT_SUCCESS retry ${
               retryCount + 1
-            }/${MAX_RETRIES}`
+            }/${MAX_RETRIES} for order ${event.orderId}`
           );
         } else {
           console.log(
-            "💀 PAYMENT_SUCCESS notification moved to DLQ"
+            `💀 [NotificationConsumer] PAYMENT_SUCCESS notification moved to DLQ for order ${event.orderId}. Error: ${error.message}`
           );
 
           channel.nack(message, false, false);

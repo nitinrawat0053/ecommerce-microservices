@@ -16,6 +16,7 @@ router.use(
   createProxyMiddleware({
     target: "http://localhost:3001",
     changeOrigin: true,
+    proxyTimeout: 15000,
     pathRewrite: {
       "^/": "/api/auth/",
     },
@@ -28,6 +29,7 @@ router.use(
   createProxyMiddleware({
     target: "http://localhost:3002/api/users",
     changeOrigin: true,
+    proxyTimeout: 15000,
 
      on: {
       proxyReq: (proxyReq, req) => {
@@ -45,6 +47,7 @@ router.use(
   createProxyMiddleware({
     target: "http://localhost:3005/api/cart",
     changeOrigin: true,
+    proxyTimeout: 15000,
 
     on: {
       proxyReq: (proxyReq, req) => {
@@ -62,6 +65,7 @@ router.use(
   createProxyMiddleware({
     target: "http://localhost:3006/api/payments",
     changeOrigin: true,
+    proxyTimeout: 15000,
 
     on: {
       proxyReq: (proxyReq, req) => {
@@ -79,6 +83,7 @@ router.use(
   createProxyMiddleware({
     target: "http://localhost:3004/api/orders",
     changeOrigin: true,
+    proxyTimeout: 15000,
     on: {
       proxyReq: (proxyReq, req) => {
         if (req.user) {

@@ -65,15 +65,6 @@ async createOrder(userId: string, productId: string, quantity: number, paymentMe
   session
 );
 
-   await outboxService.createEvent(
-   EVENTS.ORDER_PLACED,
-  {
-    orderId: order.id,
-    userId,
-  },
-  session
-);
-
   await outboxService.createEvent(
   EVENTS.PAYMENT_INITIATED,
   {

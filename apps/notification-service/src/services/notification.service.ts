@@ -27,19 +27,29 @@ export class NotificationService {
   }
 
   async handlePaymentSuccess(paymentEvent: PaymentSuccessEvent) {
-    console.log("💰 Processing PAYMENT_SUCCESS notification");
+    console.log(`💰 [NotificationService] Processing PAYMENT_SUCCESS notification for orderId: ${paymentEvent.orderId}, userId: ${paymentEvent.userId}`);
 
-    const user = await this.userClient.getUser(paymentEvent.userId);
+    let user: any;
+    try {
+      user = await userService.getUser(paymentEvent.userId);
+      console.log(`✅ [NotificationService] Fetched user for payment success: ${user?.email || 'unknown'}`);
+    } catch (userError: any) {
+      console.error(`❌ [NotificationService] Failed to fetch user ${paymentEvent.userId} for payment success:`, userError.message);
+      // Re-throw so retry mechanism can handle it
+      throw userError;
+    }
 
     const message = notificationTemplates.paymentSuccess(
       paymentEvent.orderId,
       paymentEvent.transactionId
     );
 
+    console.log(`📧 [NotificationService] Sending payment success email to ${user.email}`);
     await this.sendNotifications(
       user,
       message
     );
+    console.log(`✅ [NotificationService] Payment success notifications sent for order ${paymentEvent.orderId}`);
   }
 
   async handlePaymentFailed(paymentEvent: PaymentFailedEvent) {
@@ -60,27 +70,37 @@ export class NotificationService {
     user: any,
     message: string
   ) {
+    console.log(`📧 [NotificationService] sendNotifications called for user: ${user?.email}, message length: ${message?.length}`);
+    
     const notifications: Promise<void>[] = [];
+    const prefs = user?.notificationPreferences || { email: true, sms: true, whatsapp: true };
 
-    if (user.notificationPreferences.email) {
+    if (prefs.email && user?.email) {
+      console.log(`📧 [NotificationService] Pushing email notification to ${user.email}`);
       notifications.push(
         this.emailProvider.send(
           user.email,
           message
         )
       );
+    } else {
+      console.log(`⚠️ [NotificationService] Email notification skipped - email enabled: ${prefs.email}, user email: ${user?.email}`);
     }
 
-    if (user.notificationPreferences.sms) {
+    if (prefs.sms && user?.phone) {
+      console.log(`📱 [NotificationService] Pushing SMS notification to ${user.phone}`);
       notifications.push(
         this.smsProvider.send(
           user.phone,
           message
         )
       );
+    } else {
+      console.log(`⚠️ [NotificationService] SMS notification skipped - sms enabled: ${prefs.sms}, user phone: ${user?.phone}`);
     }
 
-    if (user.notificationPreferences.whatsapp) {
+    if (prefs.whatsapp && user?.phone) {
+      console.log(`💬 [NotificationService] Pushing WhatsApp notification to ${user.phone}`);
       notifications.push(
         this.whatsappProvider.send(
           user.phone,
@@ -89,6 +109,26 @@ export class NotificationService {
       );
     }
 
-    await Promise.all(notifications);
+    if (notifications.length === 0) {
+      console.log(`⚠️ [NotificationService] No notification channels enabled for user ${user?.email}`);
+      return;
+    }
+
+    console.log(`📤 [NotificationService] Sending ${notifications.length} notifications...`);
+    const results = await Promise.allSettled(notifications);
+    
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`❌ [NotificationService] Notification ${index} failed:`, result.reason);
+      } else {
+        console.log(`✅ [NotificationService] Notification ${index} sent successfully`);
+      }
+    });
+    
+    // Throw if ALL notifications failed
+    const allFailed = results.every(r => r.status === 'rejected');
+    if (allFailed && results.length > 0) {
+      throw new Error('All notification channels failed');
+    }
   }
 }

@@ -50,6 +50,10 @@ vi.mock("@packages/config", () => ({
   config: { RAZORPAY_KEY_ID: "test_key", RAZORPAY_KEY_SECRET: "test_secret", RAZORPAY_WEBHOOK_SECRET: "webhook_secret", LOAD_TEST: "" },
 }));
 
+vi.mock("axios", () => ({
+  default: { put: vi.fn().mockResolvedValue({ status: 200 }) },
+}));
+
 import { PaymentService } from "../services/payment.service";
 import { NotFoundError } from "@packages/errors";
 import { PaymentStatus, PaymentMethod, EVENTS } from "@packages/shared-types";
@@ -74,7 +78,7 @@ describe("PaymentService", () => {
 
       expect(mockPaymentCreate).toHaveBeenCalled();
       expect(mockRazorpayCreateOrder).toHaveBeenCalledWith(200, "INR", "order1");
-      expect(result.razorpayOrderId).toBe("rzp_order_123");
+      expect(result!.razorpayOrderId).toBe("rzp_order_123");
     });
 
     it("should skip if payment already has Razorpay order", async () => {
@@ -103,12 +107,14 @@ describe("PaymentService", () => {
     it("should return payment for order", async () => {
       mockPaymentFindByOrderId.mockResolvedValue({ id: "pay1", orderId: "order1" });
       const result = await paymentService.getOrderPayment("order1");
-      expect(result.orderId).toBe("order1");
+      expect(result).not.toBeNull();
+      expect(result!.orderId).toBe("order1");
     });
 
-    it("should throw NotFoundError", async () => {
+    it("should return null if payment not found (race condition safe)", async () => {
       mockPaymentFindByOrderId.mockResolvedValue(null);
-      await expect(paymentService.getOrderPayment("no-order")).rejects.toThrow(NotFoundError);
+      const result = await paymentService.getOrderPayment("no-order");
+      expect(result).toBeNull();
     });
   });
 
@@ -166,7 +172,7 @@ describe("PaymentService", () => {
         payload: { payment: { entity: { order_id: "rzp_123", id: "pay_rzp_456" } } },
       });
 
-      expect(mockPaymentUpdateStatus).toHaveBeenCalledWith("pay1", PaymentStatus.SUCCESS, "pay_rzp_456", undefined, expect.anything());
+      expect(mockPaymentUpdateStatus).toHaveBeenCalledWith("pay1", PaymentStatus.SUCCESS, "pay_rzp_456", undefined, expect.anything(), "pay_rzp_456");
       expect(mockOutboxCreateEvent).toHaveBeenCalled();
     });
 
@@ -180,7 +186,7 @@ describe("PaymentService", () => {
         payload: { payment: { entity: { order_id: "rzp_123", id: "pay_rzp_789", error_description: "Insufficient funds" } } },
       });
 
-      expect(mockPaymentUpdateStatus).toHaveBeenCalledWith("pay1", PaymentStatus.FAILED, "pay_rzp_789", "Insufficient funds", expect.anything());
+      expect(mockPaymentUpdateStatus).toHaveBeenCalledWith("pay1", PaymentStatus.FAILED, "pay_rzp_789", "Insufficient funds", expect.anything(), "pay_rzp_789");
     });
 
     it("should skip if payment already successful", async () => {
