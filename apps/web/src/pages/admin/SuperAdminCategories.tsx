@@ -32,12 +32,17 @@ export default function SuperAdminCategories() {
 
   const fetchData = async () => {
     try {
-      const [catRes, prodRes] = await Promise.all([
-        api.get('/categories').catch(() => ({ data: { data: [] } })),
-        api.get('/products?limit=200').catch(() => ({ data: { data: [] } })),
-      ]);
-      setCategories(catRes.data.data || catRes.data || []);
-      setProducts(prodRes.data.data || []);
+      const prodRes = await api.get('/products?limit=200').catch(() => ({ data: { data: [] } }));
+      const prods = prodRes.data.data || [];
+      // Derive categories from products
+      const catMap: Record<string, { name: string; count: number; active: boolean }> = {};
+      prods.forEach((p: any) => {
+        const cat = p.category || 'Uncategorized';
+        if (!catMap[cat]) catMap[cat] = { name: cat, count: 0, active: true };
+        catMap[cat].count++;
+      });
+      setProducts(prods);
+      setCategories(Object.values(catMap));
     } catch { /* empty */ }
     setLoading(false);
   };
