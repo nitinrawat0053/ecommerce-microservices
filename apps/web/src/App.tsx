@@ -25,6 +25,9 @@ import Wishlist from './pages/user/Wishlist';
 import NotificationPreferences from './pages/user/NotificationPreferences';
 import SuperAdminUserManagement from './pages/admin/SuperAdminUserManagement';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
+import SuperAdminCategories from './pages/admin/SuperAdminCategories';
+import SuperAdminBrands from './pages/admin/SuperAdminBrands';
+import SuperAdminInsights from './pages/admin/SuperAdminInsights';
 
 function AuthRoutes() {
   const { token } = useAuth();
@@ -43,6 +46,7 @@ function AppRoutes() {
   const { token, isSuperAdmin } = useAuth();
   if (!token) return <AuthRoutes />;
 
+  // Super Admin: admin layout with sidebar for ALL routes including homepage
   if (isSuperAdmin) {
     return (
       <Routes>
@@ -52,6 +56,9 @@ function AppRoutes() {
           <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
           <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><SuperAdminUserManagement /></ProtectedRoute>} />
+          <Route path="/admin/categories" element={<ProtectedRoute><SuperAdminCategories /></ProtectedRoute>} />
+          <Route path="/admin/brands" element={<ProtectedRoute><SuperAdminBrands /></ProtectedRoute>} />
+          <Route path="/admin/insights" element={<ProtectedRoute><SuperAdminInsights /></ProtectedRoute>} />
           <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
           <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
@@ -64,6 +71,7 @@ function AppRoutes() {
     );
   }
 
+  // Regular user
   return (
     <Routes>
       <Route element={<Layout />}>

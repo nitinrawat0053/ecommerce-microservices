@@ -83,9 +83,6 @@ export default function SuperAdminDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-bold">Dashboard</h1><p className="text-sm text-muted-foreground">Overview of your ShopMicro platform</p></div>
-        <span className="px-3 py-1.5 bg-muted rounded-lg text-sm text-muted-foreground">
-          {new Date(Date.now()-6*86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} - {new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
-        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

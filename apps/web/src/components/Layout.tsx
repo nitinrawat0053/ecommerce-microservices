@@ -67,10 +67,9 @@ export default function Layout() {
 
   const superAdminSections = [
     { title: 'SUPER ADMIN', items: [{ to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
-    { title: 'USERS & ACCESS', items: [{ to: '/admin/users', label: 'Users', icon: Users }, { to: '#', label: 'Roles & Permissions', icon: ShieldCheck }] },
-    { title: 'COMMERCE', items: [{ to: '/orders', label: 'Orders', icon: ShoppingBag }, { to: '/admin/products', label: 'Products', icon: Package }, { to: '#', label: 'Categories', icon: Tag }, { to: '#', label: 'Brands', icon: Tag }] },
-    { title: 'INSIGHTS', items: [{ to: '#', label: 'Analytics', icon: BarChart2 }, { to: '#', label: 'Activity Logs', icon: Activity }] },
-    { title: 'SYSTEM', items: [{ to: '#', label: 'Settings', icon: Settings }] },
+    { title: 'USERS & ACCESS', items: [{ to: '/admin/users', label: 'Roles & Permissions', icon: ShieldCheck }] },
+    { title: 'COMMERCE', items: [{ to: '/orders', label: 'Orders', icon: ShoppingBag }, { to: '/admin/products', label: 'Products', icon: Package }, { to: '/admin/categories', label: 'Categories', icon: Tag }, { to: '/admin/brands', label: 'Brands', icon: Tag }] },
+    { title: 'INSIGHTS', items: [{ to: '/admin/insights', label: 'Analytics', icon: BarChart2 }, ] },
   ];
 
   const adminNavItems = [
@@ -200,11 +199,6 @@ export default function Layout() {
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             )}
-            {!sidebarCollapsed && (
-              <Button variant="ghost" size="icon" onClick={logout} className="shrink-0 h-8 w-8 text-gray-400 hover:text-red-500">
-                <LogOut size={16} />
-              </Button>
-            )}
           </div>
         </div>
       </aside>
@@ -225,7 +219,7 @@ export default function Layout() {
           </Button>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-xl">
+          <div className="flex-1">
             <div className="relative">
               <input type="text" placeholder="Search for users, orders, products and more..."
                 className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
