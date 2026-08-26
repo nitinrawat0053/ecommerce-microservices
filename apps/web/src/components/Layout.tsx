@@ -69,7 +69,7 @@ export default function Layout() {
     { title: 'SUPER ADMIN', items: [{ to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
     { title: 'USERS & ACCESS', items: [{ to: '/admin/users', label: 'Roles & Permissions', icon: ShieldCheck }] },
     { title: 'COMMERCE', items: [{ to: '/orders', label: 'Orders', icon: ShoppingBag }, { to: '/admin/products', label: 'Products', icon: Package }, { to: '/admin/categories', label: 'Categories', icon: Tag }, { to: '/admin/brands', label: 'Brands', icon: Tag }] },
-    { title: 'INSIGHTS', items: [{ to: '/admin/insights', label: 'Analytics', icon: BarChart2 }, ] },
+    { title: 'INSIGHTS', items: [{ to: '/admin/insights', label: 'Analytics', icon: BarChart2 }, { to: '/admin/activity-logs', label: 'Activity Logs', icon: Activity }, ] },
   ];
 
   const adminNavItems = [

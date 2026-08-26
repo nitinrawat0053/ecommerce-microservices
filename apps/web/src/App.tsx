@@ -28,6 +28,7 @@ import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 import SuperAdminCategories from './pages/admin/SuperAdminCategories';
 import SuperAdminBrands from './pages/admin/SuperAdminBrands';
 import SuperAdminInsights from './pages/admin/SuperAdminInsights';
+import SuperAdminActivityLogs from './pages/admin/SuperAdminActivityLogs';
 
 function AuthRoutes() {
   const { token } = useAuth();
@@ -59,6 +60,7 @@ function AppRoutes() {
           <Route path="/admin/categories" element={<ProtectedRoute><SuperAdminCategories /></ProtectedRoute>} />
           <Route path="/admin/brands" element={<ProtectedRoute><SuperAdminBrands /></ProtectedRoute>} />
           <Route path="/admin/insights" element={<ProtectedRoute><SuperAdminInsights /></ProtectedRoute>} />
+          <Route path="/admin/activity-logs" element={<ProtectedRoute><SuperAdminActivityLogs /></ProtectedRoute>} />
           <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
           <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />

@@ -112,7 +112,7 @@ export default function SuperAdminDashboard() {
           <ResponsiveContainer width="100%" height={280}><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="date" tick={{fontSize:12}} stroke="#9ca3af"/><YAxis tick={{fontSize:12}} stroke="#9ca3af"/><Tooltip/><Line type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2} dot={{r:4}}/><Line type="monotone" dataKey="orders" stroke="#a78bfa" strokeWidth={2} dot={{r:4}}/></LineChart></ResponsiveContainer>
         </CardContent></Card>
         <Card className="border shadow-sm"><CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4"><h3 className="font-semibold">Recent Activity</h3><Button variant="ghost" size="sm" className="text-blue-600 text-sm">View All</Button></div>
+          <div className="flex items-center justify-between mb-4"><h3 className="font-semibold">Recent Activity</h3><Button variant="ghost" size="sm" className="text-blue-600 text-sm" onClick={()=>navigate('/admin/activity-logs')}>View All</Button></div>
           <div className="space-y-4">{activityFeed.map((item, i) => (
             <div key={i} className="flex items-center gap-3"><div className={`h-10 w-10 rounded-full flex items-center justify-center ${item.color}`}><item.icon size={18}/></div><div className="flex-1 min-w-0"><p className="text-sm font-medium">{item.title}</p><p className="text-xs text-muted-foreground truncate">{item.desc}</p></div><span className="text-xs text-muted-foreground whitespace-nowrap">{item.time}</span></div>
           ))}</div>
