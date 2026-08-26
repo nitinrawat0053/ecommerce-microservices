@@ -21,20 +21,34 @@ export default function SuperAdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!isSuperAdmin) { navigate('/'); return; }
+  const fetchData = () => {
+    if (!isSuperAdmin) return;
     Promise.all([
       api.get('/users').catch(() => ({ data: { data: { users: [] } } })),
       api.get('/orders?limit=100').catch(() => ({ data: { data: [] } })),
       api.get('/products?limit=100').catch(() => ({ data: { data: [] } })),
-    ]).then(([userRes, orderRes, prodRes]) => {
+      api.get('/categories').catch(() => ({ data: { data: [] } })),
+      api.get('/brands').catch(() => ({ data: { data: [] } })),
+    ]).then(([userRes, orderRes, prodRes, catRes, brandRes]) => {
       setUsers(userRes.data.data?.users || []);
       setOrders(orderRes.data.data || []);
       setProducts(prodRes.data.data || []);
+      setCategories(catRes.data.data || []);
+      setBrands(brandRes.data.data || []);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    if (!isSuperAdmin) { navigate('/'); return; }
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    window.addEventListener('focus', fetchData);
+    return () => { clearInterval(interval); window.removeEventListener('focus', fetchData); };
   }, [isSuperAdmin, navigate]);
 
   const totalUsers = users.length;
@@ -61,13 +75,82 @@ export default function SuperAdminDashboard() {
   const recentUsers = [...users].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4);
   const recentOrders = [...orders].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4);
 
-  const activityFeed = [
-    { icon: UserPlus, color: 'bg-blue-100 text-blue-600', title: 'New user registered', desc: `${recentUsers[0]?.name || 'Someone'} joined the platform`, time: '2 min ago' },
-    { icon: ShieldCheck, color: 'bg-green-100 text-green-600', title: 'Role updated', desc: `${recentUsers[1]?.name || 'Someone'} was promoted to Admin`, time: '15 min ago' },
-    { icon: ShoppingBag, color: 'bg-orange-100 text-orange-600', title: 'New order placed', desc: `Order #${recentOrders[0]?._id?.slice(-6) || 'N/A'} has been placed`, time: '28 min ago' },
-    { icon: Package, color: 'bg-purple-100 text-purple-600', title: 'New product added', desc: `${products[0]?.name || 'Product'} was added to store`, time: '1 hr ago' },
-    { icon: UserPlus, color: 'bg-blue-100 text-blue-600', title: 'New user registered', desc: `${recentUsers[2]?.name || 'Someone'} joined the platform`, time: '2 hrs ago' },
-  ];
+  const formatTimeAgo = (dateStr: string) => {
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diffMs = now - then;
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hr ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  };
+
+  const activityItems: { icon: any; color: string; title: string; desc: string; time: string; sortTime: number }[] = [];
+
+  users.forEach((u: any) => {
+    if (u.createdAt) {
+      activityItems.push({
+        icon: UserPlus, color: 'bg-blue-100 text-blue-600',
+        title: 'New user registered',
+        desc: `${u.name} joined the platform`,
+        time: formatTimeAgo(u.createdAt),
+        sortTime: new Date(u.createdAt).getTime(),
+      });
+    }
+    if (u.updatedAt && u.updatedAt !== u.createdAt) {
+      const roleLabel = u.role === 'ADMIN' ? 'Admin' : u.role === 'SUPER_ADMIN' ? 'Super Admin' : 'User';
+      activityItems.push({
+        icon: ShieldCheck, color: 'bg-green-100 text-green-600',
+        title: 'Role updated',
+        desc: `${u.name} is now ${roleLabel}`,
+        time: formatTimeAgo(u.updatedAt),
+        sortTime: new Date(u.updatedAt).getTime(),
+      });
+    }
+  });
+  products.forEach((p: any) => {
+    if (p.createdAt) {
+      activityItems.push({
+        icon: Package, color: 'bg-purple-100 text-purple-600',
+        title: 'New product added',
+        desc: `${p.name} was added to store`,
+        time: formatTimeAgo(p.createdAt),
+        sortTime: new Date(p.createdAt).getTime(),
+      });
+    }
+  });
+
+  categories.forEach((c: any) => {
+    if (c.createdAt || c._id) {
+      const ts = c.createdAt ? new Date(c.createdAt).getTime() : 0;
+      activityItems.push({
+        icon: ShoppingBag, color: 'bg-pink-100 text-pink-600',
+        title: 'New category added',
+        desc: `"${c.name || c.title}" category was created`,
+        time: ts ? formatTimeAgo(c.createdAt) : 'Recently',
+        sortTime: ts,
+      });
+    }
+  });
+
+  brands.forEach((b: any) => {
+    if (b.createdAt || b._id) {
+      const ts = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      activityItems.push({
+        icon: Shield, color: 'bg-teal-100 text-teal-600',
+        title: 'New brand added',
+        desc: `"${b.name || b.title}" brand was created`,
+        time: ts ? formatTimeAgo(b.createdAt) : 'Recently',
+        sortTime: ts,
+      });
+    }
+  });
+
+  activityItems.sort((a, b) => b.sortTime - a.sortTime);
+  const activityFeed = activityItems.slice(0, 8);
 
   if (loading) {
     return (
@@ -83,6 +166,9 @@ export default function SuperAdminDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-bold">Dashboard</h1><p className="text-sm text-muted-foreground">Overview of your ShopMicro platform</p></div>
+        <span className="px-3 py-1.5 bg-muted rounded-lg text-sm text-muted-foreground">
+          {new Date(Date.now()-6*86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} - {new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
+        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Search, Activity, UserPlus, ShieldCheck, ShoppingBag, Package,
-  UserCircle, TrendingUp, Clock, Filter, Loader2
+  Shield, Tag, Clock
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ActivityItem {
   id: string;
-  type: 'user_registered' | 'role_updated' | 'order_placed' | 'product_added' | 'payment_received';
+  type: string;
   title: string;
   description: string;
   icon: any;
@@ -28,63 +28,115 @@ export default function SuperAdminActivityLogs() {
   const [users, setUsers] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
 
-  useEffect(() => {
-    if (!isSuperAdmin) { navigate('/'); return; }
+  const fetchData = () => {
+    if (!isSuperAdmin) return;
     Promise.all([
       api.get('/users').catch(() => ({ data: { data: { users: [] } } })),
       api.get('/orders?limit=200').catch(() => ({ data: { data: [] } })),
       api.get('/products?limit=200').catch(() => ({ data: { data: [] } })),
-    ]).then(([userRes, orderRes, prodRes]) => {
+      api.get('/categories').catch(() => ({ data: { data: [] } })),
+      api.get('/brands').catch(() => ({ data: { data: [] } })),
+    ]).then(([userRes, orderRes, prodRes, catRes, brandRes]) => {
       setUsers(userRes.data.data?.users || []);
       setOrders(orderRes.data.data || []);
       setProducts(prodRes.data.data || []);
+      setCategories(catRes.data.data || []);
+      setBrands(brandRes.data.data || []);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    if (!isSuperAdmin) { navigate('/'); return; }
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    window.addEventListener('focus', fetchData);
+    return () => { clearInterval(interval); window.removeEventListener('focus', fetchData); };
   }, [isSuperAdmin, navigate]);
 
   const activityLogs: ActivityItem[] = [];
 
+  let activityCounter = 0;
+
   // User registrations
   users.forEach((u: any) => {
-    activityLogs.push({
-      id: `user-${u._id}`,
-      type: 'user_registered',
-      title: 'New user registered',
-      description: `${u.name} joined the platform`,
-      icon: UserPlus,
-      color: 'bg-blue-100 text-blue-600',
-      time: new Date(u.createdAt),
-    });
-  });
-
-  // Orders
-  orders.forEach((o: any) => {
-    activityLogs.push({
-      id: `order-${o._id}`,
-      type: 'order_placed',
-      title: 'New order placed',
-      description: `Order #${o._id?.slice(-6)?.toUpperCase()} has been placed`,
-      icon: ShoppingBag,
-      color: 'bg-orange-100 text-orange-600',
-      time: new Date(o.createdAt),
-    });
+    if (u.createdAt) {
+      activityLogs.push({
+        id: `user-${u._id}-${activityCounter++}`,
+        type: 'user_registered',
+        title: 'New user registered',
+        description: `${u.name} joined the platform`,
+        icon: UserPlus,
+        color: 'bg-blue-100 text-blue-600',
+        time: new Date(u.createdAt),
+      });
+    }
+    // Role updates
+    if (u.updatedAt && u.updatedAt !== u.createdAt) {
+      const roleLabel = u.role === 'ADMIN' ? 'Admin' : u.role === 'SUPER_ADMIN' ? 'Super Admin' : 'User';
+      activityLogs.push({
+        id: `role-${u._id}-${activityCounter++}`,
+        type: 'role_updated',
+        title: 'Role updated',
+        description: `${u.name} is now ${roleLabel}`,
+        icon: ShieldCheck,
+        color: 'bg-green-100 text-green-600',
+        time: new Date(u.updatedAt),
+      });
+    }
   });
 
   // Products
   products.forEach((p: any) => {
-    activityLogs.push({
-      id: `product-${p._id}`,
-      type: 'product_added',
-      title: 'New product added',
-      description: `${p.name} was added to store`,
-      icon: Package,
-      color: 'bg-purple-100 text-purple-600',
-      time: new Date(p.createdAt),
-    });
+    if (p.createdAt) {
+      activityLogs.push({
+        id: `product-${p._id}-${activityCounter++}`,
+        type: 'product_added',
+        title: 'New product added',
+        description: `${p.name} was added to store`,
+        icon: Package,
+        color: 'bg-purple-100 text-purple-600',
+        time: new Date(p.createdAt),
+      });
+    }
+  });
+
+  // Categories
+  categories.forEach((c: any) => {
+    if (c.createdAt || c._id) {
+      const ts = c.createdAt ? new Date(c.createdAt) : new Date();
+      activityLogs.push({
+        id: `category-${c._id}-${activityCounter++}`,
+        type: 'category_added',
+        title: 'New category added',
+        description: `"${c.name || c.title}" category was created`,
+        icon: Tag,
+        color: 'bg-pink-100 text-pink-600',
+        time: ts,
+      });
+    }
+  });
+
+  // Brands
+  brands.forEach((b: any) => {
+    if (b.createdAt || b._id) {
+      const ts = b.createdAt ? new Date(b.createdAt) : new Date();
+      activityLogs.push({
+        id: `brand-${b._id}-${activityCounter++}`,
+        type: 'brand_added',
+        title: 'New brand added',
+        description: `"${b.name || b.title}" brand was created`,
+        icon: Shield,
+        color: 'bg-teal-100 text-teal-600',
+        time: ts,
+      });
+    }
   });
 
   // Sort by time descending
@@ -110,11 +162,24 @@ export default function SuperAdminActivityLogs() {
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
+  const getBadgeLabel = (type: string) => {
+    switch (type) {
+      case 'user_registered': return 'User';
+      case 'role_updated': return 'Role';
+      case 'product_added': return 'Product';
+      case 'category_added': return 'Category';
+      case 'brand_added': return 'Brand';
+      default: return type;
+    }
+  };
+
   const typeFilters = [
     { value: 'all', label: 'All Activity' },
     { value: 'user_registered', label: 'Users' },
-    { value: 'order_placed', label: 'Orders' },
+    { value: 'role_updated', label: 'Roles' },
     { value: 'product_added', label: 'Products' },
+    { value: 'category_added', label: 'Categories' },
+    { value: 'brand_added', label: 'Brands' },
   ];
 
   if (loading) {
@@ -170,7 +235,7 @@ export default function SuperAdminActivityLogs() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant="outline" className="text-[10px]">
-                    {log.type === 'user_registered' ? 'User' : log.type === 'order_placed' ? 'Order' : 'Product'}
+                    {getBadgeLabel(log.type)}
                   </Badge>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">{formatTime(log.time)}</span>
                 </div>

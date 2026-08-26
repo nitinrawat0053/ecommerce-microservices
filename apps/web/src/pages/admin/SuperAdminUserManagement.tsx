@@ -234,7 +234,7 @@ export default function SuperAdminUserManagement() {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold text-blue-600">
-                  {users.filter((u) => u.role === 'ADMIN').length}
+                  {users.filter((u) => u.role === 'ADMIN' || u.role === 'SUPER_ADMIN').length}
                 </div>
                 <p className="text-sm text-gray-500">Admins</p>
               </CardContent>
@@ -244,7 +244,6 @@ export default function SuperAdminUserManagement() {
                 <div className="text-2xl font-bold text-gray-600">
                   {users.filter((u) => u.role === 'USER').length}
                 </div>
-                <p className="text-sm text-gray-500">Regular Users</p>
               </CardContent>
             </Card>
           </div>
