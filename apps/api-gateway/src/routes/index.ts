@@ -4,13 +4,6 @@ import { authenticate } from "../middlewares/auth.middleware";
 import {authorize} from "../middlewares/authorize.middleware";
 const router = Router();
 
-// router.use(
-//   "/auth",
-//   createProxyMiddleware({
-//     target: "http://localhost:3001/api/auth",
-//     changeOrigin: true,
-//   })
-// );
 router.use(
   "/auth",
   createProxyMiddleware({
@@ -23,6 +16,7 @@ router.use(
   })
 );
 
+// User routes - authenticated (SUPER_ADMIN role check done in user service)
 router.use(
   "/users",
   authenticate,
@@ -30,25 +24,24 @@ router.use(
     target: "http://localhost:3002/api/users",
     changeOrigin: true,
     proxyTimeout: 15000,
-
-     on: {
+    on: {
       proxyReq: (proxyReq, req) => {
         if (req.user) {
-      proxyReq.setHeader("x-user-id", req.user.userId);
-      proxyReq.setHeader("x-user-role", req.user.role);
-      }
+          proxyReq.setHeader("x-user-id", req.user.userId);
+          proxyReq.setHeader("x-user-role", req.user.role);
+        }
+      },
     },
-  }
-})
+  })
 );
-   router.use(
+
+router.use(
   "/cart",
   authenticate,
   createProxyMiddleware({
     target: "http://localhost:3005/api/cart",
     changeOrigin: true,
     proxyTimeout: 15000,
-
     on: {
       proxyReq: (proxyReq, req) => {
         if (req.user) {
@@ -59,14 +52,14 @@ router.use(
     },
   })
 );
-  router.use(
+
+router.use(
   "/payments",
   authenticate,
   createProxyMiddleware({
     target: "http://localhost:3006/api/payments",
     changeOrigin: true,
     proxyTimeout: 15000,
-
     on: {
       proxyReq: (proxyReq, req) => {
         if (req.user) {
@@ -77,7 +70,8 @@ router.use(
     },
   })
 );
-  router.use(
+
+router.use(
   "/orders",
   authenticate,
   createProxyMiddleware({
@@ -98,34 +92,34 @@ router.use(
 const productProxy = createProxyMiddleware({
   target: "http://localhost:3003",
   changeOrigin: true,
-   pathRewrite: {
+  pathRewrite: {
     "^/products": "/api/products",
   },
 });
 
-// Product Import (Admin) - must be before catch-all routes
+// Product Import (Admin + Super Admin) - must be before catch-all routes
 router.get(
   "/products/import/template",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 router.post(
   "/products/import/preview",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 router.post(
   "/products/import",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 router.post(
   "/products/upload-image",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 
@@ -133,25 +127,25 @@ router.post(
 router.get("/products", productProxy);
 router.get("/products/:id", productProxy);
 
-// Protected
+// Protected (Admin + Super Admin)
 router.post(
   "/products",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 
 router.put(
   "/products/:id",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 
 router.delete(
   "/products/:id",
   authenticate,
-  authorize(["ADMIN"]),
+  authorize(["ADMIN", "SUPER_ADMIN"]),
   productProxy
 );
 

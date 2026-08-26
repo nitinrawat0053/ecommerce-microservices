@@ -5,7 +5,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   isVerified: boolean;
-  role: "USER" | "ADMIN";
+  role: "USER" | "ADMIN" | "SUPER_ADMIN";
   phone: string;
   notificationPreferences: {
     email: boolean;
@@ -44,7 +44,7 @@ const userSchema = new Schema<IUser>(
 
     role: {
       type: String,
-      enum: ["USER", "ADMIN"],
+      enum: ["USER", "ADMIN", "SUPER_ADMIN"],
       default: "USER",
     },
 

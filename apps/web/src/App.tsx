@@ -23,6 +23,8 @@ import PaymentVerify from './pages/payments/PaymentVerify';
 import Profile from './pages/user/Profile';
 import Wishlist from './pages/user/Wishlist';
 import NotificationPreferences from './pages/user/NotificationPreferences';
+import SuperAdminUserManagement from './pages/admin/SuperAdminUserManagement';
+import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 
 function AuthRoutes() {
   const { token } = useAuth();
@@ -38,19 +40,39 @@ function AuthRoutes() {
 }
 
 function AppRoutes() {
-  const { token } = useAuth();
+  const { token, isSuperAdmin } = useAuth();
   if (!token) return <AuthRoutes />;
+
+  if (isSuperAdmin) {
+    return (
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<ProtectedRoute><SuperAdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
+          <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><SuperAdminUserManagement /></ProtectedRoute>} />
+          <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
+          <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/profile/notifications" element={<ProtectedRoute><NotificationPreferences /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    );
+  }
 
   return (
     <Routes>
-      {/* Admin routes — sidebar layout */}
       <Route element={<Layout />}>
         <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
         <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute><SuperAdminUserManagement /></ProtectedRoute>} />
         <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
       </Route>
 
-      {/* Customer routes — full-width e-commerce layout */}
       <Route element={<CustomerLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<ProductList />} />

@@ -18,6 +18,7 @@ interface AuthContextType {
   verifyPhone: (phone: string, code: string) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -43,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.post('/auth/login', { email, password });
     const { token: accessToken, user: userData } = res.data.data;
     setToken(accessToken);
-    // Normalize: auth API returns 'id', but other APIs use '_id'
     setUser({ ...userData, _id: userData._id || userData.id });
   };
 
@@ -65,7 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, verifyPhone, logout, isAdmin: user?.role === 'ADMIN' }}>
+    <AuthContext.Provider value={{
+      user,
+      token,
+      login,
+      register,
+      verifyPhone,
+      logout,
+      isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN',
+      isSuperAdmin: user?.role === 'SUPER_ADMIN',
+    }}>
       {children}
     </AuthContext.Provider>
   );

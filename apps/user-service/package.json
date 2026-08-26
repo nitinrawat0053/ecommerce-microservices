@@ -18,6 +18,8 @@
     "@packages/errors": "workspace:*",
     "@packages/logger": "workspace:*",
     "@packages/shared-types": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
+    "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
     "mongoose": "^9.7.4"
   },

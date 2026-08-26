@@ -40,4 +40,10 @@ export const config = {
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "",
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || "",
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || "",
+
+  // Super Admin config
+  SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || "admin@shopmicro.com",
+  SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || "SuperAdmin@123",
+  SUPER_ADMIN_NAME: process.env.SUPER_ADMIN_NAME || "Super Admin",
+  SUPER_ADMIN_PHONE: process.env.SUPER_ADMIN_PHONE || "+1234567890",
 }
