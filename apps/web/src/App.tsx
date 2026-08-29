@@ -29,6 +29,9 @@ import SuperAdminCategories from './pages/admin/SuperAdminCategories';
 import SuperAdminBrands from './pages/admin/SuperAdminBrands';
 import SuperAdminInsights from './pages/admin/SuperAdminInsights';
 import SuperAdminActivityLogs from './pages/admin/SuperAdminActivityLogs';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminInventory from './pages/admin/AdminInventory';
+import AdminCustomers from './pages/admin/AdminCustomers';
 
 function AuthRoutes() {
   const { token } = useAuth();
@@ -61,6 +64,8 @@ function AppRoutes() {
           <Route path="/admin/brands" element={<ProtectedRoute><SuperAdminBrands /></ProtectedRoute>} />
           <Route path="/admin/insights" element={<ProtectedRoute><SuperAdminInsights /></ProtectedRoute>} />
           <Route path="/admin/activity-logs" element={<ProtectedRoute><SuperAdminActivityLogs /></ProtectedRoute>} />
+          <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
+          <Route path="/customers" element={<ProtectedRoute><AdminCustomers /></ProtectedRoute>} />
           <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
           <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
@@ -73,7 +78,35 @@ function AppRoutes() {
     );
   }
 
-  // Regular user
+  // Regular user (ADMIN gets admin layout with sidebar)
+  const { isAdmin } = useAuth();
+  
+  if (isAdmin) {
+    return (
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
+          <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><SuperAdminUserManagement /></ProtectedRoute>} />
+          <Route path="/admin/categories" element={<ProtectedRoute><SuperAdminCategories /></ProtectedRoute>} />
+          <Route path="/admin/brands" element={<ProtectedRoute><SuperAdminBrands /></ProtectedRoute>} />          <Route path="/admin/insights" element={<ProtectedRoute><SuperAdminInsights /></ProtectedRoute>} />
+          <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
+          <Route path="/customers" element={<ProtectedRoute><AdminCustomers /></ProtectedRoute>} />
+          <Route path="/admin/products/:id/edit" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
+          <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    );
+  }
+
+
+  // Regular customer
   return (
     <Routes>
       <Route element={<Layout />}>

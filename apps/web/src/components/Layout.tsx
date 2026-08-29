@@ -68,8 +68,24 @@ export default function Layout() {
   const superAdminSections = [
     { title: 'SUPER ADMIN', items: [{ to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
     { title: 'USERS & ACCESS', items: [{ to: '/admin/users', label: 'Roles & Permissions', icon: ShieldCheck }] },
-    { title: 'COMMERCE', items: [{ to: '/orders', label: 'Orders', icon: ShoppingBag }, { to: '/admin/products', label: 'Products', icon: Package }, { to: '/admin/categories', label: 'Categories', icon: Tag }, { to: '/admin/brands', label: 'Brands', icon: Tag }] },
-    { title: 'INSIGHTS', items: [{ to: '/admin/insights', label: 'Analytics', icon: BarChart2 }, { to: '/admin/activity-logs', label: 'Activity Logs', icon: Activity }, ] },
+    { title: 'COMMERCE', items: [{ to: '/orders', label: 'Orders', icon: ShoppingBag }, { to: '/admin/products', label: 'Products', icon: Package }, { to: '/customers', label: 'Customers', icon: Users }, { to: '/admin/inventory', label: 'Inventory', icon: PackageCheck }, { to: '/admin/categories', label: 'Categories', icon: Tag }, { to: '/admin/brands', label: 'Brands', icon: Tag }] },
+    { title: 'INSIGHTS', items: [{ to: '/admin/insights', label: 'Analytics', icon: BarChart2 }, { to: '/admin/activity-logs', label: 'Activity Logs', icon: Activity }] },
+  ];
+
+  const adminSections = [
+    { title: 'MANAGE', items: [
+      { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/admin/products', label: 'Products', icon: Package },
+      { to: '/orders', label: 'Orders', icon: ShoppingBag },
+      { to: '/customers', label: 'Customers', icon: Users },
+      { to: '/admin/inventory', label: 'Inventory', icon: PackageCheck },
+      { to: '/admin/categories', label: 'Categories', icon: Tag },
+      { to: '/admin/brands', label: 'Brands', icon: Tag },
+    ]},
+    { title: 'REPORTS', items: [
+      { to: '/admin/sales-report', label: 'Sales Report', icon: BarChart2 },
+      { to: '/admin/insights', label: 'Insights', icon: Activity },
+    ]},
   ];
 
   const adminNavItems = [
@@ -126,54 +142,28 @@ export default function Layout() {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="space-y-1">
-              {!sidebarCollapsed && <p className="px-3 py-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Menu</p>}
-              {adminNavItems.map(({ to, label, icon: Icon }) => {
-                const active = isActive(to);
-                return (
-                  <Link key={to} to={to} onClick={() => setSidebarOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200",
-                      sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2",
-                      active ? "bg-blue-600 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    )} title={sidebarCollapsed ? label : undefined}>
-                    <Icon size={18} className="shrink-0" />
-                    {!sidebarCollapsed && <>{label}{active && <span className="ml-auto"><ChevronLeft size={14} className="-rotate-90" /></span>}</>}
-                  </Link>
-                );
-              })}
-              {isAdmin && (
-                <>
-                  {!sidebarCollapsed && <p className="px-3 py-1 mt-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Admin</p>}
-                  <Link to="/admin/dashboard" onClick={() => setSidebarOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200",
-                      sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2",
-                      location.pathname.startsWith('/admin/dashboard') ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
-                    )} title={sidebarCollapsed ? 'Dashboard' : undefined}>
-                    <BarChart3 size={18} className="shrink-0" />{!sidebarCollapsed && 'Dashboard'}
-                  </Link>
-                  <Link to="/admin/products" onClick={() => setSidebarOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200",
-                      sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2",
-                      location.pathname.startsWith('/admin/products') ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
-                    )} title={sidebarCollapsed ? 'Manage Products' : undefined}>
-                    <Settings size={18} className="shrink-0" />{!sidebarCollapsed && 'Manage Products'}
-                  </Link>
-                  {isSuperAdmin && (
-                    <Link to="/admin/users" onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200",
-                        sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2",
-                        location.pathname.startsWith('/admin/users') ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                      )} title={sidebarCollapsed ? 'User Management' : undefined}>
-                      <Shield size={18} className="shrink-0" />{!sidebarCollapsed && 'User Management'}
-                    </Link>
-                  )}
-                </>
-              )}
+          ) : (              <div className="space-y-6">
+              {adminSections.map((section, si) => (
+                <div key={si}>
+                  {!sidebarCollapsed && <p className="px-3 mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{section.title}</p>}
+                  <div className="space-y-0.5">
+                    {section.items.map(({ to, label, icon: Icon }) => {
+                      const active = isActive(to);
+                      return (
+                        <Link key={label} to={to} onClick={() => setSidebarOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200",
+                            sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2",
+                            active ? "bg-blue-600 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                          )} title={sidebarCollapsed ? label : undefined}>
+                          <Icon size={18} className="shrink-0" />
+                          {!sidebarCollapsed && <span className="truncate">{label}</span>}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </ScrollArea>
@@ -199,6 +189,11 @@ export default function Layout() {
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             )}
+            {!sidebarCollapsed && (
+              <Button variant="ghost" size="icon" onClick={logout} className="shrink-0 h-8 w-8 text-gray-400 hover:text-red-500">
+                <LogOut size={16} />
+              </Button>
+            )}
           </div>
         </div>
       </aside>
@@ -219,7 +214,7 @@ export default function Layout() {
           </Button>
 
           {/* Search Bar */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-xl">
             <div className="relative">
               <input type="text" placeholder="Search for users, orders, products and more..."
                 className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -278,7 +273,10 @@ export default function Layout() {
                   <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold">
                     {user?.name?.charAt(0)?.toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium hidden sm:block text-gray-900 dark:text-white">{isSuperAdmin ? 'Super Admin' : user?.name}</span>
+                  <div className="hidden sm:block">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{isSuperAdmin ? 'Super Admin' : 'Admin'}</span>
+                    {!isSuperAdmin && <p className="text-[10px] text-gray-500">Administrator</p>}
+                  </div>
                   <ChevronLeft size={14} className={cn("text-gray-400 transition-transform duration-200 -rotate-90", userMenuOpen && "rotate-90")} />
                 </button>
               </PopoverTrigger>

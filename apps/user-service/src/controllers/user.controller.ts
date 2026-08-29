@@ -21,7 +21,7 @@ export class UserController {
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const userRole = req.headers["x-user-role"] as string;
-      if (userRole !== "SUPER_ADMIN") {
+      if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
         return res.status(403).json({
           success: false,
           message: "Only Super Admin can access user management",
