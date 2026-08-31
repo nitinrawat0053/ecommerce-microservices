@@ -9,6 +9,7 @@ import {
   SlidersHorizontal, X, Grid3X3, List
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCategories } from '@/lib/categories';
 
 interface Product {
   _id: string; name: string; description: string; price: number;
@@ -23,10 +24,9 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'name_asc', label: 'Name: A → Z' },
 ];
 
-const ALL_CATEGORIES = ['Electronics', 'Fashion', 'Home & Kitchen', 'Beauty', 'Sports', 'Books', 'Furniture', 'Kids & Baby', 'Pet Supplies', 'Auto'];
-
 export default function ProductList() {
   const { isAdmin } = useAuth();
+  const { categories } = useCategories();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // ═══ SINGLE SOURCE OF TRUTH: URL query params ═══
@@ -178,7 +178,7 @@ export default function ProductList() {
             className="h-9 px-3 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
             <option value="">All Categories</option>
-            {ALL_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
           {/* Price Range */}

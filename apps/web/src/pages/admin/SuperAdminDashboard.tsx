@@ -14,6 +14,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getCategoryBadge } from '@/lib/categories';
 
 export default function SuperAdminDashboard() {
   const { isSuperAdmin } = useAuth();
@@ -123,11 +124,12 @@ export default function SuperAdminDashboard() {
     }
   });
 
+  const categoryNames = categories.map((c: any) => c.name || c.title || '');
   categories.forEach((c: any) => {
     if (c.createdAt || c._id) {
       const ts = c.createdAt ? new Date(c.createdAt).getTime() : 0;
       activityItems.push({
-        icon: ShoppingBag, color: 'bg-pink-100 text-pink-600',
+        icon: ShoppingBag, color: getCategoryBadge(categoryNames, c.name || c.title),
         title: 'New category added',
         desc: `"${c.name || c.title}" category was created`,
         time: ts ? formatTimeAgo(c.createdAt) : 'Recently',

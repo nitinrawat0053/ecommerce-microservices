@@ -4,11 +4,13 @@ import { config } from "@packages/config";
 import {connectDB} from "./config/db";
 import { connectRabbitMQ } from "@packages/rabbitmq";
 import { consumeOrderCreated } from "./consumers/order.consumer";
+import { seedDefaultCategories } from "./seed/categories.seed";
 
 const PORT = config.PRODUCT_SERVICE_PORT;
 
 const startServer = async () => {
   await connectDB();
+  await seedDefaultCategories();
   await connectRabbitMQ();
   await consumeOrderCreated();
 

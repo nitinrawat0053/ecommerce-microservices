@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Package, Users, DollarSign, TrendingUp,
-  ShoppingBag, Calendar
+  ShoppingBag, Calendar, Tag, Filter
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -14,52 +14,91 @@ import {
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
+import { getCategoryBadge } from '@/lib/categories';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     Promise.all([
       api.get('/products?limit=200').catch(() => ({ data: { data: [] } })),
       api.get('/orders?limit=100').catch(() => ({ data: { data: { data: [] } } })),
       api.get('/users').catch(() => ({ data: { data: { users: [] } } })),
-    ]).then(([prodRes, orderRes, userRes]) => {
+      api.get('/categories').catch(() => ({ data: { data: [] } })),
+    ]).then(([prodRes, orderRes, userRes, catRes]) => {
       setProducts(prodRes.data.data || []);
       setOrders(orderRes.data.data?.data || orderRes.data.data || []);
       setUsers(userRes.data.data?.users || []);
+      setCategories(catRes.data.data || []);
       setLoading(false);
     });
   }, []);
 
+  // --- Category Filter ---
+  const filteredProducts = selectedCategory
+    ? products.filter((p: any) => p.category?.toLowerCase() === selectedCategory.toLowerCase())
+    : products;
+
+  // Build a product→category lookup so we can filter orders by category
+  const productCategoryMap = new Map<string, string>();
+  products.forEach((p: any) => { productCategoryMap.set(p._id, p.category || ''); });
+
+  const filteredOrders = selectedCategory
+    ? orders.filter((o: any) => {
+        const cat = productCategoryMap.get(o.productId) || productCategoryMap.get(o.product?._id) || '';
+        return cat.toLowerCase() === selectedCategory.toLowerCase();
+      })
+    : orders;
+
   // --- Computed Stats ---
-  const totalProducts = products.length;
-  const totalOrders = orders.length;
+  const totalProducts = filteredProducts.length;
+  const totalOrders = filteredOrders.length;
   const totalCustomers = users.filter((u: any) => u.role === 'USER').length;
-  const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
+  const totalRevenue = filteredOrders.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
 
   // --- Chart Data: Sales by date ---
   const salesByDate: { date: string; sales: number }[] = [];
   const dateMap = new Map<string, number>();
-  [...orders].sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).forEach((o: any) => {
+  // Pre-fill last 7 days so the chart always renders
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const key = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    dateMap.set(key, 0);
+  }
+  [...filteredOrders].sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).forEach((o: any) => {
     const d = new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
     dateMap.set(d, (dateMap.get(d) || 0) + (o.totalAmount || 0));
   });
   dateMap.forEach((val, key) => salesByDate.push({ date: key, sales: val }));
 
+  // --- Category Product Counts (from managed categories) ---
+  const categoryCounts: Record<string, number> = {};
+  products.forEach((p: any) => {
+    const cat = p.category || 'Uncategorized';
+    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+  });
+  const categoryList = categories
+    .filter((c: any) => c.active !== false)
+    .map((c: any) => [c.name || c.title, categoryCounts[(c.name || c.title)] ?? 0] as [string, number])
+    .sort(([, a], [, b]) => b - a);
+
   // --- Low Stock Products ---
-  const lowStockProducts = products.filter((p: any) => p.stock > 0 && p.stock <= 10);
+  const lowStockProducts = filteredProducts.filter((p: any) => p.stock > 0 && p.stock <= 10);
 
   // --- Recent Orders ---
-  const recentOrders = [...orders]
+  const recentOrders = [...filteredOrders]
     .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
-  // --- Top Selling Products (simulated - using products with most stock sold) ---
-  const topProducts = [...products]
+  // --- Top Selling Products ---
+  const topProducts = [...filteredProducts]
     .sort((a: any, b: any) => (b.stock || 0) - (a.stock || 0))
     .slice(0, 5);
 
@@ -74,16 +113,8 @@ export default function AdminDashboard() {
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      'Electronics': 'bg-blue-100 text-blue-700',
-      'Fashion': 'bg-purple-100 text-purple-700',
-      'Home & Kitchen': 'bg-green-100 text-green-700',
-      'Beauty': 'bg-pink-100 text-pink-700',
-      'Sports': 'bg-orange-100 text-orange-700',
-    };
-    return colors[category] || 'bg-gray-100 text-gray-700';
-  };
+  const getCategoryColor = (category: string) =>
+    getCategoryBadge(categories.map((c: any) => c.name || ''), category);
 
   if (loading) {
     return (
@@ -214,11 +245,26 @@ export default function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Sales Overview</h3>
-              <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>This Week</option>
-                <option>This Month</option>
-                <option>This Year</option>
-              </select>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Filter size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <select
+                    value={selectedCategory}
+                    onChange={e => setSelectedCategory(e.target.value)}
+                    className="text-sm border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((cat: any) => (
+                      <option key={cat._id || cat.name} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>This Week</option>
+                  <option>This Month</option>
+                  <option>This Year</option>
+                </select>
+              </div>
             </div>
             {salesByDate.length === 0 ? (
               <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
@@ -356,7 +402,7 @@ export default function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Low Stock Alert</h3>
-              <Link to="/admin/products">
+              <Link to="/admin/inventory">
                 <Button variant="ghost" size="sm" className="text-blue-600 text-sm h-8">
                   View All
                 </Button>
@@ -387,6 +433,41 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Categories Section */}
+      <Card className="border shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">Categories</h3>
+            <Link to="/admin/categories">
+              <Button variant="ghost" size="sm" className="text-blue-600 text-sm h-8">
+                Manage
+              </Button>
+            </Link>
+          </div>
+          {categoryList.length === 0 ? (
+            <div className="text-center py-8 text-gray-400 text-sm">No categories yet</div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {categoryList.map(([cat, count]) => (
+                <Link
+                  key={cat}
+                  to={`/products?category=${encodeURIComponent(cat)}`}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors group"
+                >
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${getCategoryColor(cat)}`}>
+                    <Tag size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">{cat}</p>
+                    <p className="text-xs text-gray-500">{count} product{count !== 1 ? 's' : ''}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

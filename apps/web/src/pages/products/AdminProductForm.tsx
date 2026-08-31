@@ -9,9 +9,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Save, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useCategories } from '@/lib/categories';
 
 export default function AdminProductForm() {
   const { id } = useParams();
+  const { categories } = useCategories();
   const navigate = useNavigate();
   const isEdit = !!id;
   const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', category: 'Electronics', brand: '', imageUrl: '' });
@@ -96,13 +98,7 @@ export default function AdminProductForm() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Electronics">Electronics</SelectItem>
-                  <SelectItem value="Clothing">Clothing</SelectItem>
-                  <SelectItem value="Footwear">Footwear</SelectItem>
-                  <SelectItem value="Home">Home</SelectItem>
-                  <SelectItem value="Sports">Sports</SelectItem>
-                  <SelectItem value="Books">Books</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

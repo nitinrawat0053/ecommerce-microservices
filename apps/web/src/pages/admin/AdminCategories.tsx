@@ -1,5 +1,5 @@
 import CategoriesManager from './CategoriesManager';
 
-export default function SuperAdminCategories() {
+export default function AdminCategories() {
   return <CategoriesManager title="Categories" subtitle="Manage product categories" />;
 }
