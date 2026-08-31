@@ -13,7 +13,8 @@ export class ProductService {
     price: number,
     stock: number,
     category: string,
-    imageUrl?: string
+    imageUrl?: string,
+    brand?: string
   ) {
     const product = await productRepository.create({
       name,
@@ -22,6 +23,7 @@ export class ProductService {
       stock,
       category,
       imageUrl,
+      brand,
     });
   const keys = await redisClient.keys("products:*");
    if (keys.length > 0) {

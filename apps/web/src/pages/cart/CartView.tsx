@@ -5,10 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, Package, AlertCircle, ShoppingBag, Trash } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, Package, AlertCircle, ShoppingBag, Trash } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 interface CartItemRaw { productId: string; quantity: number; addedAt?: string; }
 interface CartItemDetailed { productId: string; quantity: number; name: string; price: number; stock: number; imageUrl?: string; category?: string; }

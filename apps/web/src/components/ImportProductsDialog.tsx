@@ -31,7 +31,6 @@ import {
   Loader2,
   ArrowRight,
   Image as ImageIcon,
-  Trash2,
   X,
   RotateCcw,
 } from 'lucide-react';
@@ -89,7 +88,7 @@ export default function ImportProductsDialog() {
 
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>('upload');
-  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [, setCsvFile] = useState<File | null>(null);
   const [rows, setRows] = useState<ValidatedRow[]>([]);
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<{

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Phone, Shield, ShieldCheck, ShieldOff, Bell, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { User, Mail, Phone, ShieldCheck, ShieldOff, Bell, CheckCircle2, XCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
 
 export default function Profile() {
   const { user, updateUser } = useAuth();

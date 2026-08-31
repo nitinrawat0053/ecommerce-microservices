@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/api/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Package, CreditCard, User, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Package, CreditCard, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'success' | 'destructive' | 'warning' }> = {

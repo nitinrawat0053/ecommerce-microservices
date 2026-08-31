@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Search, Activity, UserPlus, ShieldCheck, ShoppingBag, Package,
-  Shield, Tag, Clock
+  Search, Activity, UserPlus, ShieldCheck, Package,
+  Shield, Tag
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -26,7 +26,7 @@ export default function SuperAdminActivityLogs() {
   const { isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
@@ -77,14 +77,13 @@ export default function SuperAdminActivityLogs() {
         time: new Date(u.createdAt),
       });
     }
-    // Role updates
+    // Profile updates (role history isn't stored, so any update is a profile change, not a role change)
     if (u.updatedAt && u.updatedAt !== u.createdAt) {
-      const roleLabel = u.role === 'ADMIN' ? 'Admin' : u.role === 'SUPER_ADMIN' ? 'Super Admin' : 'User';
       activityLogs.push({
-        id: `role-${u._id}-${activityCounter++}`,
-        type: 'role_updated',
-        title: 'Role updated',
-        description: `${u.name} is now ${roleLabel}`,
+        id: `profile-${u._id}-${activityCounter++}`,
+        type: 'profile_updated',
+        title: 'Profile updated',
+        description: `${u.name} updated their profile`,
         icon: ShieldCheck,
         color: 'bg-green-100 text-green-600',
         time: new Date(u.updatedAt),
@@ -165,7 +164,7 @@ export default function SuperAdminActivityLogs() {
   const getBadgeLabel = (type: string) => {
     switch (type) {
       case 'user_registered': return 'User';
-      case 'role_updated': return 'Role';
+      case 'profile_updated': return 'Profile';
       case 'product_added': return 'Product';
       case 'category_added': return 'Category';
       case 'brand_added': return 'Brand';
@@ -176,7 +175,7 @@ export default function SuperAdminActivityLogs() {
   const typeFilters = [
     { value: 'all', label: 'All Activity' },
     { value: 'user_registered', label: 'Users' },
-    { value: 'role_updated', label: 'Roles' },
+    { value: 'profile_updated', label: 'Profiles' },
     { value: 'product_added', label: 'Products' },
     { value: 'category_added', label: 'Categories' },
     { value: 'brand_added', label: 'Brands' },

@@ -69,12 +69,14 @@ describe("OrderService", () => {
 
       expect(mockAxiosGet).toHaveBeenCalledWith("http://localhost:3003/api/products/prod1");
       expect(mockOrderCreate).toHaveBeenCalled();
-      expect(mockOutboxCreateEvent).toHaveBeenCalledTimes(3);
+      // The order saga writes exactly two outbox events at creation:
+      // ORDER_CREATED (product stock) + PAYMENT_INITIATED (payments).
+      // ORDER_PLACED is emitted later on payment success, not here.
+      expect(mockOutboxCreateEvent).toHaveBeenCalledTimes(2);
 
       const calls = mockOutboxCreateEvent.mock.calls;
       expect(calls[0][0]).toBe(EVENTS.ORDER_CREATED);
-      expect(calls[1][0]).toBe(EVENTS.ORDER_PLACED);
-      expect(calls[2][0]).toBe(EVENTS.PAYMENT_INITIATED);
+      expect(calls[1][0]).toBe(EVENTS.PAYMENT_INITIATED);
       expect(mockCommitTransaction).toHaveBeenCalled();
       expect(result).toEqual(mockOrder);
     });

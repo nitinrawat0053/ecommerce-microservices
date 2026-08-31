@@ -11,6 +11,17 @@ export const QUEUE_CONFIG: Record<string, QueueConfig> = {
     deadLetterExchange: "dead-letter-exchange",
   },
 
+  "order-created-retry": {
+    durable: true,
+    messageTtl: 5000,
+    deadLetterExchange: "",
+    deadLetterRoutingKey: "order-created",
+  },
+
+  "order-created-dlq": {
+    durable: true,
+  },
+
   "order-placed": {
     durable: true,
     deadLetterExchange: "dead-letter-exchange",

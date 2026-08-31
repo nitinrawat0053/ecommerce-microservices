@@ -12,7 +12,6 @@ The project is designed to demonstrate how a modern distributed e-commerce syste
 
 * Secure user registration and login
 * JWT-based authentication
-* Access and refresh token support
 * Password hashing with bcrypt
 * OTP verification using Twilio
 * Protected routes and authentication middleware
@@ -145,8 +144,6 @@ The **API Gateway** acts as the primary entry point and routes incoming requests
 * **bcrypt** — Password hashing
 * **Zod** — Request validation
 * **CORS** — Cross-origin protection
-* **Helmet** — Security headers
-* **Rate Limiting** — API abuse protection
 
 ## 🔗 Integrations
 
@@ -171,8 +168,8 @@ The **API Gateway** acts as the primary entry point and routes incoming requests
 | **Auth Service**         | Authentication, JWT and OTP verification | `3001` |
 | **User Service**         | User profile and account management      | `3002` |
 | **Product Service**      | Product catalog and inventory management | `3003` |
-| **Cart Service**         | Shopping cart operations                 | `3004` |
-| **Order Service**        | Order creation and lifecycle management  | `3005` |
+| **Order Service**        | Order creation and lifecycle management  | `3004` |
+| **Cart Service**         | Shopping cart operations                 | `3005` |
 | **Payment Service**      | Razorpay payment processing              | `3006` |
 | **Notification Service** | Email and notification processing        | `3007` |
 
@@ -367,10 +364,10 @@ pnpm --filter @apps/auth-service build
 
 | Method | Endpoint                  | Description          |
 | ------ | ------------------------- | -------------------- |
-| `POST` | `/api/auth/register`      | Register a new user  |
-| `POST` | `/api/auth/login`         | Authenticate user    |
-| `POST` | `/api/auth/verify-otp`    | Verify OTP           |
-| `POST` | `/api/auth/refresh-token` | Refresh access token |
+| `POST` | `/api/auth/register`      | Register a new user         |
+| `POST` | `/api/auth/login`         | Authenticate user           |
+| `POST` | `/api/auth/verify-phone`  | Verify OTP for phone number |
+| `POST` | `/api/auth/resend-otp`    | Resend the OTP            |
 
 ## 📦 Products
 
@@ -381,15 +378,23 @@ pnpm --filter @apps/auth-service build
 | `POST`   | `/api/products`     | Create product    |
 | `PUT`    | `/api/products/:id` | Update product    |
 | `DELETE` | `/api/products/:id` | Delete product    |
+| `GET`    | `/api/categories`   | Get all categories |
+| `POST`   | `/api/categories`   | Create category (admin) |
+| `PUT`    | `/api/categories/:id` | Update category (admin) |
+| `DELETE` | `/api/categories/:id` | Delete category (admin) |
+| `GET`    | `/api/brands`       | Get all brands    |
+| `POST`   | `/api/brands`       | Create brand (admin) |
+| `PUT`    | `/api/brands/:id`   | Update brand (admin) |
+| `DELETE` | `/api/brands/:id`   | Delete brand (admin) |
 
 ## 🛒 Cart
 
-| Method   | Endpoint              | Description      |
-| -------- | --------------------- | ---------------- |
-| `GET`    | `/api/cart`           | Get user cart    |
-| `POST`   | `/api/cart/items`     | Add item to cart |
-| `PUT`    | `/api/cart/items/:id` | Update cart item |
-| `DELETE` | `/api/cart/items/:id` | Remove cart item |
+| Method   | Endpoint            | Description      |
+| -------- | ------------------- | ---------------- |
+| `GET`    | `/api/cart`         | Get user cart    |
+| `POST`   | `/api/cart`         | Add item to cart |
+| `DELETE` | `/api/cart/:productId` | Remove cart item |
+| `DELETE` | `/api/cart`         | Clear cart       |
 
 ## 📋 Orders
 
@@ -401,10 +406,15 @@ pnpm --filter @apps/auth-service build
 
 ## 💳 Payments
 
-| Method | Endpoint               | Description                   |
-| ------ | ---------------------- | ----------------------------- |
-| `POST` | `/api/payments/create` | Create Razorpay payment order |
-| `POST` | `/api/payments/verify` | Verify payment                |
+| Method | Endpoint                 | Description                  |
+| ------ | ------------------------ | ---------------------------- |
+| `POST` | `/api/payments/verify`   | Verify payment signature     |
+| `POST` | `/api/payments/webhook`  | Razorpay webhook handler     |
+| `GET`  | `/api/payments/:id`      | Get payment by ID            |
+| `GET`  | `/api/payments/order/:orderId` | Get payments for an order |
+
+> Razorpay order creation is triggered internally when the payment service consumes the
+> `PAYMENT_INITIATED` event from the order service — there is no direct `/payments/create` endpoint.
 
 ---
 

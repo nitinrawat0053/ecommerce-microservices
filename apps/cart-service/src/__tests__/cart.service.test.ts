@@ -51,7 +51,7 @@ describe("CartService", () => {
 
       expect(mockCartCreate).toHaveBeenCalledWith("user1");
       expect(mockRedisDel).toHaveBeenCalledWith("cart:user1");
-      expect(result.items).toHaveLength(1);
+      expect(result!.items).toHaveLength(1);
     });
 
     it("should increase quantity if item already in cart", async () => {
@@ -62,7 +62,7 @@ describe("CartService", () => {
 
       expect(mockCartIncreaseQuantity).toHaveBeenCalledWith("user1", "p1", 2);
       expect(mockCartAddNewItem).not.toHaveBeenCalled();
-      expect(result.items[0].quantity).toBe(3);
+      expect(result!.items[0].quantity).toBe(3);
     });
 
     it("should throw BadRequestError for zero quantity", async () => {
@@ -138,7 +138,7 @@ describe("CartService", () => {
       mockCartClearCart.mockResolvedValue({ userId: "user1", items: [] });
       const result = await cartService.clearCart("user1");
       expect(mockRedisDel).toHaveBeenCalledWith("cart:user1");
-      expect(result.items).toHaveLength(0);
+      expect(result!.items).toHaveLength(0);
     });
 
     it("should return null if cart doesn't exist", async () => {

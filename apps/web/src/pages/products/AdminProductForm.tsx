@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Save, ArrowLeft, Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Save, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
@@ -14,7 +14,7 @@ export default function AdminProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
-  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', category: 'Electronics', imageUrl: '' });
+  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', category: 'Electronics', brand: '', imageUrl: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +22,7 @@ export default function AdminProductForm() {
     if (isEdit) {
       api.get(`/products/${id}`).then((r) => {
         const p = r.data.data;
-        setForm({ name: p.name, description: p.description, price: String(p.price), stock: String(p.stock), category: p.category, imageUrl: p.imageUrl || '' });
+        setForm({ name: p.name, description: p.description, price: String(p.price), stock: String(p.stock), category: p.category, brand: p.brand || '', imageUrl: p.imageUrl || '' });
       });
     }
   }, [id]);
@@ -105,6 +105,11 @@ export default function AdminProductForm() {
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Brand <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input value={form.brand} onChange={update('brand')} placeholder="e.g. Nike" />
             </div>
 
             <div className="space-y-2">

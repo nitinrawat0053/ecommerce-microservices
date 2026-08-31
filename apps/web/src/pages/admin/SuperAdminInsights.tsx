@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend
+  ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -78,8 +78,6 @@ export default function SuperAdminInsights() {
 
   // Recent activity
   const recentOrders = [...orders].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
-
-  const PIE_COLORS = ['#22c55e', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#9ca3af'];
 
   if (loading) {
     return (
@@ -148,7 +146,7 @@ export default function SuperAdminInsights() {
           {orderStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={orderStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                <Pie data={orderStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
                   {orderStatusData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                 </Pie>
                 <Tooltip />

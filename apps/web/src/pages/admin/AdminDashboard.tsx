@@ -5,8 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  ShoppingCart, Package, Users, DollarSign, TrendingUp, TrendingDown,
-  ArrowRight, AlertTriangle, PackageX, CreditCard, Clock, ShoppingBag, Calendar
+  Package, Users, DollarSign, TrendingUp,
+  ShoppingBag, Calendar
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
                   <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
                   <Tooltip
                     contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '12px' }}
-                    formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Sales (₹)']}
+                    formatter={(value) => [`₹${Number(value || 0).toLocaleString()}`, 'Sales (₹)']}
                   />
                   <Line type="monotone" dataKey="sales" stroke="#2563eb" strokeWidth={2} dot={{ r: 4, fill: '#2563eb' }} />
                 </LineChart>

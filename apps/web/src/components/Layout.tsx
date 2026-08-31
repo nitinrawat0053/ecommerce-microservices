@@ -1,11 +1,11 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import {
-  ShoppingCart, Package, CreditCard, User, LayoutDashboard,
+  Package, LayoutDashboard,
   LogOut, Menu, Store, ChevronLeft, Bell, Moon, Sun,
-  UserCircle, ClipboardList, BellRing, BarChart3, Shield,
+  UserCircle, ClipboardList, BellRing,
   Users, ShieldCheck, ShoppingBag, Tag, BarChart2,
-  Activity, Settings, PackageCheck, AlertTriangle, PackageX, Check
+  Activity, PackageCheck, AlertTriangle, PackageX, Check
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/api/client';
@@ -86,15 +86,6 @@ export default function Layout() {
       { to: '/admin/sales-report', label: 'Sales Report', icon: BarChart2 },
       { to: '/admin/insights', label: 'Insights', icon: Activity },
     ]},
-  ];
-
-  const adminNavItems = [
-    { to: '/', label: 'Home', icon: LayoutDashboard },
-    { to: '/products', label: 'Products', icon: Package },
-    { to: '/cart', label: 'Cart', icon: ShoppingCart },
-    { to: '/orders', label: 'Orders', icon: Package },
-    { to: '/payments', label: 'Payments', icon: CreditCard },
-    { to: '/profile', label: 'Profile', icon: User },
   ];
 
   return (

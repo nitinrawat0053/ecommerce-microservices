@@ -1,16 +1,13 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
-import path from "path";
+import { config } from "@packages/config";
 import { User } from "./models/user.model";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
-
-const MONGODB_URI = process.env.MONGODB_URI || "";
-const EMAIL = process.env.SUPER_ADMIN_EMAIL || "admin@shopmicro.com";
-const PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "SuperAdmin@123";
-const NAME = process.env.SUPER_ADMIN_NAME || "Super Admin";
-const PHONE = process.env.SUPER_ADMIN_PHONE || "+1234567890";
+const MONGODB_URI = config.MONGODB_URI;
+const EMAIL = config.SUPER_ADMIN_EMAIL;
+const PASSWORD = config.SUPER_ADMIN_PASSWORD;
+const NAME = config.SUPER_ADMIN_NAME;
+const PHONE = config.SUPER_ADMIN_PHONE;
 
 async function seedSuperAdmin() {
   try {

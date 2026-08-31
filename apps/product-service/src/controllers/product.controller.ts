@@ -11,6 +11,7 @@ export class ProductController {
         price,
         stock,
         category,
+        brand,
         imageUrl,
       } = req.body;
 
@@ -20,7 +21,8 @@ export class ProductController {
         price,
         stock,
         category,
-        imageUrl
+        imageUrl,
+        brand
       );
 
       res.status(201).json({

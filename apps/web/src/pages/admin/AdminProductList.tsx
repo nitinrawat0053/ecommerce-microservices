@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
-  Package, Plus, Pencil, Trash2, Search, 
-  ChevronLeft, ChevronRight, AlertCircle, Loader2, ArrowUpDown
+import {
+  Package, Plus, Pencil, Trash2, Search,
+  ChevronLeft, ChevronRight, Loader2, ArrowUpDown
 } from 'lucide-react';
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, 

@@ -148,6 +148,12 @@ export async function consumeMessage(
   options?: {
     retryQueue?: string;
     maxRetries?: number;
+    /**
+     * Optional gate: when provided, a message is only retried if this returns
+     * true. When omitted, all errors are retried (default behavior). Useful for
+     * consumers that only want to retry temporary/transient failures.
+     */
+    shouldRetry?: (error: unknown) => boolean;
   }
 ) {
   const channel = getChannel();
@@ -175,9 +181,14 @@ export async function consumeMessage(
         error
       );
 
-      // Retry if retry queue is configured
+      const isRetryable = options?.shouldRetry
+        ? options.shouldRetry(error)
+        : true;
+
+      // Retry if retry queue is configured and the error is retryable
       if (
         options?.retryQueue &&
+        isRetryable &&
         retryCount < (options.maxRetries ?? 3)
       ) {
         const nextRetryCount = retryCount + 1;
@@ -199,7 +210,7 @@ export async function consumeMessage(
         return;
       }
 
-      // Maximum retries reached
+      // Maximum retries reached (or error is not retryable)
       console.log(
         `💀 ${queue} failed after ${retryCount} retries. Moving to DLQ`
       );
@@ -280,22 +291,3 @@ async function setupDeadLetterQueues() {
     );
   }
 }
-//   async function setupDeadLetterQueues() {
-//   const deadLetterExchange = "dead-letter-exchange";
-
-//   const queues = Object.keys(QUEUE_CONFIG);
-
-//   for (const queue of queues) {
-//     const dlq = `${queue}-dlq`;
-
-//     await channel.assertQueue(dlq, {
-//       durable: true,
-//     });
-
-//     await channel.bindQueue(
-//       dlq,
-//       deadLetterExchange,
-//       queue
-//     );
-//   }
-// }

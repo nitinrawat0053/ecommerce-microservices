@@ -149,4 +149,66 @@ router.delete(
   productProxy
 );
 
+const categoryProxy = createProxyMiddleware({
+  target: "http://localhost:3003",
+  changeOrigin: true,
+  proxyTimeout: 15000,
+  pathRewrite: {
+    "^/categories": "/api/categories",
+  },
+});
+
+const brandProxy = createProxyMiddleware({
+  target: "http://localhost:3003",
+  changeOrigin: true,
+  proxyTimeout: 15000,
+  pathRewrite: {
+    "^/brands": "/api/brands",
+  },
+});
+
+// Categories - public reads, admin writes
+router.get("/categories", categoryProxy);
+router.get("/categories/:id", categoryProxy);
+router.post(
+  "/categories",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  categoryProxy
+);
+router.put(
+  "/categories/:id",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  categoryProxy
+);
+router.delete(
+  "/categories/:id",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  categoryProxy
+);
+
+// Brands - public reads, admin writes
+router.get("/brands", brandProxy);
+router.get("/brands/:id", brandProxy);
+router.post(
+  "/brands",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  brandProxy
+);
+router.put(
+  "/brands/:id",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  brandProxy
+);
+router.delete(
+  "/brands/:id",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  brandProxy
+);
+
 export default router;

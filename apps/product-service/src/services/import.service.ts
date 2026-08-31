@@ -11,6 +11,7 @@ export interface ImportRow {
   price: number;
   stock: number;
   category: string;
+  brand?: string;
   imageFile?: Express.Multer.File;
   imageName?: string;
 }
@@ -78,6 +79,7 @@ export class ImportService {
         price: parseFloat(get("price")) || 0,
         stock: parseInt(get("stock"), 10) || 0,
         category: get("category"),
+        brand: get("brand") || undefined,
         imageUrl: get("imageUrl") || "",
       };
     });
@@ -209,6 +211,7 @@ export class ImportService {
       price: row.price,
       stock: row.stock,
       category: row.category.toLowerCase().trim(),
+      brand: row.brand ? row.brand.toLowerCase().trim() : undefined,
       imageUrl: (row as any).imageUrl || "",
     }));
 

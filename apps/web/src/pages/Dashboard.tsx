@@ -3,28 +3,20 @@ import { Link } from 'react-router-dom';
 import api from '@/api/client';
 import { Button } from '@/components/ui/button';
 import {
-  ChevronLeft, ChevronRight, ArrowRight, Smartphone, Shirt, Home,
-  BookOpen, Dumbbell, Heart, Armchair, Gem, Baby, Dog, Car,
-  TrendingUp, Zap, ShoppingCart, Flame, Shield, Truck, RotateCcw,
-  Headphones, Package
+  ChevronLeft, ChevronRight, ArrowRight, Home,
+  Heart,
+  TrendingUp, Zap, Flame, Shield, Truck, RotateCcw,
+  Headphones
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import AdminDashboard from './admin/AdminDashboard';
 import ProductCard from '@/components/ProductCard';
 
 const BANNERS = [
-  { title: 'Mega Electronics Sale', subtitle: 'Up to 75% off on laptops, smartwatches, headphones & more', gradient: 'from-blue-600 via-indigo-600 to-purple-700', cta: 'Shop Now', link: '/products?category=Electronics', icon: LaptopIcon },
-  { title: 'Fashion Week Deals', subtitle: 'New arrivals at unbeatable prices — styles for everyone', gradient: 'from-rose-500 via-pink-500 to-fuchsia-600', cta: 'Explore', link: '/products?category=Fashion', icon: Shirt },
-  { title: 'Home & Kitchen Fest', subtitle: 'Transform your space for less — curated essentials', gradient: 'from-emerald-500 via-teal-500 to-cyan-600', cta: 'Discover', link: '/products?category=Home & Kitchen', icon: Home },
+  { title: 'Mega Electronics Sale', subtitle: 'Up to 75% off on laptops, smartwatches, headphones & more', gradient: 'from-blue-600 via-indigo-600 to-purple-700', cta: 'Shop Now', link: '/products?category=Electronics' },
+  { title: 'Fashion Week Deals', subtitle: 'New arrivals at unbeatable prices — styles for everyone', gradient: 'from-rose-500 via-pink-500 to-fuchsia-600', cta: 'Explore', link: '/products?category=Fashion' },
+  { title: 'Home & Kitchen Fest', subtitle: 'Transform your space for less — curated essentials', gradient: 'from-emerald-500 via-teal-500 to-cyan-600', cta: 'Discover', link: '/products?category=Home & Kitchen' },
 ];
-
-function LaptopIcon(props: any) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16" />
-    </svg>
-  );
-}
 
 /* ─── Product Carousel ─── */
 function ProductCarousel({ title, icon: Icon, products, loading, viewAllLink }: {
@@ -153,9 +145,6 @@ export default function Dashboard() {
                   {b.cta} <ArrowRight size={15} className="ml-2" />
                 </Button>
               </Link>
-            </div>
-            <div className="absolute right-8 md:right-16 top-1/2 -translate-y-1/2 hidden md:flex h-32 w-32 rounded-3xl bg-white/10 backdrop-blur-sm items-center justify-center">
-              <b.icon size={56} className="text-white/30" />
             </div>
           </div>
         ))}

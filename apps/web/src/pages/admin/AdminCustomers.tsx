@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Users, UserPlus, UserCheck, UserX, Search,
-  Download, Filter, ChevronLeft, ChevronRight, Calendar,
-  Eye, Edit2, Trash2, MoreVertical
+  Filter, ChevronLeft, ChevronRight,
+  Eye, Trash2, MoreVertical
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {

@@ -22,7 +22,7 @@ export default function Register() {
     try {
       const res = await register(form.name, form.email, form.password, form.phone);
       // If OTP failed to send, still navigate but show warning
-      if (res?.data?.otpSent === false) {
+      if (res && 'otpSent' in res && res.otpSent === false) {
         toast.warning(res.message || 'Account created. OTP could not be sent — you can verify later from your profile.');
       }
       navigate('/verify-phone', { state: { phone: form.phone } });

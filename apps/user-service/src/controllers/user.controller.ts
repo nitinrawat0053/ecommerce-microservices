@@ -46,7 +46,7 @@ export class UserController {
   async updateUserRole(req: Request, res: Response, next: NextFunction) {
     try {
       const requesterId = req.headers["x-user-id"] as string;
-      const { userId } = req.params;
+      const userId = req.params.userId as string;
       const { role } = req.body;
       const updatedUser = await userService.updateUserRole(requesterId, userId, role);
       res.status(200).json({

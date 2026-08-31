@@ -5,14 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Search, Plus, Tag, TrendingUp, Edit2, Trash2,
-  Building2, X, Save, Loader2
+  Building2, X, Save, Loader2, AlertCircle
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SuperAdminBrands() {
   const [brands, setBrands] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingBrand, setEditingBrand] = useState<any>(null);
@@ -25,34 +26,36 @@ export default function SuperAdminBrands() {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const prodRes = await api.get('/products?limit=500').catch(() => ({ data: { data: [] } }));
-      const prods = prodRes.data.data || [];
-      setProducts(prods);
-      // Derive brands from products since there's no separate brands API
-      const brandMap = new Map<string, { name: string; count: number; active: boolean }>();
-      prods.forEach((p: any) => {
-        const brand = p.brand;
-        if (!brand) return;
-        const key = brand.toLowerCase();
-        if (brandMap.has(key)) {
-          brandMap.get(key)!.count++;
-        } else {
-          brandMap.set(key, { name: brand, count: 1, active: true });
-        }
+      const [brandRes, prodRes] = await Promise.all([
+        api.get('/brands'),
+        api.get('/products?limit=500').catch(() => ({ data: { data: [] } })),
+      ]);
+      const bnds = brandRes.data.data || [];
+      setBrands(bnds);
+
+      const counts: Record<string, number> = {};
+      (prodRes.data.data || []).forEach((p: any) => {
+        if (!p.brand) return;
+        const key = p.brand.toLowerCase();
+        counts[key] = (counts[key] || 0) + 1;
       });
-      setBrands(Array.from(brandMap.values()));
-    } catch { /* empty */ }
-    setLoading(false);
+      setProductCounts(counts);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || 'Failed to load brands');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getBrandProductCount = (brandName: string) => {
-    const found = brands.find((b: any) => (b.name || b).toLowerCase() === brandName.toLowerCase());
-    return found?.count ?? 0;
+    return productCounts[String(brandName).toLowerCase()] ?? 0;
   };
 
   const filtered = brands.filter((b: any) =>
-    (b.name || b).toLowerCase().includes(search.toLowerCase()));
+    (b.name || '').toLowerCase().includes(search.toLowerCase()));
 
   const totalBrands = brands.length;
   const activeBrands = brands.filter((b: any) => b.active !== false).length;
@@ -62,7 +65,7 @@ export default function SuperAdminBrands() {
     setSaving(true);
     try {
       if (editingBrand) {
-        await api.put(`/brands/${editingBrand._id || editingBrand.id}`, { name: formName, logo: formLogo });
+        await api.put(`/brands/${editingBrand._id}`, { name: formName, logo: formLogo });
       } else {
         await api.post('/brands', { name: formName, logo: formLogo });
       }
@@ -71,16 +74,24 @@ export default function SuperAdminBrands() {
       setEditingBrand(null);
       setFormName('');
       setFormLogo('');
-    } catch { /* empty */ }
-    setSaving(false);
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to save brand');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (brand: any) => {
-    if (!confirm(`Delete "${brand.name || brand}"? This cannot be undone.`)) return;
-    try { await api.delete(`/brands/${brand._id || brand.id}`); await fetchData(); } catch { /* empty */ }
+    if (!confirm(`Delete "${brand.name}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/brands/${brand._id}`);
+      await fetchData();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to delete brand');
+    }
   };
 
-  const openEdit = (brand: any) => { setEditingBrand(brand); setFormName(brand.name || brand); setFormLogo(brand.logo || ''); setShowModal(true); };
+  const openEdit = (brand: any) => { setEditingBrand(brand); setFormName(brand.name || ''); setFormLogo(brand.logo || ''); setShowModal(true); };
   const openNew = () => { setEditingBrand(null); setFormName(''); setFormLogo(''); setShowModal(true); };
 
   const brandColors = ['bg-blue-100 text-blue-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-orange-100 text-orange-600', 'bg-pink-100 text-pink-600', 'bg-teal-100 text-teal-600'];
@@ -106,6 +117,12 @@ export default function SuperAdminBrands() {
           <Plus size={16} /> Add Brand
         </Button>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle size={16} /> {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="border shadow-sm">
@@ -172,11 +189,11 @@ export default function SuperAdminBrands() {
                     <p className="text-xs mt-1">Try a different search or add a new brand</p>
                   </td></tr>
                 ) : filtered.map((brand: any, idx: number) => {
-                  const name = brand.name || brand;
+                  const name = brand.name || '';
                   const count = getBrandProductCount(name);
                   const colorClass = brandColors[idx % brandColors.length];
                   return (
-                    <tr key={brand._id || brand.id || name} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr key={brand._id || name} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                       <td className="py-3">
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm ${colorClass}`}>
                           {brand.logo ? <img src={brand.logo} alt={name} className="h-10 w-10 rounded-lg object-contain" /> : name.charAt(0).toUpperCase()}
@@ -191,10 +208,10 @@ export default function SuperAdminBrands() {
                       </td>
                       <td className="py-3">
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(brand)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(brand)} disabled={!brand._id}>
                             <Edit2 size={15} className="text-gray-500" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(brand)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(brand)} disabled={!brand._id}>
                             <Trash2 size={15} className="text-red-500" />
                           </Button>
                         </div>

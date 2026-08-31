@@ -2,11 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@/api/client';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   Package, ChevronLeft, ChevronRight, Search, ArrowUpDown, Clock,
-  CheckCircle2, XCircle, Truck, RotateCcw, CreditCard, AlertCircle,
+  CheckCircle2, XCircle, Truck, RotateCcw, CreditCard,
   ShoppingCart, ChevronRight as ChevronIcon, Filter, Calendar
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';

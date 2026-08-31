@@ -84,6 +84,8 @@ describe("AuthService", () => {
         email: validData.email,
         phone: validData.phone,
         isVerified: false,
+        otpSent: true,
+        otpError: undefined,
       });
     });
 
@@ -104,17 +106,21 @@ describe("AuthService", () => {
       ).rejects.toThrow(ConflictError);
     });
 
-    it("should delete user if OTP sending fails", async () => {
+    it("should still register and mark OTP as not sent when OTP sending fails", async () => {
       mockFindByEmail.mockResolvedValue(null);
       mockFindByPhone.mockResolvedValue(null);
-      mockCreate.mockResolvedValue({ _id: "user123" });
+      mockCreate.mockResolvedValue({ _id: "user123", name: validData.name, email: validData.email, phone: validData.phone, isVerified: false });
       mockSendVerificationCode.mockRejectedValue(new Error("Twilio error"));
 
-      await expect(
-        authService.register(validData.name, validData.email, validData.password, validData.phone)
-      ).rejects.toThrow("Twilio error");
+      const result = await authService.register(
+        validData.name, validData.email, validData.password, validData.phone
+      );
 
-      expect(mockDeleteById).toHaveBeenCalledWith("user123");
+      // Registration is not rolled back / rethrown on an OTP provider failure:
+      // it returns a resolved result with otpSent=false so the OTP can be resent.
+      expect(result.otpSent).toBe(false);
+      expect(result.otpError).toBe("Twilio error");
+      expect(mockDeleteById).not.toHaveBeenCalled();
     });
   });
 
@@ -153,7 +159,7 @@ describe("AuthService", () => {
       mockFindByPhone.mockResolvedValue(mockUser);
       mockVerifyCode.mockResolvedValue(true);
 
-      const result = await authService.verifyPhone("+1234567890", "123456");
+      await authService.verifyPhone("+1234567890", "123456");
 
       expect(mockVerifyCode).toHaveBeenCalledWith("+1234567890", "123456");
       expect(mockUser.isVerified).toBe(true);

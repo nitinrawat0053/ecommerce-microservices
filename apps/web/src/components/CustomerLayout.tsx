@@ -1,17 +1,15 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import {
-  ShoppingCart, Package, CreditCard, User, Store,
-  LogOut, Menu, X, ChevronDown, Bell, Moon, Sun,
-  Search, UserCircle, ClipboardList, BellRing, Heart,
-  ChevronRight, Settings, BarChart3,
-  Smartphone, Shirt, Home, Sparkles, Dumbbell, BookOpen,
-  Armchair, Baby, Dog, Car
+  ShoppingCart, CreditCard, Store,
+  LogOut, Menu, X, ChevronDown, Moon, Sun,
+  Search, UserCircle, ClipboardList, BellRing, Heart, Settings,
+  Smartphone, Shirt, Home, Sparkles, BarChart3,
+  Dumbbell, BookOpen, Armchair, Baby, Dog, Car
 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '@/api/client';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Popover, PopoverContent, PopoverTrigger,

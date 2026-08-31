@@ -6,6 +6,7 @@ export interface IProduct extends Document {
   price: number;
   stock: number;
   category: string;
+  brand?: string;
   imageUrl?: string;
 }
 
@@ -41,6 +42,11 @@ const productSchema = new Schema<IProduct>(
 
     },
 
+    brand: {
+      type: String,
+      lowercase: true,
+    },
+
     imageUrl: {
       type: String,
     },
@@ -52,6 +58,7 @@ const productSchema = new Schema<IProduct>(
  // Single field indexes
 productSchema.index({ name: 1 });
 productSchema.index({ category: 1 });
+productSchema.index({ brand: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
 

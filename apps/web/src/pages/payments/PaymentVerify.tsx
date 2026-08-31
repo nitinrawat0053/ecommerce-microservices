@@ -4,8 +4,8 @@ import api from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShieldCheck, ArrowLeft, Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react';
 
 export default function PaymentVerify() {
   const navigate = useNavigate();

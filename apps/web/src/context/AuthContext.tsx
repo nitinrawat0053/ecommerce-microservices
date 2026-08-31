@@ -14,9 +14,11 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, phone: string) => Promise<{ message: string }>;
+  register: (name: string, email: string, password: string, phone: string) => Promise<{ message: string; otpSent?: boolean }>;
   verifyPhone: (phone: string, code: string) => Promise<void>;
+  resendOtp: (phone: string) => Promise<void>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
   isAdmin: boolean;
   isSuperAdmin: boolean;
 }
@@ -57,11 +59,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.data;
   };
 
+  const resendOtp = async (phone: string) => {
+    const res = await api.post('/auth/resend-otp', { phone });
+    return res.data;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
+  };
+
+  const updateUser = (updates: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...updates } : prev);
   };
 
   return (
@@ -71,7 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       verifyPhone,
+      resendOtp,
       logout,
+      updateUser,
       isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN',
       isSuperAdmin: user?.role === 'SUPER_ADMIN',
     }}>

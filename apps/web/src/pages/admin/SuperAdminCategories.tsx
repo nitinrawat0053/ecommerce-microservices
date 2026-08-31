@@ -5,14 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Search, Plus, Tag, TrendingUp, Edit2, Trash2,
-  FolderOpen, X, Save, Loader2
+  FolderOpen, X, Save, Loader2, AlertCircle
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SuperAdminCategories() {
   const [categories, setCategories] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -25,34 +26,36 @@ export default function SuperAdminCategories() {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const prodRes = await api.get('/products?limit=500').catch(() => ({ data: { data: [] } }));
-      const prods = prodRes.data.data || [];
-      setProducts(prods);
-      // Derive categories from products since there's no separate categories API
-      const catMap = new Map<string, { name: string; count: number; active: boolean }>();
-      prods.forEach((p: any) => {
-        const cat = p.category;
-        if (!cat) return;
-        const key = cat.toLowerCase();
-        if (catMap.has(key)) {
-          catMap.get(key)!.count++;
-        } else {
-          catMap.set(key, { name: cat, count: 1, active: true });
-        }
+      const [catRes, prodRes] = await Promise.all([
+        api.get('/categories'),
+        api.get('/products?limit=500').catch(() => ({ data: { data: [] } })),
+      ]);
+      const cats = catRes.data.data || [];
+      setCategories(cats);
+
+      const counts: Record<string, number> = {};
+      (prodRes.data.data || []).forEach((p: any) => {
+        if (!p.category) return;
+        const key = p.category.toLowerCase();
+        counts[key] = (counts[key] || 0) + 1;
       });
-      setCategories(Array.from(catMap.values()));
-    } catch { /* empty */ }
-    setLoading(false);
+      setProductCounts(counts);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || 'Failed to load categories');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getCategoryProductCount = (catName: string) => {
-    const found = categories.find((c: any) => (c.name || c).toLowerCase() === catName.toLowerCase());
-    return found?.count ?? 0;
+    return productCounts[String(catName).toLowerCase()] ?? 0;
   };
 
   const filtered = categories.filter((c: any) =>
-    (c.name || c).toLowerCase().includes(search.toLowerCase()));
+    (c.name || '').toLowerCase().includes(search.toLowerCase()));
 
   const totalCategories = categories.length;
   const activeCategories = categories.filter((c: any) => c.active !== false).length;
@@ -62,7 +65,7 @@ export default function SuperAdminCategories() {
     setSaving(true);
     try {
       if (editingCategory) {
-        await api.put(`/categories/${editingCategory._id || editingCategory.id}`, { name: formName, icon: formIcon });
+        await api.put(`/categories/${editingCategory._id}`, { name: formName, icon: formIcon });
       } else {
         await api.post('/categories', { name: formName, icon: formIcon });
       }
@@ -71,18 +74,26 @@ export default function SuperAdminCategories() {
       setEditingCategory(null);
       setFormName('');
       setFormIcon('');
-    } catch { /* empty */ }
-    setSaving(false);
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to save category');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (cat: any) => {
-    if (!confirm(`Delete "${cat.name || cat}"? This cannot be undone.`)) return;
-    try { await api.delete(`/categories/${cat._id || cat.id}`); await fetchData(); } catch { /* empty */ }
+    if (!confirm(`Delete "${cat.name}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/categories/${cat._id}`);
+      await fetchData();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to delete category');
+    }
   };
 
   const openEdit = (cat: any) => {
     setEditingCategory(cat);
-    setFormName(cat.name || cat);
+    setFormName(cat.name || '');
     setFormIcon(cat.icon || '');
     setShowModal(true);
   };
@@ -116,6 +127,12 @@ export default function SuperAdminCategories() {
           <Plus size={16} /> Add Category
         </Button>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle size={16} /> {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="border shadow-sm">
@@ -182,10 +199,10 @@ export default function SuperAdminCategories() {
                     <p className="text-xs mt-1">Try a different search or add a new category</p>
                   </td></tr>
                 ) : filtered.map((cat: any) => {
-                  const name = cat.name || cat;
+                  const name = cat.name || '';
                   const count = getCategoryProductCount(name);
                   return (
-                    <tr key={cat._id || cat.id || name} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr key={cat._id || name} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                       <td className="py-3">
                         <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-xl">
                           {categoryIcons[name.toLowerCase()] || cat.icon || '📁'}
@@ -200,10 +217,10 @@ export default function SuperAdminCategories() {
                       </td>
                       <td className="py-3">
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(cat)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(cat)} disabled={!cat._id}>
                             <Edit2 size={15} className="text-gray-500" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(cat)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(cat)} disabled={!cat._id}>
                             <Trash2 size={15} className="text-red-500" />
                           </Button>
                         </div>
