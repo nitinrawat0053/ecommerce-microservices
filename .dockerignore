@@ -1,0 +1,25 @@
+# Build context for the shared backend Dockerfile (repo root).
+# Keep context small / avoid leaking secrets into image builds.
+
+# Dependencies (rebuilt inside the Docker image)
+node_modules
+**/node_modules
+
+# Build output (rebuilt inside the image)
+dist
+**/dist
+
+# VCS / local
+.git
+.gitignore
+.github
+
+# Secrets — never ship these into a build context or image layer
+.env
+.env.*
+!.env.production.example
+
+# Not needed by backend builds
+apps/web
+scripts
+*.md

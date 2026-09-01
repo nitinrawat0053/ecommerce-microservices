@@ -1,0 +1,146 @@
+# ─────────────────────────────────────────────────────────────
+# Production Docker Compose — runs the entire ecommerce stack
+# Deploy target: Oracle Cloud Always Free ARM VM (Docker + Compose)
+#
+#   $ docker compose -f docker-compose.prod.yml up -d --build
+#
+# See .env.production.example → copy to .env.production, fill in secrets.
+# ─────────────────────────────────────────────────────────────
+name: ecommerce-shopmicro
+
+services:
+  # ── Infra ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-admin}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  # ── Backend services ──────────────────────────────────
+  # Each builds via the shared root Dockerfile with a SERVICE arg.
+  # Build context is the repo root; ports are internal-only (behind gateway).
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: api-gateway
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      USER_SERVICE_URL: http://user-service:3002
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      ORDER_SERVICE_URL: http://order-service:3004
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+    ports:
+      - "3000:3000"
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: auth-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on: [rabbitmq]
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: user-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+
+  product-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: product-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on: [redis, rabbitmq]
+
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: order-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on: [redis, rabbitmq]
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: cart-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on: [redis, rabbitmq]
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: payment-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on: [redis, rabbitmq]
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: { SERVICE: notification-service }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
+    depends_on: [rabbitmq]
+
+  # ── Frontend ──────────────────────────────────────────
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    restart: unless-stopped
+    depends_on: [api-gateway]
+    ports:
+      - "80:80"
+
+volumes:
+  redis-data:
+  rabbitmq-data:

@@ -1,0 +1,5 @@
+# Frontend build context — keep small, never ship secrets.
+node_modules
+dist
+.env
+.env.*
