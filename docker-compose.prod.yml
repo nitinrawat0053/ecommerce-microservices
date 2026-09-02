@@ -38,9 +38,12 @@ services:
     restart: unless-stopped
     env_file: .env.production
     environment:
+      AUTH_SERVICE_URL: http://auth-service:3001
       USER_SERVICE_URL: http://user-service:3002
       PRODUCT_SERVICE_URL: http://product-service:3003
       ORDER_SERVICE_URL: http://order-service:3004
+      CART_SERVICE_URL: http://cart-service:3005
+      PAYMENT_SERVICE_URL: http://payment-service:3006
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
     depends_on:
       - user-service

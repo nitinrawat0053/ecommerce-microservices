@@ -4,10 +4,18 @@ import { authenticate } from "../middlewares/auth.middleware";
 import {authorize} from "../middlewares/authorize.middleware";
 const router = Router();
 
+// Resolve service URLs from env vars (Docker) or fall back to localhost (local dev)
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3002";
+const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || "http://localhost:3003";
+const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || "http://localhost:3004";
+const CART_SERVICE_URL = process.env.CART_SERVICE_URL || "http://localhost:3005";
+const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || "http://localhost:3006";
+
 router.use(
   "/auth",
   createProxyMiddleware({
-    target: "http://localhost:3001",
+    target: AUTH_SERVICE_URL,
     changeOrigin: true,
     proxyTimeout: 15000,
     pathRewrite: {
@@ -21,7 +29,7 @@ router.use(
   "/users",
   authenticate,
   createProxyMiddleware({
-    target: "http://localhost:3002/api/users",
+    target: `${USER_SERVICE_URL}/api/users`,
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
@@ -39,7 +47,7 @@ router.use(
   "/cart",
   authenticate,
   createProxyMiddleware({
-    target: "http://localhost:3005/api/cart",
+    target: `${CART_SERVICE_URL}/api/cart`,
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
@@ -57,7 +65,7 @@ router.use(
   "/payments",
   authenticate,
   createProxyMiddleware({
-    target: "http://localhost:3006/api/payments",
+    target: `${PAYMENT_SERVICE_URL}/api/payments`,
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
@@ -75,7 +83,7 @@ router.use(
   "/orders",
   authenticate,
   createProxyMiddleware({
-    target: "http://localhost:3004/api/orders",
+    target: `${ORDER_SERVICE_URL}/api/orders`,
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
@@ -90,7 +98,7 @@ router.use(
 );
 
 const productProxy = createProxyMiddleware({
-  target: "http://localhost:3003",
+  target: PRODUCT_SERVICE_URL,
   changeOrigin: true,
   pathRewrite: {
     "^/products": "/api/products",
@@ -150,7 +158,7 @@ router.delete(
 );
 
 const categoryProxy = createProxyMiddleware({
-  target: "http://localhost:3003",
+  target: PRODUCT_SERVICE_URL,
   changeOrigin: true,
   proxyTimeout: 15000,
   pathRewrite: {
@@ -159,7 +167,7 @@ const categoryProxy = createProxyMiddleware({
 });
 
 const brandProxy = createProxyMiddleware({
-  target: "http://localhost:3003",
+  target: PRODUCT_SERVICE_URL,
   changeOrigin: true,
   proxyTimeout: 15000,
   pathRewrite: {
