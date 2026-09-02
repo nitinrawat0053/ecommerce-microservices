@@ -81,7 +81,8 @@ services:
     restart: unless-stopped
     env_file: .env.production
     environment:
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
     depends_on: [redis, rabbitmq]
 
@@ -93,7 +94,8 @@ services:
     restart: unless-stopped
     env_file: .env.production
     environment:
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
     depends_on: [redis, rabbitmq]
 
@@ -105,7 +107,8 @@ services:
     restart: unless-stopped
     env_file: .env.production
     environment:
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
     depends_on: [redis, rabbitmq]
 
@@ -117,7 +120,8 @@ services:
     restart: unless-stopped
     env_file: .env.production
     environment:
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
       RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-admin}@rabbitmq:5672
     depends_on: [redis, rabbitmq]
 
