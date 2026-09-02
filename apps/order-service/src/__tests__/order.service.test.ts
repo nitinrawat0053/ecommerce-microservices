@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockAxiosGet, mockOrderCreate, mockOrderFindAll, mockOrderFindById, mockOrderUpdate, mockOrderDelete, mockOutboxCreateEvent, mockCommitTransaction, mockAbortTransaction, mockEndSession, mockStartTransaction } = vi.hoisted(() => ({
+const { mockAxiosGet, mockOrderCreate, mockOrderFindAll, mockOrderFindById, mockOrderUpdate, mockOrderDelete, mockOutboxCreateEvent, mockCommitTransaction, mockAbortTransaction, mockEndSession, mockStartTransaction, mockUserFindById } = vi.hoisted(() => ({
   mockAxiosGet: vi.fn(),
   mockOrderCreate: vi.fn(),
   mockOrderFindAll: vi.fn(),
@@ -12,6 +12,11 @@ const { mockAxiosGet, mockOrderCreate, mockOrderFindAll, mockOrderFindById, mock
   mockAbortTransaction: vi.fn(),
   mockEndSession: vi.fn(),
   mockStartTransaction: vi.fn(),
+  mockUserFindById: vi.fn(),
+}));
+
+vi.mock("../models/user.model", () => ({
+  User: { findById: mockUserFindById },
 }));
 
 vi.mock("axios", () => ({ default: { get: mockAxiosGet } }));
@@ -56,6 +61,7 @@ describe("OrderService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserFindById.mockResolvedValue({ isVerified: true });
     orderService = new OrderService();
   });
 

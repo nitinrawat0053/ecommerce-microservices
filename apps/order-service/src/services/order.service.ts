@@ -1,8 +1,9 @@
-import { BadRequestError,NotFoundError } from "@packages/errors";
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@packages/errors";
 import { OrderStatus, OrderFilters, EVENTS, PaymentMethod } from "@packages/shared-types";
 import { OrderRepository } from "../repositories/order.repository";
 import {config} from "@packages/config";
 import { IOrder } from "../models/order.model";
+import { User } from "../models/user.model";
 import mongoose from "mongoose";
 import { OutboxService } from "./outbox.service";
 import axios from "axios";
@@ -24,6 +25,18 @@ export class OrderService {
   }
 }
 async createOrder(userId: string, productId: string, quantity: number, paymentMethod:PaymentMethod) {
+  // SECURITY: an order is only allowed for an authenticated AND phone-verified
+  // user. Creating an order triggers PAYMENT_INITIATED -> payment-session
+  // (Razorpay) creation, so this is the enforcement point. We resolve the
+  // user's verification state from the database (never from the client).
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new UnauthorizedError("User not authenticated");
+  }
+  if (!user.isVerified) {
+    throw new ForbiddenError("Phone number not verified. Please verify your account to proceed with payment.");
+  }
+
   const session = await mongoose.startSession();
 
   try {

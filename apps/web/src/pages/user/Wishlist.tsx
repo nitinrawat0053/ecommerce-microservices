@@ -1,19 +1,23 @@
 import { Link } from 'react-router-dom';
 import { useWishlist } from '@/context/WishlistContext';
+import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Heart, Trash2, ShoppingCart, Package, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '@/api/client';
 
 export default function Wishlist() {
   const { items, removeItem, clear } = useWishlist();
+  const { addItem } = useCart();
 
   const addToCart = async (product: any) => {
     try {
-      await api.post('/cart', { productId: product._id, quantity: 1 });
+      await addItem(
+        { _id: product._id, name: product.name, price: product.price, stock: product.stock, imageUrl: product.imageUrl, category: product.category },
+        1
+      );
       toast.success(`${product.name} added to cart`);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to add to cart');
+    } catch {
+      toast.error('Failed to add to cart');
     }
   };
 

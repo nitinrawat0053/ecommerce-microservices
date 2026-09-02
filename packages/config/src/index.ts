@@ -8,7 +8,9 @@ dotenv.config({
 
 export const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
-  LOAD_TEST: process.env.LOAD_TEST || "",
+  // NOTE: dotenv injects the raw string, so "false" is truthy in JS.
+  // Parse explicitly to avoid mock mode leaking into production / dev.
+  LOAD_TEST: process.env.LOAD_TEST?.toLowerCase() === "true",
   
   API_GATEWAY_PORT: Number(process.env.API_GATEWAY_PORT) || 3000,
   AUTH_SERVICE_PORT: Number(process.env.AUTH_SERVICE_PORT) || 3001,

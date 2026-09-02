@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { paymentController } from "./controllers/payment.controller";
 import paymentRoutes from "./routes/payment.routes";
+import { errorHandler } from "./middlewares/error.middleware";
 
 const app = express();
 
@@ -23,5 +24,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/payments", paymentRoutes);
+
+app.use(errorHandler);
 
 export default app;

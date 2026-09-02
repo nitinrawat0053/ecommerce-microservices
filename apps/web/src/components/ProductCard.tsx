@@ -4,7 +4,7 @@ import { Star, ShoppingCart, Package } from 'lucide-react';
 import StockBadge from './StockBadge';
 import WishlistButton from './WishlistButton';
 import { toast } from 'sonner';
-import api from '@/api/client';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   product: {
@@ -30,6 +30,7 @@ export default function ProductCard({ product, discount: propDiscount, rating: p
   const reviewCount = propReviews ?? ((product.price * 7) % 200) + 5;
 
   const [adding, setAdding] = useState(false);
+  const { addItem } = useCart();
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,10 +38,13 @@ export default function ProductCard({ product, discount: propDiscount, rating: p
     if (product.stock === 0 || adding) return;
     setAdding(true);
     try {
-      await api.post('/cart', { productId: product._id, quantity: 1 });
+      await addItem(
+        { _id: product._id, name: product.name, price: product.price, stock: product.stock, imageUrl: product.imageUrl, category: product.category },
+        1
+      );
       toast.success(`${product.name} added to cart`);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to add to cart');
+    } catch {
+      toast.error('Failed to add to cart');
     } finally {
       setAdding(false);
     }

@@ -1,7 +1,8 @@
 import { razorpayProvider } from "../providers/razorpay.provider";
 import { PaymentMethod, PaymentStatus, QUEUES, EVENTS, OrderStatus } from "@packages/shared-types";
-import { NotFoundError } from "@packages/errors";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "@packages/errors";
 import { PaymentRepository } from "../repositories/payment.repository";
+import { User } from "../models/user.model";
 import { OutboxService } from "./outbox.service";
 import mongoose from "mongoose";
 import crypto from "crypto"; // will be removed
@@ -204,6 +205,16 @@ return updatedPayment;
   }
 
   console.log(`📋 [PaymentService] Found payment ${payment.id} with status: ${payment.status}`);
+
+  // SECURITY: finalizing a payment requires an authenticated AND phone-verified
+  // user. Resolve verification from the database, never from the client.
+  const user = await User.findById(payment.userId);
+  if (!user) {
+    throw new UnauthorizedError("User not authenticated");
+  }
+  if (!user.isVerified) {
+    throw new ForbiddenError("Phone number not verified. Please verify your account to proceed with payment.");
+  }
 
   if (payment.status === PaymentStatus.SUCCESS) {
     console.log(`ℹ️ [PaymentService] Payment already SUCCESS, returning existing payment`);

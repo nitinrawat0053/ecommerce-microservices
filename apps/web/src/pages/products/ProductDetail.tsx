@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '@/api/client';
+import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -78,15 +79,19 @@ export default function ProductDetail() {
       .finally(() => setLoading(false));
   }, [id, navigate]);
 
+  const { addItem } = useCart();
   const addToCart = async () => {
     setAdding(true);
     try {
-      await api.post('/cart', { productId: id, quantity });
+      await addItem(
+        { _id: id!, name: product.name, price: product.price, stock: product.stock, imageUrl: product.imageUrl, category: product.category },
+        quantity
+      );
       toast.success(`Added ${quantity} item(s) to cart`);
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 4000);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to add to cart');
+    } catch {
+      toast.error('Failed to add to cart');
     } finally { setAdding(false); }
   };
 

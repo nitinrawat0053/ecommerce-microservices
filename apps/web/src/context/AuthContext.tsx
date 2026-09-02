@@ -13,7 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, password: string, phone: string) => Promise<{ message: string; otpSent?: boolean }>;
   verifyPhone: (phone: string, code: string) => Promise<void>;
   resendOtp: (phone: string) => Promise<void>;
@@ -45,8 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     const { token: accessToken, user: userData } = res.data.data;
+    const u = { ...userData, _id: userData._id || userData.id };
     setToken(accessToken);
-    setUser({ ...userData, _id: userData._id || userData.id });
+    setUser(u);
+    return u;
   };
 
   const register = async (name: string, email: string, password: string, phone: string) => {

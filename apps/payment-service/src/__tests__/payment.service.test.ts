@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockRazorpayCreateOrder, mockRazorpayVerifySignature, mockPaymentCreate, mockPaymentFindByOrderId, mockPaymentFindById, mockPaymentFindByUserId, mockPaymentFindByRazorpayOrderId, mockPaymentUpdateStatus, mockPaymentUpdateRazorpayOrderId, mockOutboxCreateEvent, mockCommitTransaction, mockAbortTransaction, mockEndSession } = vi.hoisted(() => ({
+const { mockRazorpayCreateOrder, mockRazorpayVerifySignature, mockPaymentCreate, mockPaymentFindByOrderId, mockPaymentFindById, mockPaymentFindByUserId, mockPaymentFindByRazorpayOrderId, mockPaymentUpdateStatus, mockPaymentUpdateRazorpayOrderId, mockOutboxCreateEvent, mockCommitTransaction, mockAbortTransaction, mockEndSession, mockUserFindById } = vi.hoisted(() => ({
   mockRazorpayCreateOrder: vi.fn(),
   mockRazorpayVerifySignature: vi.fn(),
   mockPaymentCreate: vi.fn(),
@@ -14,6 +14,11 @@ const { mockRazorpayCreateOrder, mockRazorpayVerifySignature, mockPaymentCreate,
   mockCommitTransaction: vi.fn(),
   mockAbortTransaction: vi.fn(),
   mockEndSession: vi.fn(),
+  mockUserFindById: vi.fn(),
+}));
+
+vi.mock("../models/user.model", () => ({
+  User: { findById: mockUserFindById },
 }));
 
 vi.mock("../providers/razorpay.provider", () => ({
@@ -63,6 +68,7 @@ describe("PaymentService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserFindById.mockResolvedValue({ isVerified: true, _id: "user1" });
     paymentService = new PaymentService();
   });
 

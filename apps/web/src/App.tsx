@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from 'sonner';
 import Layout from './components/Layout';
@@ -35,22 +36,8 @@ import AdminInventory from './pages/admin/AdminInventory';
 import AdminCustomers from './pages/admin/AdminCustomers';
 import SalesReport from './pages/admin/SalesReport';
 
-function AuthRoutes() {
-  const { token } = useAuth();
-  if (token) return <Navigate to="/" replace />;
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/verify-phone" element={<VerifyPhone />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  );
-}
-
 function AppRoutes() {
-  const { token, isSuperAdmin } = useAuth();
-  if (!token) return <AuthRoutes />;
+  const { isSuperAdmin } = useAuth();
 
   // Super Admin: admin layout with sidebar for ALL routes including homepage
   if (isSuperAdmin) {
@@ -110,9 +97,15 @@ function AppRoutes() {
   }
 
 
-  // Regular customer
+  // Regular customer / guest: browsing, cart and checkout work WITHOUT login.
+  // Login/register/OTP are available on demand; account pages stay protected.
   return (
     <Routes>
+      {/* Standalone auth pages */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/verify-phone" element={<VerifyPhone />} />
+
       <Route element={<Layout />}>
         <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />
         <Route path="/admin/products/new" element={<ProtectedRoute><AdminProductForm /></ProtectedRoute>} />
@@ -124,9 +117,9 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<ProductList />} />
         <Route path="/products/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<ProtectedRoute><CartView /></ProtectedRoute>} />
+        <Route path="/cart" element={<CartView />} />
+        <Route path="/orders/new" element={<CreateOrder />} />
         <Route path="/orders" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
-        <Route path="/orders/new" element={<ProtectedRoute><CreateOrder /></ProtectedRoute>} />
         <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
         <Route path="/payments" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
         <Route path="/payments/verify" element={<ProtectedRoute><PaymentVerify /></ProtectedRoute>} />
@@ -143,9 +136,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <CartProvider>
         <WishlistProvider>
         <AppRoutes />
         </WishlistProvider>
+        </CartProvider>
         <Toaster
           position="top-center"
           richColors

@@ -7,8 +7,7 @@ import {
   Smartphone, Shirt, Home, Sparkles, BarChart3,
   Dumbbell, BookOpen, Armchair, Baby, Dog, Car
 } from 'lucide-react';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import api from '@/api/client';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useWishlist } from '@/context/WishlistContext';
+import { useCart } from '@/context/CartContext';
 
 const CATEGORIES = [
   { name: 'Electronics', icon: Smartphone, color: 'text-blue-600 bg-blue-50 dark:bg-blue-500/10 dark:text-blue-400', hoverColor: 'hover:bg-blue-100 dark:hover:bg-blue-500/20' },
@@ -43,7 +43,7 @@ export default function CustomerLayout() {
     }
     return false;
   });
-  const [cartCount, setCartCount] = useState(0);
+  const { count: cartCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const [search, setSearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
@@ -60,18 +60,6 @@ export default function CustomerLayout() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Fetch cart count
-  const fetchCartCount = useCallback(async () => {
-    try {
-      const res = await api.get('/cart');
-      const items = res.data.data?.items || [];
-      setCartCount(items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0));
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => { fetchCartCount(); }, [fetchCartCount, location.pathname]);
-  useEffect(() => { if (!user) return; const t = setInterval(fetchCartCount, 30000); return () => clearInterval(t); }, [user, fetchCartCount]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,7 +137,8 @@ export default function CustomerLayout() {
                 {darkMode ? <Sun size={16} /> : <Moon size={16} />}
               </Button>
 
-              {/* User menu */}
+              {/* User menu (or Login button for guests) */}
+              {user ? (
               <Popover open={userMenuOpen} onOpenChange={setUserMenuOpen}>
                 <PopoverTrigger asChild>
                   <button className="flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-muted rounded-lg px-2 py-1.5 transition-colors">
@@ -201,6 +190,14 @@ export default function CustomerLayout() {
                   </div>
                 </PopoverContent>
               </Popover>
+              ) : (
+              <Link to="/login" className="flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-muted rounded-lg px-2 py-1.5 transition-colors">
+                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                  <UserCircle size={16} />
+                </div>
+                <span className="text-sm font-medium text-gray-700 dark:text-foreground hidden md:block">Login</span>
+              </Link>
+              )}
 
               {/* Cart */}
               <Link to="/cart" className="relative flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-muted rounded-lg px-2 py-1.5 transition-colors">

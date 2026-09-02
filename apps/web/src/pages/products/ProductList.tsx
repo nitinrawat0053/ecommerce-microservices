@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import {
@@ -112,11 +113,15 @@ export default function ProductList() {
     return () => { cancelled = true; };
   }, [pageParam, selectedCategory, searchQuery, minPriceParam, maxPriceParam, sortBy]);
 
+  const { addItem } = useCart();
   const addToCart = async (product: Product) => {
     try {
-      await api.post('/cart', { productId: product._id, quantity: 1 });
-    } catch (err: any) {
-      console.error(err);
+      await addItem(
+        { _id: product._id, name: product.name, price: product.price, stock: product.stock, imageUrl: product.imageUrl, category: product.category },
+        1
+      );
+    } catch {
+      console.error('Failed to add to cart');
     }
   };
 

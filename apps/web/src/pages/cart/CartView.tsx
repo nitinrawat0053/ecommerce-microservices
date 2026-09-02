@@ -1,90 +1,57 @@
-import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '@/api/client';
+import { useCart } from '@/context/CartContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Trash2, Plus, Minus, ArrowRight, Package, AlertCircle, ShoppingBag, Trash } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, Package, ShoppingBag, Trash } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useState } from 'react';
 import { toast } from 'sonner';
-
-interface CartItemRaw { productId: string; quantity: number; addedAt?: string; }
-interface CartItemDetailed { productId: string; quantity: number; name: string; price: number; stock: number; imageUrl?: string; category?: string; }
-interface CartData { _id: string; userId: string; items: CartItemRaw[]; }
 
 export default function CartView() {
   const navigate = useNavigate();
-  const [items, setItems] = useState<CartItemDetailed[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { lines: items, loading, updateQty, removeItem, clear } = useCart();
   const [updating, setUpdating] = useState<string | null>(null);
-  const [error, setError] = useState('');
   const [clearing, setClearing] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
 
-  const fetchProductDetails = useCallback(async (productIds: string[]): Promise<Map<string, any>> => {
-    const productMap = new Map<string, any>();
-    const results = await Promise.allSettled(productIds.map((id) => api.get(`/products/${id}`).then((r) => r.data.data)));
-    results.forEach((result, i) => { if (result.status === 'fulfilled' && result.value) productMap.set(productIds[i], result.value); });
-    return productMap;
-  }, []);
+  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const rebuildItems = async (cartData: any) => {
-    if (!cartData?.items || cartData.items.length === 0) { setItems([]); setTotalPrice(0); return; }
-    const productIds = cartData.items.map((i: CartItemRaw) => i.productId);
-    const productMap = await fetchProductDetails(productIds);
-    const detailed: CartItemDetailed[] = cartData.items.map((item: CartItemRaw) => {
-      const product = productMap.get(item.productId);
-      if (!product) return null;
-      return { productId: item.productId, quantity: item.quantity, name: product.name, price: product.price, stock: product.stock, imageUrl: product.imageUrl, category: product.category };
-    }).filter(Boolean) as CartItemDetailed[];
-    setItems(detailed);
-    setTotalPrice(detailed.reduce((sum, item) => sum + item.price * item.quantity, 0));
-  };
-
-  const fetchCart = useCallback(async () => {
-    setLoading(true); setError('');
-    try {
-      const res = await api.get('/cart');
-      const cartData: CartData | null = res.data.data;
-      if (!cartData || !cartData.items || cartData.items.length === 0) { setItems([]); setTotalPrice(0); return; }
-      await rebuildItems(cartData);
-    } catch (err: any) {
-      if (err.response?.status === 404) { setItems([]); setTotalPrice(0); }
-      else setError(err.response?.data?.message || 'Failed to load cart');
-    } finally { setLoading(false); }
-  }, [fetchProductDetails]);
-
-  useEffect(() => { fetchCart(); }, [fetchCart]);
-
-  const updateQty = async (productId: string, quantity: number) => {
+  const handleQty = async (productId: string, quantity: number) => {
     setUpdating(productId);
-    try { const res = await api.patch(`/cart/${productId}`, { quantity }); await rebuildItems(res.data.data); }
-    catch (err: any) { toast.error(err.response?.data?.message || 'Failed to update quantity'); }
-    finally { setUpdating(null); }
+    try {
+      await updateQty(productId, quantity);
+    } catch {
+      toast.error('Failed to update quantity');
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const remove = async (productId: string) => {
     setUpdating(productId);
-    try { const res = await api.delete(`/cart/${productId}`); await rebuildItems(res.data.data); toast.success('Item removed from cart'); }
-    catch (err: any) { toast.error(err.response?.data?.message || 'Failed to remove item'); }
-    finally { setUpdating(null); }
+    try {
+      await removeItem(productId);
+      toast.success('Item removed from cart');
+    } catch {
+      toast.error('Failed to remove item');
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const clearCart = async () => {
     setClearing(true);
     try {
-      await api.delete('/cart');
-      setItems([]);
-      setTotalPrice(0);
+      await clear();
       setShowClearDialog(false);
-      toast.success('Cart cleared successfully', {
-        icon: <Trash2 size={14} className="text-emerald-500" />,
-      });
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to clear cart. Please try again.');
-    } finally { setClearing(false); }
+      toast.success('Cart cleared successfully', { icon: <Trash2 size={14} className="text-emerald-500" /> });
+    } catch {
+      toast.error('Failed to clear cart. Please try again.');
+    } finally {
+      setClearing(false);
+    }
   };
 
   if (loading) {
@@ -92,7 +59,7 @@ export default function CartView() {
       <div className="max-w-3xl mx-auto space-y-6">
         <Skeleton className="h-8 w-48" />
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
         </div>
       </div>
     );
@@ -112,18 +79,7 @@ export default function CartView() {
         )}
       </div>
 
-      {error && (
-        <div className="p-4 bg-destructive/10 text-destructive text-sm rounded-lg border border-destructive/20 flex items-start gap-3">
-          <AlertCircle size={18} className="shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium">Error loading cart</p>
-            <p className="text-destructive/70 mt-1">{error}</p>
-            <Button variant="ghost" size="sm" onClick={fetchCart} className="mt-2 h-7 px-2 text-xs">Try again</Button>
-          </div>
-        </div>
-      )}
-
-      {items.length === 0 && !error ? (
+      {items.length === 0 ? (
         <Card>
           <CardContent className="py-20 text-center">
             <ShoppingBag size={40} className="mx-auto mb-3 text-muted-foreground/30" />
@@ -132,7 +88,7 @@ export default function CartView() {
             <Button onClick={() => navigate('/products')}>Browse Products</Button>
           </CardContent>
         </Card>
-      ) : items.length > 0 ? (
+      ) : (
         <>
           <Card>
             <CardContent className="p-0">
@@ -153,13 +109,13 @@ export default function CartView() {
                       {item.quantity > item.stock && <p className="text-xs text-destructive mt-0.5">Only {item.stock} available</p>}
                     </div>
                     <div className="flex items-center border border-border rounded-md">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-r-none" onClick={() => updateQty(item.productId, item.quantity - 1)} disabled={updating === item.productId || item.quantity <= 1}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-r-none" onClick={() => handleQty(item.productId, item.quantity - 1)} disabled={updating === item.productId || item.quantity <= 1}>
                         <Minus size={12} />
                       </Button>
                       <span className="w-10 text-center text-sm font-medium border-x border-border h-8 flex items-center justify-center">
                         {updating === item.productId ? '...' : item.quantity}
                       </span>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-l-none" onClick={() => updateQty(item.productId, item.quantity + 1)} disabled={updating === item.productId || item.quantity >= item.stock}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-l-none" onClick={() => handleQty(item.productId, item.quantity + 1)} disabled={updating === item.productId || item.quantity >= item.stock}>
                         <Plus size={12} />
                       </Button>
                     </div>
@@ -187,7 +143,7 @@ export default function CartView() {
             </CardContent>
           </Card>
         </>
-      ) : null}
+      )}
 
       {/* ═══ CLEAR CART CONFIRMATION MODAL ═══ */}
       <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
