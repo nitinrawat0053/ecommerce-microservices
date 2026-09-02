@@ -2,11 +2,11 @@
 # Multi-stage: build with Node, serve with Nginx
 
 # Stage 1 – Build
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 RUN corepack enable && corepack prepare pnpm@11 --activate
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 COPY . .
 ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
