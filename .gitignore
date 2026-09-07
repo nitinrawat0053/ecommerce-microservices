@@ -1,19 +1,29 @@
-node_modules
+# Dependencies
+node_modules/
 
+# Environment variables / secrets
 .env
-.env.production
-.env.local
+.env.*
+!.env.production.example
 
-dist
+# Build output
+dist/
+build/
 
-build
+# Test / coverage output
+coverage/
 
-coverage
+# Turborepo
+.turbo/
 
-.turbo
+# IDE
+.vscode/
 
-.vscode
-
+# OS files
 .DS_Store
 
+# Local tools
 .freebuff
+
+# Runtime logs
+*.log
