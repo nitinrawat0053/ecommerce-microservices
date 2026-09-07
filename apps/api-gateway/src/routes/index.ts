@@ -4,6 +4,20 @@ import { authenticate } from "../middlewares/auth.middleware";
 import {authorize} from "../middlewares/authorize.middleware";
 const router = Router();
 
+// Shared proxy error handler. On upstream failure/timeout, http-proxy-middleware
+// otherwise ends the response with a plain HTML body (e.g. "504 Gateway Timeout").
+// The frontend reads `res.data.message`, so those HTML bodies render as
+// "Failed to create order: undefined". Return JSON with a real message instead.
+const proxyErrorHandler = (service: string) => (err: any, _req: any, res: any) => {
+  if (res.headersSent || res.writableEnded) return;
+  const isDown = ["ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "EHOSTUNREACH", "EAI_AGAIN"].includes(err?.code);
+  const status = isDown ? 503 : 504;
+  res.status(status).json({
+    success: false,
+    message: `${service} is ${isDown ? "unavailable" : "timed out"} (${err?.code || "proxy timeout"}). Please try again.`,
+  });
+};
+
 // Resolve service URLs from env vars (Docker) or fall back to localhost (local dev)
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3002";
@@ -21,6 +35,7 @@ router.use(
     pathRewrite: {
       "^/": "/api/auth/",
     },
+    on: { error: proxyErrorHandler("Auth service") },
   })
 );
 
@@ -39,6 +54,7 @@ router.use(
           proxyReq.setHeader("x-user-role", req.user.role);
         }
       },
+      error: proxyErrorHandler("User service"),
     },
   })
 );
@@ -57,6 +73,7 @@ router.use(
           proxyReq.setHeader("x-user-role", req.user.role);
         }
       },
+      error: proxyErrorHandler("Cart service"),
     },
   })
 );
@@ -75,6 +92,7 @@ router.use(
           proxyReq.setHeader("x-user-role", req.user.role);
         }
       },
+      error: proxyErrorHandler("Payment service"),
     },
   })
 );
@@ -93,6 +111,7 @@ router.use(
           proxyReq.setHeader("x-user-role", req.user.role);
         }
       },
+      error: proxyErrorHandler("Order service"),
     },
   })
 );
@@ -103,6 +122,7 @@ const productProxy = createProxyMiddleware({
   pathRewrite: {
     "^/products": "/api/products",
   },
+  on: { error: proxyErrorHandler("Product service") },
 });
 
 // Product Import (Admin + Super Admin) - must be before catch-all routes
@@ -164,6 +184,7 @@ const categoryProxy = createProxyMiddleware({
   pathRewrite: {
     "^/categories": "/api/categories",
   },
+  on: { error: proxyErrorHandler("Product service") },
 });
 
 const brandProxy = createProxyMiddleware({
@@ -173,6 +194,7 @@ const brandProxy = createProxyMiddleware({
   pathRewrite: {
     "^/brands": "/api/brands",
   },
+  on: { error: proxyErrorHandler("Product service") },
 });
 
 // Categories - public reads, admin writes

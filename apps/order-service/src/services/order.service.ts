@@ -1,4 +1,4 @@
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@packages/errors";
+import { AppError, BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@packages/errors";
 import { OrderStatus, OrderFilters, EVENTS, PaymentMethod } from "@packages/shared-types";
 import { OrderRepository } from "../repositories/order.repository";
 import {config} from "@packages/config";
@@ -16,11 +16,19 @@ export class OrderService {
   private async getProduct(productId: string) {
   try {
     const response = await axios.get(
-      `${config.PRODUCT_SERVICE_URL}/api/products/${productId}`
+      `${config.PRODUCT_SERVICE_URL}/api/products/${productId}`,
+      // Fail fast: without a timeout this call can hang indefinitely and
+      // blow past the API gateway's 15s proxy budget, surfacing as a 504.
+      // 5s keeps us safely under that ceiling so a stuck product lookup
+      // returns a real error instead of a silent gateway timeout.
+      { timeout: 5000 }
     );
 
     return response.data.data;
-  } catch {
+  } catch (error) {
+    if (axios.isAxiosError(error) && (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT")) {
+      throw new AppError("Product service timed out while fetching product", 502);
+    }
     throw new BadRequestError("Product not found");
   }
 }

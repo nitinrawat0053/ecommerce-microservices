@@ -20,6 +20,23 @@ const PAYMENT_METHODS = [
   { value: 'WALLET', label: 'Wallet', icon: '👛' },
 ];
 
+// Surface the REAL backend error. The gateway returns JSON { message } for
+// its own errors now, but a timeout can still reach the client as an HTML
+// body (or no response body at all), so `err.response.data.message` alone
+// rendered as "undefined". Walk the response to find a truthful message and
+// NEVER render "undefined".
+function getApiErrorMessage(err: unknown, fallback: string): string {
+  const anyErr = err as { response?: { data?: unknown; statusText?: string }; code?: string; message?: string } | undefined;
+  const data = anyErr?.response?.data;
+  if (data && typeof data === 'object' && 'message' in data && typeof (data as { message: unknown }).message === 'string') {
+    return (data as { message: string }).message;
+  }
+  if (typeof data === 'string' && data.trim()) return data.trim();
+  if (anyErr?.response?.statusText) return anyErr.response.statusText;
+  if (anyErr?.message) return anyErr.message;
+  return fallback;
+}
+
 declare global { interface Window { Razorpay: any; } }
 
 export default function CreateOrder() {
@@ -112,7 +129,7 @@ export default function CreateOrder() {
       const createdOrders: any[] = [];
       for (const item of itemsToOrder) {
         try { const res = await api.post('/orders', { productId: item.productId, quantity: item.quantity, paymentMethod }); createdOrders.push(res.data.data); }
-        catch (err: any) { setError(`Failed to create order for ${item.name}: ${err.response?.data?.message}`); setStep('review'); return; }
+        catch (err) { setError(`Failed to create order for ${item.name}: ${getApiErrorMessage(err, 'Order service did not respond in time')}`); setStep('review'); return; }
       }
       if (createdOrders.length === 1) {
         const order = createdOrders[0]; const payment = await pollForPayment(order._id);
@@ -131,7 +148,7 @@ export default function CreateOrder() {
         }
         navigate('/orders');
       }
-    } catch (err: any) { setError(err.response?.data?.message || 'Something went wrong'); setStep('review'); }
+    } catch (err) { setError(getApiErrorMessage(err, 'Something went wrong')); setStep('review'); }
     finally { setSubmitting(false); }
   };
 

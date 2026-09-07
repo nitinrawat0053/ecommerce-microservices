@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Must use vi.hoisted() for variables used inside vi.mock factories
 const { mockFindByEmail, mockFindByPhone, mockCreate, mockDeleteById, mockSendVerificationCode, mockVerifyCode, mockHash, mockCompare, mockGenerateToken } = vi.hoisted(() => ({
   mockFindByEmail: vi.fn(),
   mockFindByPhone: vi.fn(),

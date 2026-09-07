@@ -13,10 +13,285 @@ import AdminDashboard from './admin/AdminDashboard';
 import ProductCard from '@/components/ProductCard';
 
 const BANNERS = [
-  { title: 'Mega Electronics Sale', subtitle: 'Up to 75% off on laptops, smartwatches, headphones & more', gradient: 'from-blue-600 via-indigo-600 to-purple-700', cta: 'Shop Now', link: '/products?category=Electronics' },
-  { title: 'Fashion Week Deals', subtitle: 'New arrivals at unbeatable prices — styles for everyone', gradient: 'from-rose-500 via-pink-500 to-fuchsia-600', cta: 'Explore', link: '/products?category=Fashion' },
-  { title: 'Home & Kitchen Fest', subtitle: 'Transform your space for less — curated essentials', gradient: 'from-emerald-500 via-teal-500 to-cyan-600', cta: 'Discover', link: '/products?category=Home & Kitchen' },
+  { title: 'Mega Electronics Sale', subtitle: 'Up to 75% off on laptops, smartwatches, headphones & more', gradient: 'from-blue-600 via-indigo-600 to-purple-700', cta: 'Shop Now', link: '/products?category=Electronics', discount: 'Up to 75% OFF', showProducts: true, productsVariant: 'electronics', noDiscountPill: true },
+  { title: 'Fashion Week Deals', subtitle: 'New arrivals at unbeatable prices — styles for everyone', gradient: 'from-purple-600 via-pink-500 to-blue-500', cta: 'Shop Now', link: '/products?category=Fashion', discount: 'Up to 50% OFF', showProducts: true, noDiscountPill: true },
+  { title: 'Home & Kitchen Fest', subtitle: 'Transform your space for less — curated essentials', gradient: 'from-emerald-500 via-teal-500 to-cyan-600', cta: 'Discover', link: '/products?category=Home & Kitchen', discount: 'Up to 60% OFF', showProducts: true, productsVariant: 'homeKitchen' },
 ];
+
+// Four real product PNGs (transparent backgrounds) showcased on the right
+// side of the Fashion Week Deals hero banner. Each product sits on its own
+// separate white pedestal with ZERO overlap — every product is fully visible.
+// Layout (measured bounding boxes):
+//   Dress  — tallest, center of product cluster (aspect 0.557)
+//   Handbag — upper-right on elevated pedestal (aspect 1.101)
+//   Sunglasses — front-center-left on short pedestal (aspect 2.108)
+//   Sneakers — front-right on low pedestal (aspect 1.136)
+// Decorative glow ring behind products for premium neon arch effect.
+function BannerProducts() {
+  const DRESS_URL = '/banners/fashion-dress.png';
+  const BAG_URL = '/banners/fashion-handbag.png';
+  const SHOES_URL = '/banners/fashion-sneakers.png';
+  const GLASSES_URL = '/banners/fashion-sunglasses.png';
+
+  return (
+    <div className="relative h-full w-full hidden md:block" aria-hidden="true">
+
+      {/* ─── Decorative neon glow ring (behind everything) ─── */}
+      <div
+        className="absolute left-[30%] top-[6%] w-[280px] h-[300px] rounded-full z-[0] border-[2px] border-white/20"
+        style={{ boxShadow: '0 0 60px 10px rgba(255,255,255,0.10), inset 0 0 40px 6px rgba(255,255,255,0.06)' }}
+      />
+
+      {/* ─── White pedestal podiums (one per product) ─── */}
+      {/* Dress pedestal — tallest, center */}
+      <div className="absolute bottom-0 left-[25%] w-[126px] h-[120px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_12px_50px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Handbag pedestal — tall, upper-right */}
+      <div className="absolute bottom-0 right-[10%] w-[120px] h-[165px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_10px_44px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Sunglasses pedestal — short, front-center-left */}
+      <div className="absolute bottom-0 left-[22%] w-[118px] h-[56px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_8px_36px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Sneakers pedestal — low, front-right */}
+      <div className="absolute bottom-0 right-[22%] w-[124px] h-[54px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_8px_36px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+
+      {/* ─── Dress (tallest, center of cluster) — z-2 ─── */}
+      <div
+        className="absolute left-[25%] bottom-[118px] w-[126px] h-[226px] z-[2]"
+        style={{ filter: 'drop-shadow(0 16px 30px rgba(200,80,130,0.28))' }}
+      >
+        <img
+          src={DRESS_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Handbag (upper-right on elevated pedestal) — z-3 ─── */}
+      <div
+        className="absolute right-[10%] bottom-[162px] w-[100px] h-[91px] z-[3]"
+        style={{ filter: 'drop-shadow(0 10px 18px rgba(200,80,130,0.22))' }}
+      >
+        <img
+          src={BAG_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Sunglasses (front-center-left, short pedestal) — z-4 ─── */}
+      <div
+        className="absolute left-[23%] bottom-[52px] w-[120px] h-[57px] z-[4]"
+        style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.20))' }}
+      >
+        <img
+          src={GLASSES_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Sneakers (front-right, low pedestal) — z-5 ─── */}
+      <div
+        className="absolute right-[22%] bottom-[26px] w-[118px] h-[104px] z-[5]"
+        style={{ filter: 'drop-shadow(0 12px 22px rgba(0,0,0,0.24))' }}
+      >
+        <img
+          src={SHOES_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── "Up to 50% OFF" Badge (top-right corner, clear of all products) ─── */}
+      <div className="absolute top-[6%] right-[1%] z-[6]">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-white/80 flex flex-col items-center min-w-[90px]">
+          <span className="text-gray-500 text-[11px] font-semibold tracking-wide">Up to</span>
+          <span className="text-4xl font-black text-pink-500 leading-none mt-0.5">50%</span>
+          <span className="text-gray-600 text-xs font-bold tracking-widest mt-1">OFF</span>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+// Four real product PNGs (transparent backgrounds) showcased on the right
+// side of the Home & Kitchen Fest hero banner. Each <img> preserves its native
+// alpha channel and is scaled with object-contain — no rectangular cards, no
+// background colors, no blend modes — so every product sits directly on the
+// banner gradient, anchored on white pedestal platforms like the Fashion
+// banner. Front-to-back: platforms → plant (back-left) → pot (main hero) →
+// utensils (right) → plates & bowls (foreground below the pot).
+function HomeKitchenProducts() {
+  const POT_URL = '/banners/home-kitchen-pot.png';
+  const PLATES_URL = '/banners/home-kitchen-plates.png';
+  const UTENSILS_URL = '/banners/home-kitchen-utensils.png';
+  const PLANT_URL = '/banners/home-kitchen-plant.png';
+
+  return (
+    <div className="relative h-full w-full hidden md:block" aria-hidden="true">
+
+      {/* ─── White pedestal platforms (rearmost) ─── */}
+      {/* Plant platform (far left) */}
+      <div className="absolute bottom-0 left-[1%] w-[116px] h-[88px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_10px_44px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Main platform — under the pot and plates (center) */}
+      <div className="absolute bottom-0 left-[18%] w-[270px] h-[96px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_12px_50px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Utensils platform (right) */}
+      <div className="absolute bottom-0 right-0 w-[102px] h-[88px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_8px_36px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+
+      {/* ─── Plant (back layer, slightly behind/next to the plates) ─── */}
+      <div
+        className="absolute left-[1%] bottom-[86px] w-[114px] h-[114px] z-[2]"
+        style={{ filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.16))' }}
+      >
+        <img
+          src={PLANT_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Cooking pot (MAIN hero product — largest, upper-right/center) ─── */}
+      <div
+        className="absolute left-[36%] bottom-[94px] w-[172px] h-[215px] z-[3]"
+        style={{ filter: 'drop-shadow(0 14px 24px rgba(0,0,0,0.22))' }}
+      >
+        <img
+          src={POT_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Wooden utensils (standing vertically beside the pot, right) ─── */}
+      <div
+        className="absolute right-[1%] bottom-[86px] w-[90px] h-[188px] z-[4]"
+        style={{ filter: 'drop-shadow(0 10px 18px rgba(0,0,0,0.18))' }}
+      >
+        <img
+          src={UTENSILS_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Plates & bowls (foreground, positioned below the pot) ─── */}
+      <div
+        className="absolute left-[18%] bottom-[52px] w-[172px] h-[172px] z-[5]"
+        style={{ filter: 'drop-shadow(0 12px 20px rgba(0,0,0,0.2))' }}
+      >
+        <img
+          src={PLATES_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+    </div>
+  );
+}
+
+// Three real product PNGs (transparent backgrounds) showcased on the right
+// side of the Mega Electronics Sale hero banner. Same design system as the
+// Fashion banner: every <img> preserves its native alpha channel and uses
+// object-contain — no rectangular cards, no background colors, no blend modes —
+// so each product sits directly on the blue→purple gradient, anchored on white
+// pedestal platforms. Front-to-back/layer order: platforms → laptop (main hero,
+// center-right) → headphones (right) → smartwatch (foreground below the laptop)
+// with a stacked "Up to 75% OFF" badge kept clear on the far right.
+function ElectronicsProducts() {
+  const LAPTOP_URL = '/banners/electronics-laptop.png';
+  const HEADPHONES_URL = '/banners/electronics-headphones.png';
+  const SMARTWATCH_URL = '/banners/electronics-smartwatch.png';
+
+  return (
+    <div className="relative h-full w-full hidden md:block" aria-hidden="true">
+
+      {/* ─── White pedestal platforms (rearmost) ─── */}
+      {/* Smartwatch platform (front-left) */}
+      <div className="absolute bottom-0 left-[10%] w-[140px] h-[72px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_10px_44px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Laptop platform (center, main) */}
+      <div className="absolute bottom-0 left-[26%] w-[300px] h-[100px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_12px_50px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+      {/* Headphones platform (right) */}
+      <div className="absolute bottom-0 right-0 w-[130px] h-[74px] z-[1]">
+        <div className="w-full h-full rounded-t-2xl bg-gradient-to-b from-white via-white to-gray-100 shadow-[0_8px_36px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.9)]" />
+      </div>
+
+      {/* ─── Laptop (MAIN hero product — largest, center-right, slightly behind) ─── */}
+      <div
+        className="absolute left-[28%] bottom-[96px] w-[235px] h-[157px] z-[3]"
+        style={{ filter: 'drop-shadow(0 16px 28px rgba(0,0,0,0.26))' }}
+      >
+        <img
+          src={LAPTOP_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Headphones (right of the laptop, kept clear of the badge) ─── */}
+      <div
+        className="absolute right-[1%] bottom-[40px] w-[118px] h-[118px] z-[4]"
+        style={{ filter: 'drop-shadow(0 10px 18px rgba(0,0,0,0.18))' }}
+      >
+        <img
+          src={HEADPHONES_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── Smartwatch (foreground, in front/below the laptop — face fully visible) ─── */}
+      <div
+        className="absolute left-[16%] bottom-[40px] w-[104px] h-[118px] z-[5]"
+        style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.16))' }}
+      >
+        <img
+          src={SMARTWATCH_URL}
+          alt=""
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+
+      {/* ─── "Up to 75% OFF" Badge (far right, no overlap with products) ─── */}
+      <div className="absolute top-[18%] right-[1%] z-[5]">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-white/80 flex flex-col items-center min-w-[90px]">
+          <span className="text-gray-500 text-[11px] font-semibold tracking-wide">Up to</span>
+          <span className="text-4xl font-black text-indigo-600 leading-none mt-0.5">75%</span>
+          <span className="text-gray-600 text-xs font-bold tracking-widest mt-1">OFF</span>
+        </div>
+      </div>
+
+    </div>
+  );
+}
 
 /* ─── Product Carousel ─── */
 function ProductCarousel({ title, icon: Icon, products, loading, viewAllLink }: {
@@ -129,22 +404,47 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* ═══ HERO BANNER ═══ */}
-      <section className="relative rounded-3xl overflow-hidden h-[220px] sm:h-[280px] md:h-[340px]">
+      <section className="relative rounded-3xl overflow-hidden h-[240px] sm:h-[300px] md:h-[360px]">
         {BANNERS.map((b, i) => (
           <div key={i} className={`absolute inset-0 transition-all duration-700 ease-in-out ${i === bannerIndex ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-105'}`}>
             <div className={`absolute inset-0 bg-gradient-to-r ${b.gradient}`} />
-            <div className="absolute -right-20 -top-20 w-[300px] h-[300px] rounded-full bg-white/5" />
+            {/* decorative glow circles */}
+            <div className="absolute -right-20 -top-20 w-[320px] h-[320px] rounded-full bg-white/5" />
             <div className="absolute -right-10 top-1/2 w-[200px] h-[200px] rounded-full bg-white/5" />
             <div className="absolute left-1/3 -bottom-10 w-[150px] h-[150px] rounded-full bg-white/5" />
-            <div className="relative z-10 h-full flex flex-col justify-center px-8 md:px-16 max-w-2xl">
-              <span className="inline-block w-fit text-white/60 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Limited Time Offer</span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-[1.1] drop-shadow-lg">{b.title}</h2>
-              <p className="text-white/75 text-sm md:text-base mt-2.5 max-w-md leading-relaxed">{b.subtitle}</p>
-              <Link to={b.link} className="mt-4">
-                <Button className="bg-white text-gray-900 hover:bg-gray-100 font-bold shadow-xl px-6 py-2.5 h-auto text-sm rounded-xl">
-                  {b.cta} <ArrowRight size={15} className="ml-2" />
-                </Button>
-              </Link>
+
+            <div className="relative z-10 h-full flex items-center justify-between px-8 md:px-16">
+              {/* left: copy */}
+              <div className="max-w-lg">
+                <span className="inline-flex items-center gap-2 text-white/80 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" /> Limited Time Offer
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black text-white tracking-tight leading-[1.08] drop-shadow-lg">{b.title}</h2>
+                <p className="text-white/80 text-sm md:text-base mt-2.5 max-w-md leading-relaxed">{b.subtitle}</p>
+                <Link to={b.link} className="mt-5 inline-block">
+                  <Button className="group bg-white text-gray-900 hover:bg-gray-100 font-bold shadow-xl px-6 py-2.5 h-auto text-sm rounded-xl">
+                    {b.cta} <ArrowRight size={15} className="ml-2 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
+              </div>
+
+              {/* right: discount badge + product imagery */}
+              <div className="hidden md:block relative flex-1 h-full max-w-[30rem]">
+                {b.showProducts ? (
+                  b.productsVariant === 'homeKitchen' ? <HomeKitchenProducts /> :
+                  b.productsVariant === 'electronics' ? <ElectronicsProducts /> :
+                  <BannerProducts />
+                ) : (
+                  <div className="absolute inset-y-0 right-0 flex items-center justify-center">
+                    <span className="text-6xl lg:text-7xl font-black text-white/25 select-none drop-shadow-lg">{b.discount}</span>
+                  </div>
+                )}
+                {!b.noDiscountPill && (
+                  <span className="absolute top-6 right-2 lg:top-10 lg:right-6 bg-white/90 text-gray-900 text-xs lg:text-sm font-extrabold px-3 lg:px-4 py-2 rounded-full shadow-xl">
+                    {b.discount}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         ))}
