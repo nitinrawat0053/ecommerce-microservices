@@ -44,7 +44,7 @@ export default function CreateOrder() {
   const [searchParams] = useSearchParams();
   const fromCart = searchParams.get('from') === 'cart';
 
-  const { lines: cartItems, loading, updateQty, removeItem, mergeGuestCart } = useCart();
+  const { lines: cartItems, loading, updateQty, removeItem, clear, mergeGuestCart } = useCart();
   const { user, token, login, verifyPhone, resendOtp, updateUser } = useAuth();
 
   // Guest + logged-in compatible: `items` reflects the current cart source.
@@ -135,15 +135,23 @@ export default function CreateOrder() {
         const order = createdOrders[0]; const payment = await pollForPayment(order._id);
         if (!payment?.razorpayOrderId) { navigate('/orders'); return; }
         const result = await openRazorpayCheckout(order, payment);
-        if (result.success) await api.post('/payments/verify', { razorpayOrderId: result.orderId, razorpayPaymentId: result.paymentId, razorpaySignature: result.signature });
+        // Clear the cart ONLY after the system confirms the payment succeeded.
+        // On dismissal/failure result.success is false, so the cart is kept.
+        if (result.success) {
+          await api.post('/payments/verify', { razorpayOrderId: result.orderId, razorpayPaymentId: result.paymentId, razorpaySignature: result.signature });
+          await clear();
+        }
         navigate('/orders');
       } else {
         for (const order of createdOrders) {
           const payment = await pollForPayment(order._id);
           if (payment?.razorpayOrderId) {
             const result = await openRazorpayCheckout(order, payment);
-            if (result.success) await api.post('/payments/verify', { razorpayOrderId: result.orderId, razorpayPaymentId: result.paymentId, razorpaySignature: result.signature });
-            break;
+            if (result.success) {
+              await api.post('/payments/verify', { razorpayOrderId: result.orderId, razorpayPaymentId: result.paymentId, razorpaySignature: result.signature });
+              await clear();
+              break;
+            }
           }
         }
         navigate('/orders');
