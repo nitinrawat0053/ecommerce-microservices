@@ -10,6 +10,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import VerifyPhone from './pages/auth/VerifyPhone';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import VerifyResetOtp from './pages/auth/VerifyResetOtp';
+import ResetPassword from './pages/auth/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import ProductList from './pages/products/ProductList';
 import ProductDetail from './pages/products/ProductDetail';
@@ -105,6 +108,9 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/verify-phone" element={<VerifyPhone />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verify-reset-otp" element={<VerifyResetOtp />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route element={<Layout />}>
         <Route path="/admin/products" element={<ProtectedRoute><AdminProductList /></ProtectedRoute>} />

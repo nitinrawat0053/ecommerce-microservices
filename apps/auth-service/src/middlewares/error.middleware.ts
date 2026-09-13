@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { AppError } from "@packages/errors";
+import { AppError, TooManyRequestsError } from "@packages/errors";
 
 export const errorHandler = (
   err: Error,
@@ -8,6 +8,9 @@ export const errorHandler = (
   next: NextFunction
 ) => {
   if (err instanceof AppError) {
+    if (err.statusCode === 429 && err instanceof TooManyRequestsError && err.retryAfterSeconds) {
+      res.setHeader("Retry-After", String(err.retryAfterSeconds));
+    }
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,

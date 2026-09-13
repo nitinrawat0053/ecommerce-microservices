@@ -16,4 +16,14 @@ export class UserRepository {
  async deleteById(id: string): Promise<void> {
   await User.findByIdAndDelete(id);
 }
+
+  async updatePassword(
+    email: string,
+    hashedPassword: string
+  ): Promise<void> {
+    await User.findOneAndUpdate(
+      { email },
+      { password: hashedPassword }
+    );
+  }
 }

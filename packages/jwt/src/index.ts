@@ -12,6 +12,17 @@ export const generateToken = (payload: JwtPayload): string => {
   });
 };
 
+/**
+ * Generate a short-lived token (e.g. password reset).
+ * @param expiresIn jwt-style duration, e.g. "10m"
+ */
+export const generateShortLivedToken = (
+  payload: JwtPayload,
+  expiresIn: string
+): string => {
+  return jwt.sign(payload, config.JWT_SECRET, { expiresIn });
+};
+
 export const verifyToken = (token: string): JwtPayload => {
   return jwt.verify(token, config.JWT_SECRET) as JwtPayload;
 };

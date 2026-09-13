@@ -36,6 +36,20 @@ vi.mock("../providers/twilio-verify", () => ({
   },
 }))
 
+// The shared Redis client is used for rate limiting / OTP protection. Mock
+// it so unit tests never dial a real Redis server.
+vi.mock("@packages/redis", () => ({
+  redisClient: {
+    set: vi.fn().mockResolvedValue("OK"),
+    get: vi.fn(),
+    del: vi.fn().mockResolvedValue(1),
+    incr: vi.fn().mockResolvedValue(1),
+    expire: vi.fn().mockResolvedValue(1),
+    ttl: vi.fn().mockResolvedValue(60),
+    eval: vi.fn().mockResolvedValue(1),
+  },
+}))
+
 import bcrypt from "bcryptjs";
 import { generateToken } from "@packages/jwt";
 import { AuthService } from "../services/auth.service";

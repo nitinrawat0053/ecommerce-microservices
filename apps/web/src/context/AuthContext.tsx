@@ -17,6 +17,10 @@ interface AuthContextType {
   register: (name: string, email: string, password: string, phone: string) => Promise<{ message: string; otpSent?: boolean }>;
   verifyPhone: (phone: string, code: string) => Promise<void>;
   resendOtp: (phone: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ message: string }>;
+  verifyResetOtp: (email: string, otp: string) => Promise<{ token: string }>;
+  resetPassword: (token: string, newPassword: string, confirmPassword: string) => Promise<{ message: string }>;
+  resendResetOtp: (email: string) => Promise<{ message: string }>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   isAdmin: boolean;
@@ -66,6 +70,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.data;
   };
 
+  const forgotPassword = async (email: string) => {
+    const res = await api.post('/auth/forgot-password', { email });
+    return res.data;
+  };
+
+  const verifyResetOtp = async (email: string, otp: string) => {
+    const res = await api.post('/auth/verify-reset-otp', { email, otp });
+    return res.data.data;
+  };
+
+  const resetPassword = async (token: string, newPassword: string, confirmPassword: string) => {
+    const res = await api.post('/auth/reset-password', { token, newPassword, confirmPassword });
+    return res.data;
+  };
+
+  const resendResetOtp = async (email: string) => {
+    const res = await api.post('/auth/resend-reset-otp', { email });
+    return res.data;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -85,6 +109,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       verifyPhone,
       resendOtp,
+      forgotPassword,
+      verifyResetOtp,
+      resetPassword,
+      resendResetOtp,
       logout,
       updateUser,
       isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN',
