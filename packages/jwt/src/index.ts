@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import { config } from "@packages/config";
 
 export interface JwtPayload {
@@ -18,7 +18,7 @@ export const generateToken = (payload: JwtPayload): string => {
  */
 export const generateShortLivedToken = (
   payload: JwtPayload,
-  expiresIn: string
+  expiresIn: SignOptions["expiresIn"]
 ): string => {
   return jwt.sign(payload, config.JWT_SECRET, { expiresIn });
 };
