@@ -8,6 +8,7 @@ interface User {
   phone: string;
   role: string;
   isVerified: boolean;
+  phoneVerified?: boolean;
 }
 
 interface AuthContextType {
@@ -49,7 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     const { token: accessToken, user: userData } = res.data.data;
-    const u = { ...userData, _id: userData._id || userData.id };
+    const isVerified = Boolean(userData.isVerified ?? userData.phoneVerified ?? false);
+    const u = {
+      ...userData,
+      _id: userData._id || userData.id,
+      isVerified,
+      phoneVerified: isVerified,
+    };
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('user', JSON.stringify(u));
     setToken(accessToken);
     setUser(u);
     return u;
@@ -62,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyPhone = async (phone: string, code: string) => {
     const res = await api.post('/auth/verify-phone', { phone, code });
+    updateUser({ isVerified: true, phoneVerified: true });
     return res.data;
   };
 

@@ -8,7 +8,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "@packages/config": "workspace:*",
     "@packages/errors": "workspace:*",
     "@packages/logger": "workspace:*",
+    "@packages/redis": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "@types/bcryptjs": "^3.0.0",
     "bcryptjs": "^3.0.3",

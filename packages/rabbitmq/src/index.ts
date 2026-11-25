@@ -5,6 +5,32 @@ import { QUEUE_CONFIG } from "./queue.config";
 let connection: ChannelModel;
 let channel: Channel;
 
+/**
+ * Safely sanitizes a RabbitMQ connection URL by masking credentials and sensitive tokens,
+ * preventing credentials and sensitive connection strings from being exposed in logs.
+ */
+export function sanitizeRabbitMQUrl(rawUrl?: string): string {
+  if (!rawUrl || typeof rawUrl !== "string") {
+    return "[not configured]";
+  }
+  try {
+    const urlToParse = rawUrl.includes("://") ? rawUrl : `amqp://${rawUrl}`;
+    const parsed = new URL(urlToParse);
+    if (parsed.username || parsed.password) {
+      parsed.username = "***";
+      parsed.password = "***";
+    }
+    for (const key of Array.from(parsed.searchParams.keys())) {
+      if (/pass|secret|token|key|auth|cred/i.test(key)) {
+        parsed.searchParams.set(key, "***");
+      }
+    }
+    return rawUrl.includes("://") ? parsed.toString() : parsed.host;
+  } catch {
+    return "[configured endpoint]";
+  }
+}
+
 export async function connectRabbitMQ() {
   let retries = 5;
 
@@ -13,7 +39,7 @@ export async function connectRabbitMQ() {
       console.log(
         `🔌 Connecting to RabbitMQ... (${retries} attempts left)`
       );
-       console.log("RabbitMQ URL:",config.RABBITMQ_URL);
+      console.log("RabbitMQ URL:", sanitizeRabbitMQUrl(config.RABBITMQ_URL));
 
       connection = await amqp.connect(
         config.RABBITMQ_URL

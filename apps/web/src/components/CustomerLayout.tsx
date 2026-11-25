@@ -1,4 +1,5 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
+import AiShoppingAssistant from '@/components/AiShoppingAssistant';
 import { useAuth } from '@/context/AuthContext';
 import {
   ShoppingCart, CreditCard, Store,
@@ -361,6 +362,9 @@ export default function CustomerLayout() {
           </div>
         </div>
       </footer>
+
+      {/* ══ AI Shopping Assistant (floating robot + chat widget) ══ */}
+      <AiShoppingAssistant />
     </div>
   );
 }

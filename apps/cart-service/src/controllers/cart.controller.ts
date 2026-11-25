@@ -1,14 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 import { CartService } from "../services/cart.service";
-import { Types } from "mongoose";
+import { UnauthorizedError } from "@packages/errors";
 
 const cartService = new CartService();
+
+const getUserId = (req: Request): string => {
+  const userId = (req.headers["x-user-id"] as string | undefined)?.trim();
+  if (!userId) {
+    throw new UnauthorizedError("User not authenticated");
+  }
+  return userId;
+};
 
 export class CartController {
   async addToCart(req: Request, res: Response, next: NextFunction) {
     try {
       const { productId, quantity } = req.body;
-      const userId = req.headers["x-user-id"] as string;
+      const userId = getUserId(req);
 
       const cart = await cartService.addToCart(
         userId,
@@ -27,7 +35,7 @@ export class CartController {
 
   async getCart(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.headers["x-user-id"] as string;
+      const userId = getUserId(req);
 
       const cart = await cartService.getCart(userId);
 
@@ -46,7 +54,7 @@ export class CartController {
     next: NextFunction
   ) {
     try {
-      const userId = req.headers["x-user-id"] as string;
+      const userId = getUserId(req);
       const productId = req.params.productId as string;
       const { quantity } = req.body;
 
@@ -71,7 +79,7 @@ export class CartController {
     next: NextFunction
   ) {
     try {
-      const userId = req.headers["x-user-id"] as string;
+      const userId = getUserId(req);
       const productId = req.params.productId as string;
 
       const cart = await cartService.removeFromCart(
@@ -94,7 +102,7 @@ export class CartController {
     next: NextFunction
   ) {
     try {
-      const userId = req.headers["x-user-id"] as string;
+      const userId = getUserId(req);
 
       const cart = await cartService.clearCart(userId);
 

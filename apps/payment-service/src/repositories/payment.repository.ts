@@ -19,8 +19,8 @@ export class PaymentRepository {
     return await Payment.findById(paymentId);
   }
 
-  async findByOrderId(orderId: string) {
-    return await Payment.findOne({ orderId });
+  async findByOrderId(orderId: string, session?: ClientSession) {
+    return await Payment.findOne({ orderId }, null, { session });
   }
 
   async findByUserId(userId: string) {
@@ -52,19 +52,22 @@ export class PaymentRepository {
     );
   }
 
-  async updateRazorpayOrderId(paymentId: string, razorpayOrderId: string) {
-  return Payment.findByIdAndUpdate(
-    paymentId,
-    {
-      razorpayOrderId,
-    },
-    {
-      returnDocument: "after",
-    }
-  );
-}
+  async updateRazorpayOrderId(
+    paymentId: string,
+    razorpayOrderId: string,
+    session: ClientSession
+  ) {
+    return Payment.findByIdAndUpdate(
+      paymentId,
+      { razorpayOrderId },
+      {
+        returnDocument: "after",
+        session,
+      }
+    );
+  }
 
   async findByRazorpayOrderId(razorpayOrderId: string) {
-  return Payment.findOne({ razorpayOrderId });
-}
+    return Payment.findOne({ razorpayOrderId });
+  }
 }

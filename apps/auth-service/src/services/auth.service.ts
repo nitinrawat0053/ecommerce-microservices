@@ -62,7 +62,8 @@ export class AuthService {
     name: user.name,
     email: user.email,
     phone: user.phone,
-    isVerified: user.isVerified,
+    isVerified: Boolean(user.isVerified),
+    phoneVerified: Boolean(user.isVerified),
     otpSent,
     otpError: otpSent ? undefined : otpError,
   };
@@ -99,7 +100,8 @@ export class AuthService {
     name: user.name,
     email: user.email,
     phone: user.phone,
-    isVerified: user.isVerified,
+    isVerified: true,
+    phoneVerified: true,
   };
 }
 
@@ -138,16 +140,17 @@ export class AuthService {
     role: user.role,
 });
     return {
-        token,
-        user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isVerified: user.isVerified,
-      phone: user.phone,
-    },
-   };
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: Boolean(user.isVerified),
+        phoneVerified: Boolean(user.isVerified),
+        phone: user.phone,
+      },
+    };
  }
 
   // ─── Forgot Password ────────────────────────────────────

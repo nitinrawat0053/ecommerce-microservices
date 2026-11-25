@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ShoppingCart, CreditCard, Package, Check, Loader2, AlertCircle, Trash2, Plus, Minus, Shield, ShieldCheck, RotateCw, LogIn } from 'lucide-react';
+import { ShoppingCart, CreditCard, Package, Check, Loader2, AlertCircle, Trash2, Plus, Minus, Shield, ShieldCheck, RotateCw, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
@@ -61,6 +61,7 @@ export default function CreateOrder() {
   const [gateStep, setGateStep] = useState<'login' | 'otp'>('login');
   const [gateEmail, setGateEmail] = useState('');
   const [gatePassword, setGatePassword] = useState('');
+  const [showGatePassword, setShowGatePassword] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [gateError, setGateError] = useState('');
   const [gateInfo, setGateInfo] = useState('');
@@ -353,7 +354,29 @@ export default function CreateOrder() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="gate-password">Password</Label>
-                <Input id="gate-password" type="password" required placeholder="Enter your password" value={gatePassword} onChange={(e) => setGatePassword(e.target.value)} />
+                <div className="relative">
+                  <Input
+                    id="gate-password"
+                    type={showGatePassword ? 'text' : 'password'}
+                    required
+                    placeholder="Enter your password"
+                    value={gatePassword}
+                    onChange={(e) => setGatePassword(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowGatePassword(!showGatePassword)}
+                    aria-label={showGatePassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center focus:outline-none"
+                  >
+                    {showGatePassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={gateLoading}>
                 {gateLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><LogIn size={15} /> Login &amp; Continue</>}

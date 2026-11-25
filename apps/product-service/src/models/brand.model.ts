@@ -27,8 +27,6 @@ const brandSchema = new Schema<IBrand>(
   }
 );
 
-brandSchema.index({ name: 1 });
-
 export const Brand = mongoose.model<IBrand>(
   "Brand",
   brandSchema

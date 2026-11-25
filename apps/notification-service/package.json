@@ -6,21 +6,26 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "vitest run"
   },
   "dependencies": {
     "@packages/config": "workspace:*",
+    "@packages/errors": "workspace:*",
     "@packages/logger": "workspace:*",
     "@packages/rabbitmq": "workspace:*",
+    "@packages/redis": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "amqplib": "^2.0.1",
     "axios": "^1.19.0",
+    "express": "^4.19.2",
     "resend": "^6.18.1",
     "twilio": "^6.0.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
     "@types/node": "^26.1.1",
     "tsx": "^4.23.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.10"
   }
 }

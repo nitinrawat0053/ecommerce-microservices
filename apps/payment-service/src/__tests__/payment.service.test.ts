@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockRazorpayCreateOrder, mockRazorpayVerifySignature, mockPaymentCreate, mockPaymentFindByOrderId, mockPaymentFindById, mockPaymentFindByUserId, mockPaymentFindByRazorpayOrderId, mockPaymentUpdateStatus, mockPaymentUpdateRazorpayOrderId, mockOutboxCreateEvent, mockCommitTransaction, mockAbortTransaction, mockEndSession, mockUserFindById } = vi.hoisted(() => ({
+const { mockRazorpayCreateOrder, mockRazorpayVerifySignature, mockPaymentCreate, mockPaymentFindByOrderId, mockPaymentFindById, mockPaymentFindByUserId, mockPaymentFindByRazorpayOrderId, mockPaymentUpdateStatus, mockPaymentUpdateRazorpayOrderId, mockOutboxCreateEvent, mockCommitTransaction, mockAbortTransaction, mockEndSession, mockUserFindById, mockRedisSet, mockRedisDel } = vi.hoisted(() => ({
   mockRazorpayCreateOrder: vi.fn(),
   mockRazorpayVerifySignature: vi.fn(),
   mockPaymentCreate: vi.fn(),
@@ -15,6 +15,18 @@ const { mockRazorpayCreateOrder, mockRazorpayVerifySignature, mockPaymentCreate,
   mockAbortTransaction: vi.fn(),
   mockEndSession: vi.fn(),
   mockUserFindById: vi.fn(),
+  mockRedisSet: vi.fn().mockResolvedValue("OK"),
+  mockRedisDel: vi.fn().mockResolvedValue(1),
+}));
+
+vi.mock("@packages/redis", () => ({
+  redisClient: {
+    set: mockRedisSet,
+    del: mockRedisDel,
+    get: vi.fn(),
+    eval: vi.fn(),
+    ttl: vi.fn(),
+  },
 }));
 
 vi.mock("../models/user.model", () => ({
@@ -207,6 +219,36 @@ describe("PaymentService", () => {
     it("should ignore events without payment entity", async () => {
       await paymentService.processWebhookEvent({ event: "payment.captured", payload: {} });
       expect(mockPaymentFindByRazorpayOrderId).not.toHaveBeenCalled();
+    });
+
+    it("should skip duplicate webhook deliveries via Redis deduplication", async () => {
+      // SET NX returns null → event has already been processed within the 24h window
+      mockRedisSet.mockResolvedValueOnce(null);
+
+      await paymentService.processWebhookEvent({
+        event: "payment.captured",
+        payload: { payment: { entity: { order_id: "rzp_123", id: "pay_duplicate_1" } } },
+      });
+
+      // Should skip immediately without even reading from DB
+      expect(mockPaymentFindByRazorpayOrderId).not.toHaveBeenCalled();
+      expect(mockPaymentUpdateStatus).not.toHaveBeenCalled();
+    });
+
+    it("should clean up dedup key if transaction fails so retry can succeed", async () => {
+      const mockPayment = { id: "pay1", orderId: "order1", userId: "user1", razorpayOrderId: "rzp_123", status: PaymentStatus.PENDING };
+      mockPaymentFindByRazorpayOrderId.mockResolvedValue(mockPayment);
+      mockPaymentUpdateStatus.mockRejectedValue(new Error("DB deadlock"));
+
+      await expect(
+        paymentService.processWebhookEvent({
+          event: "payment.captured",
+          payload: { payment: { entity: { order_id: "rzp_123", id: "pay_retry_1" } } },
+        })
+      ).rejects.toThrow("DB deadlock");
+
+      // Verify dedup key is removed so Razorpay's retry is not blocked
+      expect(mockRedisDel).toHaveBeenCalledWith("webhook:processed:payment.captured:pay_retry_1");
     });
   });
 });

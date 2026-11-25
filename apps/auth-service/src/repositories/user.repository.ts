@@ -10,12 +10,21 @@ export class UserRepository {
   }
 
   async findByPhone(phone: string): Promise<IUser | null> {
-  return User.findOne({ phone });
-}
+    if (!phone) return null;
+    const clean = phone.trim();
+    const withoutPlus = clean.replace(/^\+/, "");
+    const withoutCountryCode = clean.replace(/^(\+91|91)/, "");
+    const withPlus91 = `+91${withoutCountryCode}`;
+    const with91 = `91${withoutCountryCode}`;
 
- async deleteById(id: string): Promise<void> {
-  await User.findByIdAndDelete(id);
-}
+    const candidates = Array.from(new Set([clean, withoutPlus, withoutCountryCode, withPlus91, with91]));
+
+    return User.findOne({ phone: { $in: candidates } });
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await User.findByIdAndDelete(id);
+  }
 
   async updatePassword(
     email: string,

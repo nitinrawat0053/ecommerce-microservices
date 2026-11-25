@@ -16,7 +16,7 @@ interface CartContextType {
   lines: CartLine[];
   count: number;
   loading: boolean;
-  addItem: (product: { _id: string; name: string; price: number; stock: number; imageUrl?: string; category?: string }, qty?: number) => Promise<void>;
+  addItem: (product: { _id?: string; id?: string; name: string; price: number; stock: number; imageUrl?: string; category?: string }, qty?: number) => Promise<void>;
   updateQty: (productId: string, quantity: number) => Promise<void>;
   removeItem: (productId: string) => Promise<void>;
   clear: () => Promise<void>;
@@ -44,9 +44,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [loading, setLoading] = useState(false);
+  const linesRef = useRef<CartLine[]>(lines);
+  linesRef.current = lines;
 
   // Logged-in users use the server cart; guests use a localStorage cart.
-  const isServer = !!token;
+  const isServer = !!token || !!localStorage.getItem('accessToken');
 
   const loadServerCart = useCallback(async () => {
     try {
@@ -62,16 +64,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const mapped: CartLine[] = [];
       items.forEach((item: any, idx: number) => {
         const r = results[idx];
-        if (r.status !== 'fulfilled' || !r.value) return;
-        const p = r.value;
+        const p = r.status === 'fulfilled' && r.value ? r.value : null;
+        const existingLine = linesRef.current.find((l) => l.productId === item.productId);
         mapped.push({
           productId: item.productId,
           quantity: item.quantity,
-          name: p.name,
-          price: p.price,
-          stock: p.stock,
-          imageUrl: p.imageUrl,
-          category: p.category,
+          name: p?.name || existingLine?.name || 'Product',
+          price: p?.price ?? existingLine?.price ?? 0,
+          stock: p?.stock ?? existingLine?.stock ?? item.quantity,
+          imageUrl: p?.imageUrl || existingLine?.imageUrl,
+          category: p?.category || existingLine?.category,
         });
       });
       setLines(mapped);
@@ -83,10 +85,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    if (token) await loadServerCart();
+    if (isServer) await loadServerCart();
     else setLines(readGuestCart());
     setLoading(false);
-  }, [token, loadServerCart]);
+  }, [isServer, loadServerCart]);
 
   useEffect(() => {
     refresh();
@@ -107,25 +109,51 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const addItem = async (
-    product: { _id: string; name: string; price: number; stock: number; imageUrl?: string; category?: string },
+    product: { _id?: string; id?: string; name: string; price: number; stock: number; imageUrl?: string; category?: string },
     qty = 1
   ) => {
+    const pid = product._id || (product as any).id;
+    if (!pid) return;
+
     if (isServer) {
+      // Optimistic update
+      setLines((prev) => {
+        const existing = prev.find((l) => l.productId === pid);
+        if (existing) {
+          return prev.map((l) =>
+            l.productId === pid ? { ...l, quantity: l.quantity + qty } : l
+          );
+        }
+        return [
+          ...prev,
+          {
+            productId: pid,
+            quantity: qty,
+            name: product.name,
+            price: product.price,
+            stock: product.stock,
+            imageUrl: product.imageUrl,
+            category: product.category,
+          },
+        ];
+      });
+
       try {
-        await api.post('/cart', { productId: product._id, quantity: qty });
-      } catch {
-        /* ignore — count refreshes below */
+        await api.post('/cart', { productId: pid, quantity: qty });
+      } catch (err) {
+        await loadServerCart();
+        throw err;
       }
       await loadServerCart();
       return;
     }
     const guest = readGuestCart();
-    const existing = guest.find((l) => l.productId === product._id);
+    const existing = guest.find((l) => l.productId === pid);
     if (existing) {
       existing.quantity += qty;
     } else {
       guest.push({
-        productId: product._id,
+        productId: pid,
         quantity: qty,
         name: product.name,
         price: product.price,
@@ -140,10 +168,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateQty = async (productId: string, quantity: number) => {
     if (isServer) {
+      setLines((prev) =>
+        prev.map((l) => (l.productId === productId ? { ...l, quantity } : l))
+      );
       try {
         await api.patch(`/cart/${productId}`, { quantity });
-      } catch {
-        /* ignore */
+      } catch (err) {
+        await loadServerCart();
+        throw err;
       }
       await loadServerCart();
       return;
@@ -157,10 +189,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (productId: string) => {
     if (isServer) {
+      setLines((prev) => prev.filter((l) => l.productId !== productId));
       try {
         await api.delete(`/cart/${productId}`);
-      } catch {
-        /* ignore */
+      } catch (err) {
+        await loadServerCart();
+        throw err;
       }
       await loadServerCart();
       return;
@@ -172,10 +206,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = async () => {
     if (isServer) {
+      setLines([]);
       try {
         await api.delete('/cart');
-      } catch {
-        /* ignore */
+      } catch (err) {
+        await loadServerCart();
+        throw err;
       }
       setLines([]);
       return;

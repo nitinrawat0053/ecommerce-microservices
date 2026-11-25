@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,9 +17,12 @@ export default function Profile() {
     api.get('/users/profile').then((r) => {
       const data = r.data.data;
       setProfile(data);
-      // Sync isVerified from backend to context
-      if (data && user && data.isVerified !== user.isVerified) {
-        updateUser({ isVerified: data.isVerified });
+      // Sync isVerified from backend to context if provided
+      if (data) {
+        const verified = Boolean(data.isVerified ?? data.phoneVerified);
+        if (user && user.isVerified !== verified) {
+          updateUser({ isVerified: verified, phoneVerified: verified });
+        }
       }
     }).finally(() => setLoading(false));
   }, []);
@@ -26,7 +30,7 @@ export default function Profile() {
   if (loading) return <div className="max-w-2xl mx-auto space-y-6"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
   if (!profile) return <div className="text-center py-20 text-muted-foreground">Could not load profile</div>;
 
-  const isVerified = user?.isVerified ?? profile?.isVerified ?? false;
+  const isVerified = Boolean(profile?.isVerified ?? profile?.phoneVerified ?? user?.isVerified ?? user?.phoneVerified ?? false);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -70,17 +74,27 @@ export default function Profile() {
             </div>
             <div className="flex-1">
               <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Verification Status</p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center justify-between mt-0.5">
                 {isVerified ? (
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 size={15} />
                     Verified
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-destructive">
-                    <XCircle size={15} />
-                    Not Verified
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-destructive">
+                      <XCircle size={15} />
+                      Not Verified
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => navigate('/verify-phone', { state: { phone: profile.phone, fromProfile: true } })}
+                    >
+                      Verify Now
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

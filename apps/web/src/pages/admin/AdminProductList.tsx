@@ -55,7 +55,7 @@ export default function AdminProductList() {
       const res = await api.get('/products', { params });
       setProducts(res.data.data || []);
       setTotalPages(res.data.pagination?.totalPages || 1);
-      setTotalCount(res.data.pagination?.totalOrders || 0);
+      setTotalCount(res.data.pagination?.totalProducts ?? 0);
     } catch (err) {
       console.error(err);
     } finally {

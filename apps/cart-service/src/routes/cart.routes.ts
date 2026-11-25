@@ -1,17 +1,22 @@
 import { Router } from "express";
 import { CartController } from "../controllers/cart.controller";
+import {
+  getCartRateLimiter,
+  cartMutationRateLimiter,
+  clearCartRateLimiter,
+} from "../middlewares/rate-limit";
 
 const router = Router();
 const cartController = new CartController();
 
-router.post("/", cartController.addToCart);
+router.post("/", cartMutationRateLimiter, cartController.addToCart);
 
-router.get("/", cartController.getCart);
+router.get("/", getCartRateLimiter, cartController.getCart);
 
-router.patch("/:productId", cartController.updateQuantity);
+router.patch("/:productId", cartMutationRateLimiter, cartController.updateQuantity);
 
-router.delete("/:productId", cartController.removeFromCart);
+router.delete("/:productId", cartMutationRateLimiter, cartController.removeFromCart);
 
-router.delete("/", cartController.clearCart);
+router.delete("/", clearCartRateLimiter, cartController.clearCart);
 
 export default router;

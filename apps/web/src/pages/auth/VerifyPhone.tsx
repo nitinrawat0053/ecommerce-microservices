@@ -9,12 +9,12 @@ import { ShieldCheck, ArrowLeft, Loader2, RotateCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function VerifyPhone() {
-  const { verifyPhone, resendOtp } = useAuth();
+  const { verifyPhone, resendOtp, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const state = (location.state as any) || {};
-  const phone = state.phone || '';
-  const fromProfile = state.fromProfile || false;
+  const phone = state.phone || user?.phone || '';
+  const fromProfile = state.fromProfile || Boolean(user);
 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');

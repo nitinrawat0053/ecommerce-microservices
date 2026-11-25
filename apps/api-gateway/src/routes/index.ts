@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { authenticate } from "../middlewares/auth.middleware";
-import {authorize} from "../middlewares/authorize.middleware";
+import { authorize } from "../middlewares/authorize.middleware";
+
 const router = Router();
 
 // Shared proxy error handler. On upstream failure/timeout, http-proxy-middleware
 // otherwise ends the response with a plain HTML body (e.g. "504 Gateway Timeout").
-// The frontend reads `res.data.message`, so those HTML bodies render as
-// "Failed to create order: undefined". Return JSON with a real message instead.
+// Return structured JSON with status and message.
 const proxyErrorHandler = (service: string) => (err: any, _req: any, res: any) => {
   if (res.headersSent || res.writableEnded) return;
   const isDown = ["ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "EHOSTUNREACH", "EAI_AGAIN"].includes(err?.code);
@@ -18,6 +18,23 @@ const proxyErrorHandler = (service: string) => (err: any, _req: any, res: any) =
   });
 };
 
+/**
+ * Standard proxy header mutator:
+ * - Always removes client-injected `x-internal-secret`
+ * - Injects verified `x-user-id` and `x-user-role` if authenticated
+ * - Explicitly strips `x-user-id` and `x-user-role` if unauthenticated to prevent spoofing
+ */
+const attachUserHeaders = (proxyReq: any, req: any) => {
+  proxyReq.removeHeader("x-internal-secret");
+  if (req.user) {
+    proxyReq.setHeader("x-user-id", req.user.userId);
+    proxyReq.setHeader("x-user-role", req.user.role);
+  } else {
+    proxyReq.removeHeader("x-user-id");
+    proxyReq.removeHeader("x-user-role");
+  }
+};
+
 // Resolve service URLs from env vars (Docker) or fall back to localhost (local dev)
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3002";
@@ -25,6 +42,7 @@ const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || "http://localhost
 const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || "http://localhost:3004";
 const CART_SERVICE_URL = process.env.CART_SERVICE_URL || "http://localhost:3005";
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || "http://localhost:3006";
+const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3007";
 
 router.use(
   "/auth",
@@ -35,7 +53,10 @@ router.use(
     pathRewrite: {
       "^/": "/api/auth/",
     },
-    on: { error: proxyErrorHandler("Auth service") },
+    on: {
+      proxyReq: attachUserHeaders,
+      error: proxyErrorHandler("Auth service"),
+    },
   })
 );
 
@@ -48,12 +69,7 @@ router.use(
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
-      proxyReq: (proxyReq, req) => {
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.userId);
-          proxyReq.setHeader("x-user-role", req.user.role);
-        }
-      },
+      proxyReq: attachUserHeaders,
       error: proxyErrorHandler("User service"),
     },
   })
@@ -67,17 +83,31 @@ router.use(
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
-      proxyReq: (proxyReq, req) => {
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.userId);
-          proxyReq.setHeader("x-user-role", req.user.role);
-        }
-      },
+      proxyReq: attachUserHeaders,
       error: proxyErrorHandler("Cart service"),
     },
   })
 );
 
+// Razorpay Webhook — unauthenticated at Gateway; verified via HMAC signature & dedup in Payment Service
+router.post(
+  "/payments/webhook",
+  createProxyMiddleware({
+    target: `${PAYMENT_SERVICE_URL}/api/payments/webhook`,
+    changeOrigin: true,
+    proxyTimeout: 15000,
+    on: {
+      proxyReq: (proxyReq) => {
+        proxyReq.removeHeader("x-user-id");
+        proxyReq.removeHeader("x-user-role");
+        proxyReq.removeHeader("x-internal-secret");
+      },
+      error: proxyErrorHandler("Payment service"),
+    },
+  })
+);
+
+// Protected Payments API (Order payment, verify, history)
 router.use(
   "/payments",
   authenticate,
@@ -86,12 +116,7 @@ router.use(
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
-      proxyReq: (proxyReq, req) => {
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.userId);
-          proxyReq.setHeader("x-user-role", req.user.role);
-        }
-      },
+      proxyReq: attachUserHeaders,
       error: proxyErrorHandler("Payment service"),
     },
   })
@@ -105,13 +130,22 @@ router.use(
     changeOrigin: true,
     proxyTimeout: 15000,
     on: {
-      proxyReq: (proxyReq, req) => {
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.userId);
-          proxyReq.setHeader("x-user-role", req.user.role);
-        }
-      },
+      proxyReq: attachUserHeaders,
       error: proxyErrorHandler("Order service"),
+    },
+  })
+);
+
+router.use(
+  "/notifications",
+  authenticate,
+  createProxyMiddleware({
+    target: `${NOTIFICATION_SERVICE_URL}/api/notifications`,
+    changeOrigin: true,
+    proxyTimeout: 15000,
+    on: {
+      proxyReq: attachUserHeaders,
+      error: proxyErrorHandler("Notification service"),
     },
   })
 );
@@ -122,7 +156,10 @@ const productProxy = createProxyMiddleware({
   pathRewrite: {
     "^/products": "/api/products",
   },
-  on: { error: proxyErrorHandler("Product service") },
+  on: {
+    proxyReq: attachUserHeaders,
+    error: proxyErrorHandler("Product service"),
+  },
 });
 
 // Product Import (Admin + Super Admin) - must be before catch-all routes
@@ -177,6 +214,13 @@ router.delete(
   productProxy
 );
 
+router.patch(
+  "/products/:id/stock",
+  authenticate,
+  authorize(["ADMIN", "SUPER_ADMIN"]),
+  productProxy
+);
+
 const categoryProxy = createProxyMiddleware({
   target: PRODUCT_SERVICE_URL,
   changeOrigin: true,
@@ -184,7 +228,10 @@ const categoryProxy = createProxyMiddleware({
   pathRewrite: {
     "^/categories": "/api/categories",
   },
-  on: { error: proxyErrorHandler("Product service") },
+  on: {
+    proxyReq: attachUserHeaders,
+    error: proxyErrorHandler("Product service"),
+  },
 });
 
 const brandProxy = createProxyMiddleware({
@@ -194,7 +241,10 @@ const brandProxy = createProxyMiddleware({
   pathRewrite: {
     "^/brands": "/api/brands",
   },
-  on: { error: proxyErrorHandler("Product service") },
+  on: {
+    proxyReq: attachUserHeaders,
+    error: proxyErrorHandler("Product service"),
+  },
 });
 
 // Categories - public reads, admin writes

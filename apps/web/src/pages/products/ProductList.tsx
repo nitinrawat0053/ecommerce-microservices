@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCategories } from '@/lib/categories';
+import { toast } from 'sonner';
 
 interface Product {
   _id: string; name: string; description: string; price: number;
@@ -103,7 +104,7 @@ export default function ProductList() {
       if (cancelled) return;
       setProducts(r.data.data || []);
       setTotalPages(r.data.pagination?.totalPages || 1);
-      setTotalCount(r.data.pagination?.totalOrders || (r.data.data || []).length);
+      setTotalCount(r.data.pagination?.totalProducts ?? (r.data.data || []).length);
     }).catch(() => {
       if (!cancelled) { setProducts([]); setTotalCount(0); }
     }).finally(() => {
@@ -120,8 +121,9 @@ export default function ProductList() {
         { _id: product._id, name: product.name, price: product.price, stock: product.stock, imageUrl: product.imageUrl, category: product.category },
         1
       );
+      toast.success(`${product.name} added to cart`);
     } catch {
-      console.error('Failed to add to cart');
+      toast.error('Failed to add to cart');
     }
   };
 

@@ -69,7 +69,7 @@ export class OutboxService {
           break;
 
         default:
-          console.log(`⚠️ [PaymentOutbox] Unknown event type: ${event.eventType}`);
+          console.warn(`⚠️  [PaymentOutbox] Unknown event type: ${event.eventType} — skipping`);
       }
 
       await outboxRepository.markAsSent(event.id);

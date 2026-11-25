@@ -77,4 +77,58 @@ export class UserRepository {
       { returnDocument: "after", runValidators: true }
     );
   }
+
+  async updateProfile(userId: string, data: { name?: string; phone?: string }) {
+    const update: Record<string, string> = {};
+    if (data.name) update.name = data.name.trim();
+    if (data.phone) update.phone = data.phone.trim();
+
+    return await User.findByIdAndUpdate(
+      userId,
+      { $set: update },
+      { returnDocument: "after", runValidators: true }
+    ).select("-password");
+  }
+
+  async updatePassword(userId: string, hashedPassword: string) {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $set: { password: hashedPassword } },
+      { returnDocument: "after" }
+    );
+  }
+
+  async findAddresses(userId: string) {
+    const user = await User.findById(userId).select("addresses");
+    return user?.addresses || [];
+  }
+
+  async addAddress(userId: string, addressData: any) {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $push: { addresses: addressData } },
+      { returnDocument: "after", runValidators: true }
+    ).select("-password");
+  }
+
+  async updateAddress(userId: string, addressId: string, addressData: any) {
+    const setFields: Record<string, any> = {};
+    for (const [key, val] of Object.entries(addressData)) {
+      setFields[`addresses.$.${key}`] = val;
+    }
+
+    return await User.findOneAndUpdate(
+      { _id: userId, "addresses._id": addressId },
+      { $set: setFields },
+      { returnDocument: "after", runValidators: true }
+    ).select("-password");
+  }
+
+  async deleteAddress(userId: string, addressId: string) {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $pull: { addresses: { _id: addressId } } },
+      { returnDocument: "after" }
+    ).select("-password");
+  }
 }

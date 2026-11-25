@@ -4,6 +4,11 @@ import cors from "cors";
 import { errorHandler } from "./middlewares/error.middleware";
 
 const app = express();
+
+// Trust the first proxy hop so req.ip reflects the real client IP address
+// behind reverse proxies / API gateway rather than the internal loopback.
+app.set("trust proxy", 1);
+
 app.use(cors());
 app.use(express.json());
 

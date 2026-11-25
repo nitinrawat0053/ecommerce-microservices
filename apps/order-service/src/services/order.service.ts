@@ -37,6 +37,10 @@ async createOrder(userId: string, productId: string, quantity: number, paymentMe
   // user. Creating an order triggers PAYMENT_INITIATED -> payment-session
   // (Razorpay) creation, so this is the enforcement point. We resolve the
   // user's verification state from the database (never from the client).
+  if (!userId) {
+    throw new UnauthorizedError("User not authenticated");
+  }
+
   const user = await User.findById(userId);
   if (!user) {
     throw new UnauthorizedError("User not authenticated");

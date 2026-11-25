@@ -6,15 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Trash2, Plus, Minus, ArrowRight, Package, ShoppingBag, Trash } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 export default function CartView() {
   const navigate = useNavigate();
-  const { lines: items, loading, updateQty, removeItem, clear } = useCart();
+  const { lines: items, loading, refresh, updateQty, removeItem, clear } = useCart();
   const [updating, setUpdating] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 

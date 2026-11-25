@@ -1,5 +1,15 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+export interface IAddress {
+  _id?: any;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country?: string;
+  isDefault?: boolean;
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -7,6 +17,7 @@ export interface IUser extends Document {
   isVerified: boolean;
   role: "USER" | "ADMIN" | "SUPER_ADMIN";
   phone: string;
+  addresses?: IAddress[];
   notificationPreferences: {
     email: boolean;
     sms: boolean;
@@ -52,6 +63,17 @@ const userSchema = new Schema<IUser>(
      type: String,
      required: true,
 },
+
+    addresses: [
+      {
+        street: { type: String, required: true, trim: true },
+        city: { type: String, required: true, trim: true },
+        state: { type: String, required: true, trim: true },
+        postalCode: { type: String, required: true, trim: true },
+        country: { type: String, default: "India", trim: true },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
 
 notificationPreferences: {
   email: {
