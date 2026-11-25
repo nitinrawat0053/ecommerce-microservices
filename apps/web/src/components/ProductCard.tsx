@@ -51,20 +51,23 @@ export default function ProductCard({ product, discount: propDiscount, rating: p
   };
 
   return (
-    <Link to={`/products/${product._id}`} className="group block">
+    <Link to={`/products/${product._id}`} className="group block h-full">
       <div className={cn(
-        'bg-white dark:bg-card rounded-2xl overflow-hidden border border-gray-100/80 dark:border-border/50',
-        'hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300',
+        'h-full rounded-2xl overflow-hidden bg-gradient-to-b from-white via-[#fafaff] to-[#f4f5fc] dark:from-card dark:via-card dark:to-card',
+        'border border-indigo-200/75 dark:border-border/80',
+        'shadow-[0_6px_22px_-6px_rgba(79,70,229,0.12),0_2px_8px_-2px_rgba(15,23,42,0.06)] dark:shadow-md',
+        'hover:shadow-[0_12px_28px_-6px_rgba(79,70,229,0.18),0_4px_12px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-1 hover:border-indigo-300/80 dark:hover:border-indigo-500/40',
+        'transition-all duration-200 flex flex-col',
         compact ? 'w-[170px] md:w-[195px]' : 'w-full'
       )}>
         {/* Image Container */}
-        <div className="relative bg-white dark:bg-muted/30 flex items-center justify-center overflow-hidden"
+        <div className="relative bg-white/95 dark:bg-muted/30 flex items-center justify-center overflow-hidden border-b border-indigo-100/60 dark:border-border/40"
           style={{ aspectRatio: '1 / 1' }}>
           {product.imageUrl ? (
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="w-[80%] h-[80%] object-contain group-hover:scale-105 transition-transform duration-500"
+              className="w-[80%] h-[80%] object-contain group-hover:scale-[1.03] transition-transform duration-300"
               loading="lazy"
             />
           ) : (
@@ -104,7 +107,7 @@ export default function ProductCard({ product, discount: propDiscount, rating: p
         </div>
 
         {/* Info */}
-        <div className="p-3.5 space-y-1.5">
+        <div className="p-3.5 space-y-1.5 flex-1 flex flex-col">
           <p className="text-[10px] text-gray-400 dark:text-muted-foreground uppercase tracking-wider font-semibold">
             {product.category}
           </p>

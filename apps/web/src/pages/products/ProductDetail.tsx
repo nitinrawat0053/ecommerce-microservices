@@ -272,7 +272,7 @@ export default function ProductDetail() {
               ))}
             </div>
           ) : (
-            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none', scrollSnapType: 'x mandatory' }}>
+            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pt-2 pb-5 -mx-2 px-2" style={{ scrollbarWidth: 'none', scrollSnapType: 'x mandatory' }}>
               {recommendations.map((rp: any) => (
                 <div key={rp._id} className="flex-shrink-0" style={{ scrollSnapAlign: 'start' }}>
                   <ProductCard product={rp} compact />

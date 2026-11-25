@@ -6,7 +6,7 @@ import {
   ChevronLeft, ChevronRight, ArrowRight, Home,
   Heart,
   TrendingUp, Zap, Flame, Shield, Truck, RotateCcw,
-  Headphones
+  Headphones, Package
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import AdminDashboard from './admin/AdminDashboard';
@@ -364,7 +364,7 @@ function ProductCarousel({ title, icon: Icon, products, loading, viewAllLink }: 
           </div>
         </div>
       </div>
-      <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollSnapType: 'x mandatory' }}>
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto pt-2 pb-5 -mx-2 px-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollSnapType: 'x mandatory' }}>
         {products.map((p) => (
           <div key={p._id} className="flex-shrink-0" style={{ scrollSnapAlign: 'start' }}>
             <ProductCard product={p} compact />
@@ -379,14 +379,47 @@ function ProductCarousel({ title, icon: Icon, products, loading, viewAllLink }: 
 export default function Dashboard() {
   const { isAdmin } = useAuth();
   if (isAdmin) return <AdminDashboard />;
+  return <CustomerDashboard />;
+}
 
+function CustomerDashboard() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
 
-  useEffect(() => {
-    api.get('/products?limit=200').then(r => setProducts(r.data.data || [])).finally(() => setLoading(false));
+  const fetchProducts = useCallback(async (signal?: { cancelled: boolean }) => {
+    setLoading(true);
+    setLoadError(false);
+    const maxAttempts = 4;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const res = await api.get('/products?limit=200');
+        if (signal?.cancelled) return;
+        setProducts(res.data.data || []);
+        setLoading(false);
+        return;
+      } catch (err: any) {
+        if (signal?.cancelled) return;
+        const status = err?.response?.status;
+        const isTransient = !status || status >= 500;
+        if (attempt < maxAttempts && isTransient) {
+          await new Promise((r) => setTimeout(r, attempt * 1200));
+          continue;
+        }
+        setLoadError(true);
+        setLoading(false);
+        return;
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    const signal = { cancelled: false };
+    fetchProducts(signal);
+    return () => { signal.cancelled = true; };
+  }, [fetchProducts]);
 
   useEffect(() => {
     const t = setInterval(() => setBannerIndex(p => (p + 1) % BANNERS.length), 6000);
@@ -505,6 +538,32 @@ export default function Dashboard() {
       </section>
 
       {/* ═══ TRENDING PRODUCTS ═══ */}
+      {loadError ? (
+        <section className="bg-white dark:bg-card border border-slate-200/80 dark:border-border rounded-2xl p-8 text-center space-y-3">
+          <div className="h-12 w-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
+            <Package size={24} />
+          </div>
+          <h3 className="text-base font-bold text-gray-900 dark:text-foreground">Unable to load products right now</h3>
+          <p className="text-sm text-gray-500 dark:text-muted-foreground max-w-md mx-auto">
+            The product catalog service may still be starting up or temporarily unavailable.
+          </p>
+          <Button onClick={() => fetchProducts()} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
+            <RotateCcw size={14} /> Retry Loading Products
+          </Button>
+        </section>
+      ) : !loading && products.length === 0 ? (
+        <section className="bg-white dark:bg-card border border-slate-200/80 dark:border-border rounded-2xl p-8 text-center space-y-3">
+          <div className="h-12 w-12 rounded-2xl bg-slate-100 dark:bg-muted text-slate-500 flex items-center justify-center mx-auto">
+            <Package size={24} />
+          </div>
+          <h3 className="text-base font-bold text-gray-900 dark:text-foreground">No products available yet</h3>
+          <p className="text-sm text-gray-500 dark:text-muted-foreground">Check back soon or refresh to load the latest catalog.</p>
+          <Button variant="outline" onClick={() => fetchProducts()} className="gap-2">
+            <RotateCcw size={14} /> Refresh
+          </Button>
+        </section>
+      ) : null}
+
       <ProductCarousel title="Trending Now" icon={TrendingUp} products={trending} loading={loading} viewAllLink="/products" />
 
       {/* ═══ CATEGORY-BASED SECTIONS ═══ */}

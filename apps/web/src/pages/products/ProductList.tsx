@@ -47,6 +47,8 @@ export default function ProductList() {
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -88,31 +90,51 @@ export default function ProductList() {
   // ═══ FETCH PRODUCTS ═══
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
 
-    const params: any = { page: pageParam, limit: 12 };
-    if (selectedCategory) params.category = selectedCategory;
-    if (searchQuery) params.search = searchQuery;
-    if (minPriceParam) params.minPrice = minPriceParam;
-    if (maxPriceParam) params.maxPrice = maxPriceParam;
-    if (sortBy === 'price_asc') { params.sort = 'price'; params.order = 'asc'; }
-    else if (sortBy === 'price_desc') { params.sort = 'price'; params.order = 'desc'; }
-    else if (sortBy === 'name_asc') { params.sort = 'name'; params.order = 'asc'; }
-    else { params.sort = 'createdAt'; params.order = 'desc'; }
+    const load = async () => {
+      setLoading(true);
+      setLoadError(false);
 
-    api.get('/products', { params }).then((r) => {
-      if (cancelled) return;
-      setProducts(r.data.data || []);
-      setTotalPages(r.data.pagination?.totalPages || 1);
-      setTotalCount(r.data.pagination?.totalProducts ?? (r.data.data || []).length);
-    }).catch(() => {
-      if (!cancelled) { setProducts([]); setTotalCount(0); }
-    }).finally(() => {
-      if (!cancelled) setLoading(false);
-    });
+      const params: any = { page: pageParam, limit: 12 };
+      if (selectedCategory) params.category = selectedCategory;
+      if (searchQuery) params.search = searchQuery;
+      if (minPriceParam) params.minPrice = minPriceParam;
+      if (maxPriceParam) params.maxPrice = maxPriceParam;
+      if (sortBy === 'price_asc') { params.sort = 'price'; params.order = 'asc'; }
+      else if (sortBy === 'price_desc') { params.sort = 'price'; params.order = 'desc'; }
+      else if (sortBy === 'name_asc') { params.sort = 'name'; params.order = 'asc'; }
+      else { params.sort = 'createdAt'; params.order = 'desc'; }
 
+      const maxAttempts = 3;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const r = await api.get('/products', { params });
+          if (cancelled) return;
+          setProducts(r.data.data || []);
+          setTotalPages(r.data.pagination?.totalPages || 1);
+          setTotalCount(r.data.pagination?.totalProducts ?? (r.data.data || []).length);
+          setLoading(false);
+          return;
+        } catch (err: any) {
+          if (cancelled) return;
+          const status = err?.response?.status;
+          const isTransient = !status || status >= 500;
+          if (attempt < maxAttempts && isTransient) {
+            await new Promise((res) => setTimeout(res, attempt * 1000));
+            continue;
+          }
+          setProducts([]);
+          setTotalCount(0);
+          setLoadError(true);
+          setLoading(false);
+          return;
+        }
+      }
+    };
+
+    load();
     return () => { cancelled = true; };
-  }, [pageParam, selectedCategory, searchQuery, minPriceParam, maxPriceParam, sortBy]);
+  }, [pageParam, selectedCategory, searchQuery, minPriceParam, maxPriceParam, sortBy, retryTick]);
 
   const { addItem } = useCart();
   const addToCart = async (product: Product) => {
@@ -264,6 +286,20 @@ export default function ProductList() {
               </div>
             </div>
           ))}
+        </div>
+      ) : loadError ? (
+        <div className="bg-white dark:bg-card border border-gray-100 dark:border-border rounded-xl py-20 text-center">
+          <Package size={48} className="mx-auto mb-4 text-indigo-300 dark:text-indigo-500/40" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-foreground mb-1">
+            Unable to load products
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-muted-foreground mb-4">
+            The product service may still be starting up or temporarily unavailable.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button onClick={() => setRetryTick((t) => t + 1)}>Retry</Button>
+            <Link to="/"><Button variant="outline">Back to Home</Button></Link>
+          </div>
         </div>
       ) : products.length === 0 ? (
         <div className="bg-white dark:bg-card border border-gray-100 dark:border-border rounded-xl py-20 text-center">

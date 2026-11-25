@@ -39,7 +39,7 @@ export default function WishlistButton({ product, size = 'md', className }: Wish
     <button
       onClick={handleClick}
       className={cn(
-        'rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center transition-all shadow-sm hover:scale-110',
+        'rounded-full bg-white/95 dark:bg-black/40 border border-slate-200/80 dark:border-white/10 backdrop-blur-sm flex items-center justify-center transition-all duration-200 shadow-sm hover:scale-105 cursor-pointer',
         sizeClasses[size],
         className
       )}
@@ -48,8 +48,8 @@ export default function WishlistButton({ product, size = 'md', className }: Wish
       <Heart
         size={iconSizes[size]}
         className={cn(
-          'transition-all duration-300',
-          wishlisted ? 'fill-red-500 text-red-500 scale-110' : 'text-gray-400 hover:text-red-400'
+          'transition-all duration-200',
+          wishlisted ? 'fill-red-500 text-red-500 scale-105' : 'text-slate-600 dark:text-slate-300 hover:text-red-500'
         )}
       />
     </button>
