@@ -10,8 +10,8 @@ export default function StockBadge({ stock, size = 'sm', className = '' }: Stock
   // In Stock: > 10
   if (stock > 10) {
     return (
-      <span className={`inline-flex items-center gap-1 ${sizeClasses[size]} text-emerald-600 dark:text-emerald-400 ${className}`}>
-        <CheckCircle2 size={iconSizes[size]} />
+      <span className={`inline-flex items-center gap-1.5 ${sizeClasses[size]} text-[#15B257] dark:text-emerald-400 ${className}`}>
+        <CheckCircle2 size={iconSizes[size]} strokeWidth={2.2} />
         In Stock
       </span>
     );
@@ -37,13 +37,13 @@ export default function StockBadge({ stock, size = 'sm', className = '' }: Stock
 }
 
 const sizeClasses = {
-  sm: 'text-[11px] font-semibold',
+  sm: 'text-[12px] font-semibold',
   md: 'text-sm font-semibold',
   lg: 'text-base font-bold',
 };
 
 const iconSizes = {
-  sm: 12,
+  sm: 13,
   md: 14,
   lg: 18,
 };

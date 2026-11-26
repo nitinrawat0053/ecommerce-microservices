@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import api from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -26,18 +26,41 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'name_asc', label: 'Name: A → Z' },
 ];
 
+function parseCategoryParam(search: string, categories: string[]): string {
+  const params = new URLSearchParams(search);
+  let raw = params.get('category') || '';
+  const match = search.match(/[?&]category=([^#]*)/i);
+  if (match && raw) {
+    try {
+      const afterCategory = decodeURIComponent(match[1].replace(/\+/g, ' ')).trim().toLowerCase();
+      const matchedKnown = categories.find((c) => {
+        const lc = c.toLowerCase();
+        return afterCategory === lc || afterCategory.startsWith(`${lc}&`);
+      });
+      if (matchedKnown) {
+        raw = matchedKnown;
+      }
+    } catch {
+      // keep raw param if malformed percent-encoding
+    }
+  }
+  if (!raw) return '';
+  return categories.find((c) => c.toLowerCase() === raw.trim().toLowerCase()) || raw.trim();
+}
+
 export default function ProductList() {
   const { isAdmin } = useAuth();
   const { categories } = useCategories();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // ═══ SINGLE SOURCE OF TRUTH: URL query params ═══
-  const selectedCategory = searchParams.get('category') || '';
+  const selectedCategory = parseCategoryParam(location.search, categories);
   const searchQuery = searchParams.get('search') || '';
   const sortBy = (searchParams.get('sort') as SortOption) || 'newest';
   const minPriceParam = searchParams.get('minPrice') || '';
   const maxPriceParam = searchParams.get('maxPrice') || '';
-  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const pageParam = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
 
   // Local UI state only for inputs (not synced to URL until committed)
   const [localSearch, setLocalSearch] = useState(searchQuery);
